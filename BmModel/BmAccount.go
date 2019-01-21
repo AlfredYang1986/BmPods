@@ -12,8 +12,8 @@ type Account struct {
 
 	Account  string `json:"account" bson:"account"`
 	Password string `json:"password" bson:"password"`
-
-	Token string `json:"token"`
+	BrandId  string `json:"brand-id" bson:"brand-id"`
+	Token    string `json:"token"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
