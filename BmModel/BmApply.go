@@ -143,6 +143,8 @@ func (u *Apply) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	for k, v := range parameters {
 		switch k {
+		case "brand-id":
+			rst[k] = v[0]
 		case "status":
 			val, err := strconv.ParseFloat(v[0], 64)
 			if err != nil {
@@ -157,6 +159,14 @@ func (u *Apply) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			r := make(map[string]interface{})
 			r["$lt"] = val
 			rst["create-time"] = r
+		case "gt[apply-time]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gt"] = val
+			rst["apply-time"] = r
 		}
 	}
 

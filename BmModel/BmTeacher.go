@@ -1,6 +1,8 @@
 package BmModel
 
-import "gopkg.in/mgo.v2/bson"
+import (
+	"gopkg.in/mgo.v2/bson"
+)
 
 type Teacher struct {
 	ID  string        `json:"-"`
@@ -45,5 +47,12 @@ func (c *Teacher) SetID(id string) error {
 }
 
 func (u *Teacher) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	for k, v := range parameters {
+		switch k {
+		case "brand-id":
+			rst[k] = v[0]
+		}
+	}
+	return rst
 }

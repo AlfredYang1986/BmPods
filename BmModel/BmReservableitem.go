@@ -136,6 +136,8 @@ func (u *Reservableitem) GetConditionsBsonM(parameters map[string][]string) bson
 	rst := make(map[string]interface{})
 	for k, v := range parameters {
 		switch k {
+		case "brand-id":
+			rst[k] = v[0]
 		case "status":
 			val, err := strconv.ParseFloat(v[0], 64)
 			if err != nil {

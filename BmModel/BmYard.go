@@ -163,5 +163,12 @@ func (u *Yard) DeleteToManyIDs(name string, IDs []string) error {
 }
 
 func (u *Yard) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	for k, v := range parameters {
+		switch k {
+		case "brand-id":
+			rst[k] = v[0]
+		}
+	}
+	return rst
 }
