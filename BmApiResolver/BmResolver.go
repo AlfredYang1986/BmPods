@@ -25,4 +25,5 @@ func (m RequestURL) GetBaseURL() string {
 	}
 
 	return fmt.Sprintf("http://%s", m.Addr)
+	//return fmt.Sprintf("")
 }
