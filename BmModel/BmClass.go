@@ -100,6 +100,7 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			ID:   u.YardID,
 			Type: "yards",
 			Name: "yard",
+			Relationship:jsonapi.ToOneRelationship,
 		})
 	}
 	if u.SessioninfoID != "" {

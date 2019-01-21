@@ -58,11 +58,11 @@ func (u *Yard) SetID(id string) error {
 func (u Yard) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "Image",
+			Type: "images",
 			Name: "images",
 		},
 		{
-			Type: "Room",
+			Type: "rooms",
 			Name: "rooms",
 		},
 	}
@@ -74,7 +74,7 @@ func (u Yard) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, kID := range u.ImagesIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   kID,
-			Type: "image",
+			Type: "images",
 			Name: "images",
 		})
 	}
@@ -82,7 +82,7 @@ func (u Yard) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, kID := range u.RoomsIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   kID,
-			Type: "room",
+			Type: "rooms",
 			Name: "rooms",
 		})
 	}

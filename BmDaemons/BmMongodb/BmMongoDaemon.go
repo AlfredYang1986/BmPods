@@ -108,13 +108,10 @@ func (m *BmMongodb) FindMulti(r api2go.Request, ptr BmModel.BmModelBase, out int
 	cn := v.Type().Name()
 	c := session.DB(m.Database).C(cn)
 
-	cond := ptr.GetConditionsBsonM(r.QueryParams)
-	fmt.Println(cond)
-
 	if skip < 0 && take < 0 {
-		err = c.Find(cond).Sort(Request2SortCondi(r)).All(out)
+		err = c.Find(ptr.GetConditionsBsonM(r.QueryParams)).Sort(Request2SortCondi(r)).All(out)
 	} else {
-		err = c.Find(cond).Skip(skip).Limit(take).Sort(Request2SortCondi(r)).All(out)
+		err = c.Find(ptr.GetConditionsBsonM(r.QueryParams)).Skip(skip).Limit(take).Sort(Request2SortCondi(r)).All(out)
 	}
 
 	if err != nil {
@@ -164,7 +161,7 @@ func (m *BmMongodb) Update(ptr BmModel.BmModelBase) error {
 	return nil
 }
 
-//TODO:條件查詢 
+//TODO:條件查詢
 func (m *BmMongodb) Count(ptr BmModel.BmModelBase) (int, error) {
 	session, err := mgo.Dial(m.Host + ":" + m.Port)
 	if err != nil {

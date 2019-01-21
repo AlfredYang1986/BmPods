@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
@@ -29,31 +30,109 @@ func (c BmRoomResource) NewRoomResource(args []BmDataStorage.BmStorage) BmRoomRe
 	return BmRoomResource{BmYardStorage: us, BmRoomStorage: cs}
 }
 
-// FindAll Rooms
 func (c BmRoomResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	roomsID, ok := r.QueryParams["roomsID"]
+	result := []BmModel.Room{}
+	yardsID, ok := r.QueryParams["yardsID"]
 	if ok {
-		// this means that we want to show all rooms of a model, this is the route
-		// /v0/models/1/rooms
-		modelID := roomsID[0]
-		// filter out rooms with modelID, in real world, you would just run a different database query
-		filteredLeafs := []BmModel.Room{}
-		model, err := c.BmYardStorage.GetOne(modelID)
+		modelRootID := yardsID[0]
+		modelRoot, err := c.BmYardStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}
-		for _, modelLeafID := range model.RoomsIDs {
-			sweet, err := c.BmRoomStorage.GetOne(modelLeafID)
+		for _, modelID := range modelRoot.RoomsIDs {
+			model, err := c.BmRoomStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
-			filteredLeafs = append(filteredLeafs, sweet)
+			result = append(result, model)
 		}
 
-		return &Response{Res: filteredLeafs}, nil
+		return &Response{Res: result}, nil
 	}
-	rooms := c.BmRoomStorage.GetAll(r)
-	return &Response{Res: rooms}, nil
+	result = c.BmRoomStorage.GetAll(r, -1, -1)
+	return &Response{Res: result}, nil
+}
+
+func (s BmRoomResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
+	var (
+		result                      []BmModel.Room
+		number, size, offset, limit string
+		skip, take, count, pages    int
+	)
+
+	numberQuery, ok := r.QueryParams["page[number]"]
+	if ok {
+		number = numberQuery[0]
+	}
+	sizeQuery, ok := r.QueryParams["page[size]"]
+	if ok {
+		size = sizeQuery[0]
+	}
+	offsetQuery, ok := r.QueryParams["page[offset]"]
+	if ok {
+		offset = offsetQuery[0]
+	}
+	limitQuery, ok := r.QueryParams["page[limit]"]
+	if ok {
+		limit = limitQuery[0]
+	}
+
+	if size != "" {
+		sizeI, err := strconv.ParseInt(size, 10, 64)
+		if err != nil {
+			return uint(0), &Response{}, err
+		}
+
+		numberI, err := strconv.ParseInt(number, 10, 64)
+		if err != nil {
+			return uint(0), &Response{}, err
+		}
+
+		start := sizeI * (numberI - 1)
+
+		skip = int(start)
+		take = int(sizeI)
+	} else {
+		limitI, err := strconv.ParseUint(limit, 10, 64)
+		if err != nil {
+			return uint(0), &Response{}, err
+		}
+
+		offsetI, err := strconv.ParseUint(offset, 10, 64)
+		if err != nil {
+			return uint(0), &Response{}, err
+		}
+
+		skip = int(offsetI)
+		take = int(limitI)
+	}
+
+	yardsID, ok := r.QueryParams["yardsID"]
+	if ok {
+		modelRootID := yardsID[0]
+		modelRoot, err := s.BmYardStorage.GetOne(modelRootID)
+		if err != nil {
+			return uint(0), &Response{}, err
+		}
+		for _, modelID := range modelRoot.RoomsIDs[skip : skip+take] {
+			model, err := s.BmRoomStorage.GetOne(modelID)
+			if err != nil {
+				return uint(0), &Response{}, err
+			}
+			result = append(result, model)
+		}
+
+		count = len(modelRoot.RoomsIDs)
+		pages = 1 + int(count /take)
+
+		return uint(count), &Response{Res: result, QueryRes:"rooms", TotalPage:pages}, nil
+	}
+
+	result = s.BmRoomStorage.GetAll(r, skip, take)
+	in := BmModel.Room{}
+	count = s.BmRoomStorage.Count(in)
+	pages = 1 + int(count /take)
+	return uint(count), &Response{Res: result, QueryRes:"rooms", TotalPage:pages}, nil
 }
 
 // FindOne choc

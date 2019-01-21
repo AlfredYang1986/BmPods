@@ -50,76 +50,33 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	//查詢 class 下的 students
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
-		modelID := classesID[0]
-		model, err := s.BmClassStorage.GetOne(modelID)
+		modelRootID := classesID[0]
+		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}
-		for _, modelLeafID := range model.StudentsIDs {
-			stud, err := s.BmStudentStorage.GetOne(modelLeafID)
+		for _, modelID := range modelRoot.StudentsIDs {
+			model, err := s.BmStudentStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			err = s.ResetReferencedModel(&model)
 			if err != nil {
 				return &Response{}, err
 			}
 
-			//TODO:rebindmodel 抽離成 func
-			stud.Guardians = []*BmModel.Guardian{}
-			for _, gId := range stud.GuardiansIDs {
-				g, err := s.BmGuardianStorage.GetOne(gId)
-				if err != nil {
-					return &Response{}, err
-				}
-				stud.Guardians = append(stud.Guardians, &g)
-			}
-
-			if stud.KidID != "" {
-				k, err := s.BmKidStorage.GetOne(stud.KidID)
-				if err != nil {
-					return &Response{}, err
-				}
-				stud.Kid = &k
-			}
-
-			if stud.TeacherID != "" {
-				k, err := s.BmTeacherStorage.GetOne(stud.TeacherID)
-				if err != nil {
-					return &Response{}, err
-				}
-				stud.Teacher = &k
-			}
-
-			result = append(result, stud)
+			result = append(result, model)
 		}
 		return &Response{Res: result}, nil
 	}
 
-	studs := s.BmStudentStorage.GetAll(r, -1, -1)
-	for _, stud := range studs {
-		stud.Guardians = []*BmModel.Guardian{}
-		for _, gId := range stud.GuardiansIDs {
-			g, err := s.BmGuardianStorage.GetOne(gId)
-			if err != nil {
-				return &Response{}, err
-			}
-			stud.Guardians = append(stud.Guardians, &g)
+	models := s.BmStudentStorage.GetAll(r, -1, -1)
+	for _, model := range models {
+		err := s.ResetReferencedModel(model)
+		if err != nil {
+			return &Response{}, err
 		}
-
-		if stud.KidID != "" {
-			k, err := s.BmKidStorage.GetOne(stud.KidID)
-			if err != nil {
-				return &Response{}, err
-			}
-			stud.Kid = &k
-		}
-
-		if stud.TeacherID != "" {
-			k, err := s.BmTeacherStorage.GetOne(stud.TeacherID)
-			if err != nil {
-				return &Response{}, err
-			}
-			stud.Teacher = &k
-		}
-
-		result = append(result, *stud)
+		result = append(result, *model)
 	}
 	return &Response{Res: result}, nil
 }
@@ -129,7 +86,7 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 	var (
 		result                      []BmModel.Student
 		number, size, offset, limit string
-		startIndex, sizeInt, count, pages int
+		skip, take, count, pages    int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -154,88 +111,62 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
 		numberI, err := strconv.ParseInt(number, 10, 64)
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
 		start := sizeI * (numberI - 1)
-
-		startIndex = int(start)
-		sizeInt = int(sizeI)
+		skip = int(start)
+		take = int(sizeI)
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
 		offsetI, err := strconv.ParseUint(offset, 10, 64)
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
-		startIndex = int(offsetI)
-		sizeInt = int(limitI)
+		skip = int(offsetI)
+		take = int(limitI)
 	}
 
 	//查詢class下的students
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
-		modelID := classesID[0]
-		filteredLeafs := []BmModel.Student{}
-		model, err := s.BmClassStorage.GetOne(modelID)
+		modelRootID := classesID[0]
+		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
 		if err != nil {
 			return uint(0), &Response{}, err
 		}
-		for _, modelLeafID := range model.StudentsIDs {
-			stud, err := s.BmStudentStorage.GetOne(modelLeafID)
+		for _, modelID := range modelRoot.StudentsIDs[skip : skip+take] {
+			model, err := s.BmStudentStorage.GetOne(modelID)
+			if err != nil {
+				return uint(0), &Response{}, err
+			}
+			err = s.ResetReferencedModel(&model)
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
 
-			//TODO:rebindmodel 抽離成 func
-			stud.Guardians = []*BmModel.Guardian{}
-			for _, gId := range stud.GuardiansIDs {
-				g, err := s.BmGuardianStorage.GetOne(gId)
-				if err != nil {
-					return uint(0), &Response{}, err
-				}
-				stud.Guardians = append(stud.Guardians, &g)
-			}
-
-			if stud.KidID != "" {
-				k, err := s.BmKidStorage.GetOne(stud.KidID)
-				if err != nil {
-					return uint(0), &Response{}, err
-				}
-				stud.Kid = &k
-			}
-
-			if stud.TeacherID != "" {
-				k, err := s.BmTeacherStorage.GetOne(stud.TeacherID)
-				if err != nil {
-					return uint(0), &Response{}, err
-				}
-				stud.Teacher = &k
-			}
-
-			filteredLeafs = append(filteredLeafs, stud)
+			result = append(result, model)
 		}
-
-		count = len(filteredLeafs)
-		pages = 1 + int(count / sizeInt)
-
-		return uint(count), &Response{Res: filteredLeafs, QueryRes:"students", TotalPage:pages}, nil
+		count = len(modelRoot.StudentsIDs)
+		pages = 1 + int(count /take)
+		return uint(count), &Response{Res: result, QueryRes:"students", TotalPage:pages}, nil
 	}
 
-	for _, iter := range s.BmStudentStorage.GetAll(r, startIndex, sizeInt) {
-		result = append(result, *iter)
+	for _, model := range s.BmStudentStorage.GetAll(r, skip, take) {
+		err := s.ResetReferencedModel(model)
+		if err != nil {
+			return uint(0), &Response{}, err
+		}
+		result = append(result, *model)
 	}
 
 	in := BmModel.Student{}
 	count = s.BmStudentStorage.Count(in)
-	pages = 1 + int(count / sizeInt)
+	pages = 1 + int(count /take)
 
 	return uint(count), &Response{Res: result, QueryRes:"students", TotalPage:pages}, nil
 }
@@ -243,37 +174,16 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 // FindOne to satisfy `api2go.DataSource` interface
 // this method should return the user with the given ID, otherwise an error
 func (s BmStudentResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	user, err := s.BmStudentStorage.GetOne(ID)
+	model, err := s.BmStudentStorage.GetOne(ID)
+	if err != nil {
+		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
+	}
+	err = s.ResetReferencedModel(&model)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 
-	user.Guardians = []*BmModel.Guardian{}
-	for _, chocolateID := range user.GuardiansIDs {
-		choc, err := s.BmGuardianStorage.GetOne(chocolateID)
-		if err != nil {
-			return &Response{}, err
-		}
-		user.Guardians = append(user.Guardians, &choc)
-	}
-
-	if user.KidID != "" {
-		k, err := s.BmKidStorage.GetOne(user.KidID)
-		if err != nil {
-			return &Response{}, err
-		}
-		user.Kid = &k
-	}
-
-	if user.TeacherID != "" {
-		k, err := s.BmTeacherStorage.GetOne(user.TeacherID)
-		if err != nil {
-			return &Response{}, err
-		}
-		user.Teacher = &k
-	}
-
-	return &Response{Res: user}, nil
+	return &Response{Res: model}, nil
 }
 
 // Create method to satisfy `api2go.DataSource` interface
@@ -305,4 +215,34 @@ func (s BmStudentResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 
 	err := s.BmStudentStorage.Update(user)
 	return &Response{Res: user, Code: http.StatusNoContent}, err
+}
+
+func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student) error {
+
+	model.Guardians = []*BmModel.Guardian{}
+	for _, chocolateID := range model.GuardiansIDs {
+		choc, err := s.BmGuardianStorage.GetOne(chocolateID)
+		if err != nil {
+			return err
+		}
+		model.Guardians = append(model.Guardians, &choc)
+	}
+
+	if model.KidID != "" {
+		k, err := s.BmKidStorage.GetOne(model.KidID)
+		if err != nil {
+			return err
+		}
+		model.Kid = &k
+	}
+
+	if model.TeacherID != "" {
+		k, err := s.BmTeacherStorage.GetOne(model.TeacherID)
+		if err != nil {
+			return err
+		}
+		model.Teacher = &k
+	}
+
+	return nil
 }
