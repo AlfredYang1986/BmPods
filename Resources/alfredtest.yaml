@@ -117,6 +117,7 @@ resources:
   method: NewGuardianResource
   storages:
   - BmGuardianStorage
+  - BmStudentStorage
 - name: BmTeacherResource
   method: NewTeacherResource
   storages:
