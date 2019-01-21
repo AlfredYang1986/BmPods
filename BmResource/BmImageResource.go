@@ -30,29 +30,30 @@ func (c BmImageResource) NewImageResource(args []BmDataStorage.BmStorage) BmImag
 
 // FindAll images
 func (c BmImageResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	imagesID, ok := r.QueryParams["imagesID"]
-	images := c.BmImageStorage.GetAll(r)
+	sessioninfosID, ok := r.QueryParams["sessioninfosID"]
+	result := []BmModel.Image{}
 	if ok {
-		// this means that we want to show all images of a model, this is the route
+		// this means that we want to show all images of a modelRoot, this is the route
 		// /v0/models/1/images
-		modelID := imagesID[0]
-		// filter out images with modelID, in real world, you would just run a different database query
-		filteredLeafs := []BmModel.Image{}
-		model, err := c.BmSessioninfoStorage.GetOne(modelID)
+		modelRootID := sessioninfosID[0]
+		// filter out images with modelRootID, in real world, you would just run a different database query
+
+		modelRoot, err := c.BmSessioninfoStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}
-		for _, modelLeafID := range model.ImagesIDs {
-			sweet, err := c.BmImageStorage.GetOne(modelLeafID)
+		for _, modelID := range modelRoot.ImagesIDs {
+			model, err := c.BmImageStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
-			filteredLeafs = append(filteredLeafs, sweet)
+			result = append(result, model)
 		}
 
-		return &Response{Res: filteredLeafs}, nil
+		return &Response{Res: result}, nil
 	}
-	return &Response{Res: images}, nil
+	result = c.BmImageStorage.GetAll(r)
+	return &Response{Res: result}, nil
 }
 
 // FindOne choc

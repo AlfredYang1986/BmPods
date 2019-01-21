@@ -139,6 +139,10 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 		if err != nil {
 			return uint(0), &Response{}, err
 		}
+		count = len(modelRoot.StudentsIDs)
+		if skip>=count {
+			return uint(0), &Response{}, err
+		}
 		for _, modelID := range modelRoot.StudentsIDs[skip : skip+take] {
 			model, err := s.BmStudentStorage.GetOne(modelID)
 			if err != nil {
@@ -151,7 +155,6 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 
 			result = append(result, model)
 		}
-		count = len(modelRoot.StudentsIDs)
 		pages = 1 + int(count /take)
 		return uint(count), &Response{Res: result, QueryRes:"students", TotalPage:pages}, nil
 	}

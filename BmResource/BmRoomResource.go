@@ -114,6 +114,10 @@ func (s BmRoomResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		if err != nil {
 			return uint(0), &Response{}, err
 		}
+		count = len(modelRoot.RoomsIDs)
+		if skip>=count {
+			return uint(0), &Response{}, err
+		}
 		for _, modelID := range modelRoot.RoomsIDs[skip : skip+take] {
 			model, err := s.BmRoomStorage.GetOne(modelID)
 			if err != nil {
@@ -121,8 +125,6 @@ func (s BmRoomResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 			}
 			result = append(result, model)
 		}
-
-		count = len(modelRoot.RoomsIDs)
 		pages = 1 + int(count /take)
 
 		return uint(count), &Response{Res: result, QueryRes:"rooms", TotalPage:pages}, nil

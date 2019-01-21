@@ -149,6 +149,10 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		if err != nil {
 			return uint(0), &Response{}, err
 		}
+		count = len(modelRoot.ClassesIDs)
+		if skip>=count {
+			return uint(0), &Response{}, err
+		}
 		for _, modelID := range modelRoot.ClassesIDs[skip : skip+take] {
 			model, err := s.BmClassStorage.GetOne(modelID)
 			if err != nil {
@@ -161,7 +165,6 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			result = append(result, model)
 		}
 
-		count = len(modelRoot.ClassesIDs)
 		pages = 1 + int(count /take)
 
 		return uint(count), &Response{Res: result, QueryRes:"classes", TotalPage:pages}, nil
