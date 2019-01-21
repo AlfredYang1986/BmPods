@@ -40,11 +40,11 @@ func (u *Reservableitem) SetID(id string) error {
 func (u Reservableitem) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "Sessioninfo",
+			Type: "sessioninfos",
 			Name: "sessioninfo",
 		},
 		{
-			Type: "Class",
+			Type: "classes",
 			Name: "classes",
 		},
 	}
@@ -57,7 +57,7 @@ func (u Reservableitem) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.SessioninfoID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.SessioninfoID,
-			Type: "sessioninfo",
+			Type: "sessioninfos",
 			Name: "sessioninfo",
 		})
 	}
@@ -65,7 +65,7 @@ func (u Reservableitem) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, tmpID := range u.ClassesIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   tmpID,
-			Type: "class",
+			Type: "classes",
 			Name: "classes",
 		})
 	}

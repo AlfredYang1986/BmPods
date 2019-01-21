@@ -64,7 +64,7 @@ func (u *Student) SetID(id string) error {
 func (u Student) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "kid",
+			Type: "kids",
 			Name: "kid",
 		},
 		{
@@ -81,9 +81,9 @@ func (u Student) GetReferences() []jsonapi.Reference {
 // GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
 func (u Student) GetReferencedIDs() []jsonapi.ReferenceID {
 	result := []jsonapi.ReferenceID{}
-	for _, kID := range u.GuardiansIDs {
+	for _, gID := range u.GuardiansIDs {
 		result = append(result, jsonapi.ReferenceID{
-			ID:   kID,
+			ID:   gID,
 			Type: "guardians",
 			Name: "guardians",
 		})

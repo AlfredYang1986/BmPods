@@ -52,11 +52,11 @@ func (u *Sessioninfo) SetID(id string) error {
 func (u Sessioninfo) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "Category",
+			Type: "categories",
 			Name: "category",
 		},
 		{
-			Type: "Image",
+			Type: "images",
 			Name: "images",
 		},
 	}
@@ -68,7 +68,7 @@ func (u Sessioninfo) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, kID := range u.ImagesIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   kID,
-			Type: "tagimg",
+			Type: "images",
 			Name: "images",
 		})
 	}
@@ -76,7 +76,7 @@ func (u Sessioninfo) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.CategoryID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.CategoryID,
-			Type: "category",
+			Type: "categories",
 			Name: "category",
 		})
 	}

@@ -45,12 +45,14 @@ func (u *Apply) SetID(id string) error {
 func (u Apply) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "Applicant",
-			Name: "applicant",
+			Type:         "applicants",
+			Name:         "applicant",
+			Relationship: jsonapi.ToOneRelationship,
 		},
 		{
-			Type: "Kid",
+			Type: "kids",
 			Name: "kids",
+			Relationship:jsonapi.ToManyRelationship,
 		},
 	}
 }
@@ -61,7 +63,7 @@ func (u Apply) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, kID := range u.KidsIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   kID,
-			Type: "kid",
+			Type: "kids",
 			Name: "kids",
 		})
 	}
@@ -69,7 +71,7 @@ func (u Apply) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.ApplicantID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.ApplicantID,
-			Type: "applicant",
+			Type: "applicants",
 			Name: "applicant",
 		})
 	}

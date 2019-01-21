@@ -32,27 +32,27 @@ func (c BmGuardianResource) NewGuardianResource(args []BmDataStorage.BmStorage) 
 // FindAll guardians
 func (c BmGuardianResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
+	result := []BmModel.Guardian{}
 	studentsID, ok := r.QueryParams["studentsID"]
 	if ok {
-		modelID := studentsID[0]
-		filteredLeafs := []BmModel.Guardian{}
-		model, err := c.BmStudentStorage.GetOne(modelID)
+		modelRootID := studentsID[0]
+		modelRoot, err := c.BmStudentStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}
-		for _, modelLeafID := range model.GuardiansIDs {
-			sweet, err := c.BmGuardianStorage.GetOne(modelLeafID)
+		for _, modelID := range modelRoot.GuardiansIDs {
+			model, err := c.BmGuardianStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
-			filteredLeafs = append(filteredLeafs, sweet)
+			result = append(result, model)
 		}
 
-		return &Response{Res: filteredLeafs}, nil
+		return &Response{Res: result}, nil
 	}
 
-	guardians := c.BmGuardianStorage.GetAll(r)
-	return &Response{Res: guardians}, nil
+	result = c.BmGuardianStorage.GetAll(r)
+	return &Response{Res: result}, nil
 }
 
 // FindOne choc

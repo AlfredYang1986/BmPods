@@ -42,11 +42,11 @@ func (u *Brand) SetID(id string) error {
 func (u Brand) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "Image",
+			Type: "images",
 			Name: "images",
 		},
 		{
-			Type: "category",
+			Type: "categories",
 			Name: "category",
 		},
 	}
@@ -58,7 +58,7 @@ func (u Brand) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, kID := range u.ImagesIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   kID,
-			Type: "image",
+			Type: "images",
 			Name: "images",
 		})
 	}
@@ -66,7 +66,7 @@ func (u Brand) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.CategoryID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.CategoryID,
-			Type: "category",
+			Type: "categories",
 			Name: "category",
 		})
 	}

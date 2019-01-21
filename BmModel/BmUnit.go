@@ -42,15 +42,15 @@ func (u *Unit) SetID(id string) error {
 func (u Unit) GetReferences() []jsonapi.Reference {
 	return []jsonapi.Reference{
 		{
-			Type: "Teacher",
+			Type: "teachers",
 			Name: "teacher",
 		},
 		{
-			Type: "Class",
+			Type: "classes",
 			Name: "class",
 		},
 		{
-			Type: "Room",
+			Type: "rooms",
 			Name: "room",
 		},
 	}
@@ -63,14 +63,14 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.TeacherID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.TeacherID,
-			Type: "Teacher",
+			Type: "teachers",
 			Name: "teacher",
 		})
 	}
 	if u.ClassID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.ClassID,
-			Type: "Class",
+			Type: "classs",
 			Name: "class",
 		})
 	}
@@ -78,7 +78,7 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.RoomID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.RoomID,
-			Type: "Room",
+			Type: "rooms",
 			Name: "room",
 		})
 	}
