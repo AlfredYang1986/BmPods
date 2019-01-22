@@ -39,13 +39,17 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 			return &Response{}, err
 		}
 		modelID := modelRoot.CategoryID
-		model, err := c.CategoryStorage.GetOne(modelID)
-		if err != nil {
+		if modelID != "" {
+			model, err := c.CategoryStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			//result = append(result, model)
+
+			return &Response{Res: model}, nil
+		} else {
 			return &Response{}, err
 		}
-		//result = append(result, model)
-
-		return &Response{Res: model}, nil
 	}
 
 	result := c.CategoryStorage.GetAll(r,-1, -1)

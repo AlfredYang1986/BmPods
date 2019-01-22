@@ -14,12 +14,14 @@ type BmSessioninfoResource struct {
 	BmImageStorage       *BmDataStorage.BmImageStorage
 	BmSessioninfoStorage *BmDataStorage.BmSessioninfoStorage
 	BmCategoryStorage    *BmDataStorage.BmCategoryStorage
+	BmReservableitemStorage    *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmStorage) BmSessioninfoResource {
 	var us *BmDataStorage.BmSessioninfoStorage
 	var ts *BmDataStorage.BmCategoryStorage
 	var cs *BmDataStorage.BmImageStorage
+	var rs *BmDataStorage.BmReservableitemStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmSessioninfoStorage" {
@@ -28,13 +30,58 @@ func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmSto
 			cs = arg.(*BmDataStorage.BmImageStorage)
 		} else if tp.Name() == "BmCategoryStorage" {
 			ts = arg.(*BmDataStorage.BmCategoryStorage)
+		} else if tp.Name() == "BmReservableitemStorage" {
+			rs = arg.(*BmDataStorage.BmReservableitemStorage)
 		}
 	}
-	return BmSessioninfoResource{BmSessioninfoStorage: us, BmImageStorage: cs, BmCategoryStorage: ts}
+	return BmSessioninfoResource{BmSessioninfoStorage: us,
+				BmImageStorage: cs,
+				BmCategoryStorage: ts,
+				BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+	resid, ok := r.QueryParams["reservableitemsID"]
+	if ok {
+		modelRootID := resid[0]
+
+		modelRoot, err := s.BmReservableitemStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.SessioninfoID
+		if modelID != "" {
+			model, err := s.BmSessioninfoStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+
+			model.Images = []*BmModel.Image{}
+			for _, kID := range model.ImagesIDs {
+				choc, err := s.BmImageStorage.GetOne(kID)
+				if err != nil {
+					return &Response{}, err
+				}
+				model.Images = append(model.Images, &choc)
+			}
+
+			if model.CategoryID != "" {
+				applicant, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+				if err != nil {
+					return &Response{}, err
+				}
+				model.Category = applicant
+			}
+
+			//result = append(result, model)
+
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
 	var result []BmModel.Sessioninfo
 	models := s.BmSessioninfoStorage.GetAll(r, -1, -1)
 

@@ -40,7 +40,6 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 	models := s.BmReservableitemStorage.GetAll(r, -1, -1)
 
 	for _, model := range models {
-
 		if model.SessioninfoID != "" {
 			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
 			if err != nil {

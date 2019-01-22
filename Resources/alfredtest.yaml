@@ -67,6 +67,7 @@ resources:
   - BmSessioninfoStorage
   - BmCategoryStorage
   - BmImageStorage
+  - BmReservableitemStorage
 - name: BmReservableitemResource
   method: NewReservableitemResource
   storages:
