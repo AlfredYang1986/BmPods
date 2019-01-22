@@ -30,18 +30,16 @@ func (c BmCategoryResource) NewCategoryResource(args []BmDataStorage.BmStorage) 
 
 // FindAll apeolates
 func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	//brandsID, ok := r.QueryParams["brandsID"]
-	_, ok := r.QueryParams["brandsID"]
+	brandsID, ok := r.QueryParams["brandsID"]
 	if ok {
-		//modelRootID := brandsID[0]
+		modelRootID := brandsID[0]
 
-		//modelRoot, err := c.BmBrandStorage.GetOne(modelRootID)
-		//if err != nil {
-		//	return &Response{}, err
-		//}
-		//modelID := modelRoot.CategoryID
-		//model, err := c.CategoryStorage.GetOne(modelID)
-		model, err := c.CategoryStorage.GetOne("5bee59ed8fb8073396aa2677")
+		modelRoot, err := c.BmBrandStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.CategoryID
+		model, err := c.CategoryStorage.GetOne(modelID)
 		if err != nil {
 			return &Response{}, err
 		}
