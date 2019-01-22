@@ -11,26 +11,50 @@ import (
 
 type BmCategoryResource struct {
 	CategoryStorage *BmDataStorage.BmCategoryStorage
+	BmBrandStorage *BmDataStorage.BmBrandStorage
 }
 
 func (c BmCategoryResource) NewCategoryResource(args []BmDataStorage.BmStorage) BmCategoryResource {
 	var as *BmDataStorage.BmCategoryStorage
+	var bs *BmDataStorage.BmBrandStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmCategoryStorage" {
 			as = arg.(*BmDataStorage.BmCategoryStorage)
+		} else if tp.Name() == "BmBrandStorage" {
+			bs = arg.(*BmDataStorage.BmBrandStorage)
 		}
 	}
-	return BmCategoryResource{CategoryStorage: as}
+	return BmCategoryResource{CategoryStorage: as, BmBrandStorage: bs}
 }
 
 // FindAll apeolates
 func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+	//brandsID, ok := r.QueryParams["brandsID"]
+	_, ok := r.QueryParams["brandsID"]
+	if ok {
+		//modelRootID := brandsID[0]
+
+		//modelRoot, err := c.BmBrandStorage.GetOne(modelRootID)
+		//if err != nil {
+		//	return &Response{}, err
+		//}
+		//modelID := modelRoot.CategoryID
+		//model, err := c.CategoryStorage.GetOne(modelID)
+		model, err := c.CategoryStorage.GetOne("5bee59ed8fb8073396aa2677")
+		if err != nil {
+			return &Response{}, err
+		}
+		//result = append(result, model)
+
+		return &Response{Res: model}, nil
+	}
+
 	result := c.CategoryStorage.GetAll(r,-1, -1)
 	return &Response{Res: result}, nil
 }
 
-func (s BmCategoryResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
+func (c BmCategoryResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	result := []BmModel.Category{}
 	return 100, &Response{Res: result}, nil
 }

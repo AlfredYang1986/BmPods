@@ -84,6 +84,7 @@ resources:
   storages:
   - BmCategoryStorage
   - BmSessioninfoStorage
+  - BmBrandStorage
 - name: BmApplyResource
   method: NewApplyResource
   storages:
