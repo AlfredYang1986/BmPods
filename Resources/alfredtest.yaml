@@ -78,6 +78,7 @@ resources:
   storages:
   - BmImageStorage
   - BmSessioninfoStorage
+  - BmBrandStorage
 - name: BmCategoryResource
   method: NewCategoryResource
   storages:
@@ -218,9 +219,9 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-    host: 192.168.100.174
+    host: localhost
     port: 27017
-    database: test
+    database: ddsaas
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
