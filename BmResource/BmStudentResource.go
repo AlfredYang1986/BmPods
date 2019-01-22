@@ -16,7 +16,7 @@ type BmStudentResource struct {
 	BmKidStorage      *BmDataStorage.BmKidStorage
 	BmTeacherStorage  *BmDataStorage.BmTeacherStorage
 	BmGuardianStorage *BmDataStorage.BmGuardianStorage
-	BmClassStorage *BmDataStorage.BmClassStorage
+	BmClassStorage    *BmDataStorage.BmClassStorage
 }
 
 func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) BmStudentResource {
@@ -140,10 +140,14 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 			return uint(0), &Response{}, err
 		}
 		count = len(modelRoot.StudentsIDs)
-		if skip>=count {
+		if skip >= count {
 			return uint(0), &Response{}, err
 		}
-		for _, modelID := range modelRoot.StudentsIDs[skip : skip+take] {
+		endIndex := skip + take
+		if endIndex >= count {
+			endIndex = count
+		}
+		for _, modelID := range modelRoot.StudentsIDs[skip:endIndex] {
 			model, err := s.BmStudentStorage.GetOne(modelID)
 			if err != nil {
 				return uint(0), &Response{}, err
@@ -155,8 +159,8 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 
 			result = append(result, model)
 		}
-		pages = 1 + int(count /take)
-		return uint(count), &Response{Res: result, QueryRes:"students", TotalPage:pages}, nil
+		pages = 1 + int(count/take)
+		return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages}, nil
 	}
 
 	for _, model := range s.BmStudentStorage.GetAll(r, skip, take) {
@@ -169,9 +173,9 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 
 	in := BmModel.Student{}
 	count = s.BmStudentStorage.Count(in)
-	pages = 1 + int(count /take)
+	pages = 1 + int(count/take)
 
-	return uint(count), &Response{Res: result, QueryRes:"students", TotalPage:pages}, nil
+	return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface

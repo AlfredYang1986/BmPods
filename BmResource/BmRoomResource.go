@@ -115,26 +115,30 @@ func (s BmRoomResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 			return uint(0), &Response{}, err
 		}
 		count = len(modelRoot.RoomsIDs)
-		if skip>=count {
+		if skip >= count {
 			return uint(0), &Response{}, err
 		}
-		for _, modelID := range modelRoot.RoomsIDs[skip : skip+take] {
+		endIndex := skip + take
+		if endIndex >= count {
+			endIndex = count
+		}
+		for _, modelID := range modelRoot.RoomsIDs[skip:endIndex] {
 			model, err := s.BmRoomStorage.GetOne(modelID)
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
 			result = append(result, model)
 		}
-		pages = 1 + int(count /take)
+		pages = 1 + int(count/take)
 
-		return uint(count), &Response{Res: result, QueryRes:"rooms", TotalPage:pages}, nil
+		return uint(count), &Response{Res: result, QueryRes: "rooms", TotalPage: pages}, nil
 	}
 
 	result = s.BmRoomStorage.GetAll(r, skip, take)
 	in := BmModel.Room{}
 	count = s.BmRoomStorage.Count(in)
-	pages = 1 + int(count /take)
-	return uint(count), &Response{Res: result, QueryRes:"rooms", TotalPage:pages}, nil
+	pages = 1 + int(count/take)
+	return uint(count), &Response{Res: result, QueryRes: "rooms", TotalPage: pages}, nil
 }
 
 // FindOne choc
