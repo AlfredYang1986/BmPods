@@ -6,6 +6,7 @@ type Response struct {
 	Code int
 	QueryRes string
 	TotalPage int
+	TotalCount int
 }
 
 // Metadata returns additional meta data
@@ -20,6 +21,7 @@ func (r Response) Metadata() map[string]interface{} {
 	if r.QueryRes != "" && r.TotalPage > 0 {
 		meta["query-res"] = r.QueryRes
 		meta["total-page"] = r.TotalPage
+		meta["total-count"] = r.TotalCount
 	}
 
 	return meta

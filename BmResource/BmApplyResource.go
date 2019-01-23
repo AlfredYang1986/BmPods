@@ -160,7 +160,7 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	count := s.BmApplyStorage.Count(in)
 	pages := 1 + int(count / int(sizeI))
 
-	return uint(count), &Response{Res: result, QueryRes:"applies", TotalPage:pages}, nil
+	return uint(count), &Response{Res: result, QueryRes:"applies", TotalPage:pages, TotalCount:count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
