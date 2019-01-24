@@ -5,6 +5,7 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmHandler"
+	"github.com/alfredyang1986/BmPods/BmMiddleware"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/alfredyang1986/BmPods/BmResource"
 )
@@ -78,6 +79,10 @@ var BLACKMIRROR_FUNCTION_FACTORY = map[string]interface{}{
 	"BmWeChatHandler":      BmHandler.WeChatHandler{},
 }
 
+var BLACKMIRROR_MIDDLEWARE_FACTORY = map[string]interface{}{
+	"BmCheckTokenMiddleware": BmMiddleware.CheckTokenMiddleware{},
+}
+
 func GetModelByName(name string) interface{} {
 	return BLACKMIRROR_MODEL_FACTORY[name]
 }
@@ -96,4 +101,8 @@ func GetDaemonByName(name string) interface{} {
 
 func GetFunctionByName(name string) interface{} {
 	return BLACKMIRROR_FUNCTION_FACTORY[name]
+}
+
+func GetMiddlewareByName(name string) interface{} {
+	return BLACKMIRROR_MIDDLEWARE_FACTORY[name]
 }

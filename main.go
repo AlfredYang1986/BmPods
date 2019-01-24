@@ -25,6 +25,7 @@ func main() {
 	pod.RegisterAllResource(api)
 
 	pod.RegisterAllFunctions("v0", api)
+	pod.RegisterAllMiddleware(api)
 
 	handler := api.Handler().(*httprouter.Router)
 	http.ListenAndServe(addr, handler)

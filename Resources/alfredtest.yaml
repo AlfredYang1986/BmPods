@@ -291,3 +291,11 @@ functions:
   http: POST
   args:
   - name
+
+middlewares:
+- name: BmCheckTokenMiddleware
+  create: NewCheckTokenMiddleware
+  daemons:
+  - BmRedisDaemon
+  args:
+  - name

@@ -33,12 +33,18 @@ type Conf struct {
 		Method string
 		Args   map[string]string
 	}
-	Functions []struct{
-		Name string
-		Create string
+	Functions []struct {
+		Name    string
+		Create  string
 		Daemons []string
-		Method string
-		Http string
-		Args []string
+		Method  string
+		Http    string
+		Args    []string
+	}
+	Middlewares []struct {
+		Name    string
+		Create  string
+		Daemons []string
+		Args    []string
 	}
 }

@@ -2,6 +2,7 @@ package BmPodsDefine
 
 import (
 	"fmt"
+	"github.com/alfredyang1986/BmPods/BmMiddleware"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -16,7 +17,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/manyminds/api2go"
 	"github.com/manyminds/api2go/jsonapi"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 type Pod struct {
@@ -24,10 +25,11 @@ type Pod struct {
 	Res  map[string]interface{}
 	conf Conf
 
-	Storages  map[string]BmDataStorage.BmStorage
-	Resources map[string]BmResource.BmRes
-	Daemons   map[string]BmDaemons.BmDaemon
-	Handler   map[string]BmHandler.BmHandler
+	Storages   map[string]BmDataStorage.BmStorage
+	Resources  map[string]BmResource.BmRes
+	Daemons    map[string]BmDaemons.BmDaemon
+	Handler    map[string]BmHandler.BmHandler
+	Middleware map[string]BmMiddleware.BmMiddleware
 }
 
 func (p *Pod) RegisterSerFromYAML(path string) {
@@ -49,6 +51,7 @@ func (p *Pod) RegisterSerFromYAML(path string) {
 	p.CreateStorageInstances()
 	p.CreateResourceInstances()
 	p.CreateFunctionInstances()
+	p.CreateMiddleInstances()
 }
 
 func (p *Pod) CreateDaemonInstances() {
@@ -123,6 +126,26 @@ func (p *Pod) CreateFunctionInstances() {
 	}
 }
 
+func (p *Pod) CreateMiddleInstances() {
+	if p.Middleware == nil {
+		p.Middleware = make(map[string]BmMiddleware.BmMiddleware)
+	}
+
+	for _, r := range p.conf.Middlewares {
+		any := BmFactory.GetMiddlewareByName(r.Name)
+		constuctor := r.Create
+		var args []BmDaemons.BmDaemon
+		for _, d := range r.Daemons {
+			tmp := p.Daemons[d]
+			args = append(args, tmp)
+		}
+
+		inc, _ := BmSingleton.GetFactoryInstance().ReflectFunctionCall(any, constuctor, args)
+		v := inc.Interface()
+		p.Middleware[r.Name] = v.(BmMiddleware.BmMiddleware)
+	}
+}
+
 func (p Pod) RegisterAllResource(api *api2go.API) {
 	for _, ser := range p.conf.Services {
 		md := BmFactory.GetModelByName(ser.Model)
@@ -155,4 +178,10 @@ func (p Pod) RegisterAllFunctions(prefix string, api *api2go.API) {
 		}
 	}
 
+}
+
+func (p Pod) RegisterAllMiddleware(api *api2go.API) {
+	for _, mw := range p.Middleware {
+		api.UseMiddleware(mw.DoMiddleware)
+	}
 }
