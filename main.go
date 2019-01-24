@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	version := "v2"
 	fmt.Println("pod archi begins")
 	var pod = BmPodsDefine.Pod{Name: "alfred test"}
 	pod.RegisterSerFromYAML("Resources/alfredtest.yaml")
@@ -21,10 +22,10 @@ func main() {
 
 	addr := bmRouter.Host + ":" + bmRouter.Port
 	fmt.Println("Listening on ", addr)
-	api := api2go.NewAPIWithResolver("v0", &BmApiResolver.RequestURL{Addr: addr})
+	api := api2go.NewAPIWithResolver(version, &BmApiResolver.RequestURL{Addr: addr})
 	pod.RegisterAllResource(api)
 
-	pod.RegisterAllFunctions("v0", api)
+	pod.RegisterAllFunctions(version, api)
 	pod.RegisterAllMiddleware(api)
 
 	handler := api.Handler().(*httprouter.Router)
