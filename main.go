@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	version := "v2"
+	version := "v0"
 	fmt.Println("pod archi begins")
 	var pod = BmPodsDefine.Pod{Name: "alfred test"}
 	pod.RegisterSerFromYAML("Resources/alfredtest.yaml")
@@ -29,7 +29,7 @@ func main() {
 	pod.RegisterAllMiddleware(api)
 
 	handler := api.Handler().(*httprouter.Router)
-	http.ListenAndServe(addr, handler)
+	http.ListenAndServe(":" + bmRouter.Port, handler)
 
 	fmt.Println("pod archi ends")
 }
