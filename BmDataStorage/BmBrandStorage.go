@@ -81,7 +81,7 @@ func (s *BmBrandStorage) Update(c BmModel.Brand) error {
 	return nil
 }
 
-func (s *BmBrandStorage) Count(c BmModel.Brand) int {
-	r, _ := s.db.Count(&c)
+func (s *BmBrandStorage) Count(req api2go.Request, c BmModel.Brand) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

@@ -131,7 +131,7 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 	}
 
 	in := BmModel.Unit{}
-	count := s.BmUnitStorage.Count(in)
+	count := s.BmUnitStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

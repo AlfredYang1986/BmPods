@@ -85,7 +85,7 @@ func (s *BmReservableitemStorage) Update(c BmModel.Reservableitem) error {
 	return nil
 }
 
-func (s *BmReservableitemStorage) Count(c BmModel.Reservableitem) int {
-	r, _ := s.db.Count(&c)
+func (s *BmReservableitemStorage) Count(req api2go.Request, c BmModel.Reservableitem) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

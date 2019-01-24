@@ -120,7 +120,7 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 	}
 
 	in := BmModel.Reservableitem{}
-	count := s.BmReservableitemStorage.Count(in)
+	count := s.BmReservableitemStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

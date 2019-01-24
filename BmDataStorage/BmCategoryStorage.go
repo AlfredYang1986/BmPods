@@ -82,7 +82,7 @@ func (s *BmCategoryStorage) Update(c BmModel.Category) error {
 	return nil
 }
 
-func (s *BmCategoryStorage) Count(c BmModel.Category) int {
-	r, _ := s.db.Count(&c)
+func (s *BmCategoryStorage) Count(req api2go.Request, c BmModel.Category) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

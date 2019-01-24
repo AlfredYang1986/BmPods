@@ -83,7 +83,7 @@ func (s *BmYardStorage) Update(c BmModel.Yard) error {
 }
 
 // Count a model
-func (s *BmYardStorage) Count(c BmModel.Yard) int {
-	r, _ := s.db.Count(&c)
+func (s *BmYardStorage) Count(req api2go.Request, c BmModel.Yard) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

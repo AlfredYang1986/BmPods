@@ -5,6 +5,7 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
+	"math"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -159,7 +160,7 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 
 			result = append(result, model)
 		}
-		pages = 1 + int(count/take)
+		pages = int(math.Ceil(float64(count) / float64(take)))
 		return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages}, nil
 	}
 
@@ -172,9 +173,8 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 	}
 
 	in := BmModel.Student{}
-	count = s.BmStudentStorage.Count(in)
-	pages = 1 + int(count/take)
-
+	count = s.BmStudentStorage.Count(r, in)
+	pages = int(math.Ceil(float64(count) / float64(take)))
 	return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages}, nil
 }
 

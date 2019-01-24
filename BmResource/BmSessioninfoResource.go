@@ -167,7 +167,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 	}
 
 	in := BmModel.Sessioninfo{}
-	count := s.BmSessioninfoStorage.Count(in)
+	count := s.BmSessioninfoStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

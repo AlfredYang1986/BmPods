@@ -82,7 +82,7 @@ func (s *BmApplicantStorage) Update(c BmModel.Applicant) error {
 	return nil
 }
 
-func (s *BmApplicantStorage) Count(c BmModel.Applicant) int {
-	r, _ := s.db.Count(&c)
+func (s *BmApplicantStorage) Count(req api2go.Request, c BmModel.Applicant) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

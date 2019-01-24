@@ -2,6 +2,7 @@ package BmResource
 
 import (
 	"errors"
+	"math"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -129,15 +130,14 @@ func (s BmRoomResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 			}
 			result = append(result, model)
 		}
-		pages = 1 + int(count/take)
-
+		pages = int(math.Ceil(float64(count) / float64(take)))
 		return uint(count), &Response{Res: result, QueryRes: "rooms", TotalPage: pages}, nil
 	}
 
 	result = s.BmRoomStorage.GetAll(r, skip, take)
 	in := BmModel.Room{}
-	count = s.BmRoomStorage.Count(in)
-	pages = 1 + int(count/take)
+	count = s.BmRoomStorage.Count(r, in)
+	pages = int(math.Ceil(float64(count) / float64(take)))
 	return uint(count), &Response{Res: result, QueryRes: "rooms", TotalPage: pages}, nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
+	"math"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -69,6 +70,7 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	var (
 		result                      []BmModel.Apply
 		number, size, offset, limit string
+		skip, take, count, pages    int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -88,8 +90,8 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		limit = limitQuery[0]
 	}
 
-	sizeI, err := strconv.ParseInt(size, 10, 64)
 	if size != "" {
+		sizeI, err := strconv.ParseInt(size, 10, 64)
 		if err != nil {
 			return 0, &Response{}, err
 		}
@@ -100,28 +102,9 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, model := range s.BmApplyStorage.GetAll(r, int(start), int(sizeI)) {
 
-			model.Kids = []*BmModel.Kid{}
-			for _, kID := range model.KidsIDs {
-				choc, err := s.BmKidStorage.GetOne(kID)
-				if err != nil {
-					return 0, &Response{}, err
-				}
-				model.Kids = append(model.Kids, &choc)
-			}
-
-			if model.ApplicantID != "" {
-				applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
-				if err != nil {
-					return 0, &Response{}, err
-				}
-				model.Applicant = applicant
-			}
-
-			result = append(result, *model)
-		}
-
+		skip = int(start)
+		take = int(sizeI)
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
 		if err != nil {
@@ -133,33 +116,35 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			return 0, &Response{}, err
 		}
 
-		for _, model := range s.BmApplyStorage.GetAll(r, int(offsetI), int(limitI)) {
+		skip = int(offsetI)
+		take = int(limitI)
+	}
 
-			model.Kids = []*BmModel.Kid{}
-			for _, kID := range model.KidsIDs {
-				choc, err := s.BmKidStorage.GetOne(kID)
-				if err != nil {
-					return 0, &Response{}, err
-				}
-				model.Kids = append(model.Kids, &choc)
+	for _, model := range s.BmApplyStorage.GetAll(r, skip, take) {
+
+		model.Kids = []*BmModel.Kid{}
+		for _, kID := range model.KidsIDs {
+			choc, err := s.BmKidStorage.GetOne(kID)
+			if err != nil {
+				return 0, &Response{}, err
 			}
-
-			if model.ApplicantID != "" {
-				applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
-				if err != nil {
-					return 0, &Response{}, err
-				}
-				model.Applicant = applicant
-			}
-
-			result = append(result, *model)
+			model.Kids = append(model.Kids, &choc)
 		}
+
+		if model.ApplicantID != "" {
+			applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
+			if err != nil {
+				return 0, &Response{}, err
+			}
+			model.Applicant = applicant
+		}
+
+		result = append(result, *model)
 	}
 
 	in := BmModel.Apply{}
-	count := s.BmApplyStorage.Count(in)
-	pages := 1 + int(count / int(sizeI))
-
+	count = s.BmApplyStorage.Count(r, in)
+	pages = int(math.Ceil(float64(count) / float64(take)))
 	return uint(count), &Response{Res: result, QueryRes:"applies", TotalPage:pages, TotalCount:count}, nil
 }
 

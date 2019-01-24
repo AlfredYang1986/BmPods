@@ -89,7 +89,7 @@ func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 	}
 
 	in := BmModel.Teacher{}
-	count := s.BmTeacherStorage.Count(in)
+	count := s.BmTeacherStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

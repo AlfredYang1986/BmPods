@@ -120,7 +120,7 @@ func (s BmBrandResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	}
 
 	in := BmModel.Brand{}
-	count := s.BmBrandStorage.Count(in)
+	count := s.BmBrandStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

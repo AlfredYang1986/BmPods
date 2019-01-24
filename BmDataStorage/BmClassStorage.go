@@ -123,7 +123,7 @@ func (s *BmClassStorage) Update(c BmModel.Class) error {
 	return nil
 }
 
-func (s *BmClassStorage) Count(c BmModel.Class) int {
-	r, _ := s.db.Count(&c)
+func (s *BmClassStorage) Count(req api2go.Request, c BmModel.Class) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

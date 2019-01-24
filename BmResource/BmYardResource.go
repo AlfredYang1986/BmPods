@@ -122,7 +122,7 @@ func (s BmYardResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 	}
 
 	in := BmModel.Yard{}
-	count := s.BmYardStorage.Count(in)
+	count := s.BmYardStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

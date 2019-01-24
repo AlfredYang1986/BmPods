@@ -80,7 +80,7 @@ func (s *BmTeacherStorage) Update(c BmModel.Teacher) error {
 	return nil
 }
 
-func (s *BmTeacherStorage) Count(c BmModel.Teacher) int {
-	r, _ := s.db.Count(&c)
+func (s *BmTeacherStorage) Count(req api2go.Request, c BmModel.Teacher) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }

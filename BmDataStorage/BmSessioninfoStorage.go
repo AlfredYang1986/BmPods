@@ -91,7 +91,7 @@ func (s *BmSessioninfoStorage) Update(c BmModel.Sessioninfo) error {
 	return nil
 }
 
-func (s *BmSessioninfoStorage) Count(c BmModel.Sessioninfo) int {
-	r, _ := s.db.Count(&c)
+func (s *BmSessioninfoStorage) Count(req api2go.Request, c BmModel.Sessioninfo) int {
+	r, _ := s.db.Count(req, &c)
 	return r
 }
