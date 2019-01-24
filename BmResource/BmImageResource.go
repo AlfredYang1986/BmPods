@@ -12,13 +12,15 @@ import (
 type BmImageResource struct {
 	BmImageStorage       *BmDataStorage.BmImageStorage
 	BmSessioninfoStorage *BmDataStorage.BmSessioninfoStorage
-	BmBrandStorage *BmDataStorage.BmBrandStorage
+	BmBrandStorage       *BmDataStorage.BmBrandStorage
+	BmYardStorage       *BmDataStorage.BmYardStorage
 }
 
 func (c BmImageResource) NewImageResource(args []BmDataStorage.BmStorage) BmImageResource {
 	var us *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmImageStorage
 	var bs *BmDataStorage.BmBrandStorage
+	var ys *BmDataStorage.BmYardStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmSessioninfoStorage" {
@@ -27,15 +29,18 @@ func (c BmImageResource) NewImageResource(args []BmDataStorage.BmStorage) BmImag
 			cs = arg.(*BmDataStorage.BmImageStorage)
 		} else if tp.Name() == "BmBrandStorage" {
 			bs = arg.(*BmDataStorage.BmBrandStorage)
+		} else if tp.Name() == "BmYardStorage" {
+			ys = arg.(*BmDataStorage.BmYardStorage)
 		}
 	}
-	return BmImageResource{BmSessioninfoStorage: us, BmImageStorage: cs, BmBrandStorage: bs}
+	return BmImageResource{BmSessioninfoStorage: us, BmImageStorage: cs, BmBrandStorage: bs, BmYardStorage: ys}
 }
 
 // FindAll images
 func (c BmImageResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	sessioninfosID, ok := r.QueryParams["sessioninfosID"]
 	brandsID, brdok := r.QueryParams["brandsID"]
+	yardsID, ydok := r.QueryParams["yardsID"]
 	result := []BmModel.Image{}
 	if ok {
 		modelRootID := sessioninfosID[0]
@@ -57,6 +62,22 @@ func (c BmImageResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		modelRootID := brandsID[0]
 
 		modelRoot, err := c.BmBrandStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		for _, modelID := range modelRoot.ImagesIDs {
+			model, err := c.BmImageStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			result = append(result, model)
+		}
+
+		return &Response{Res: result}, nil
+	} else if ydok {
+		modelRootID := yardsID[0]
+
+		modelRoot, err := c.BmYardStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}

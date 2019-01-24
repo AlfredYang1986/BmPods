@@ -1,0 +1,302 @@
+storages:
+- name: BmApplicantStorage
+  method: NewApplicantStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmKidStorage
+  method: NewKidStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmApplyStorage
+  method: NewApplyStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmCategoryStorage
+  method: NewCategoryStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmImageStorage
+  method: NewImageStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmSessioninfoStorage
+  method: NewSessioninfoStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmReservableitemStorage
+  method: NewReservableitemStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmBrandStorage
+  method: NewBrandStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmStudentStorage
+  method: NewStudentStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmGuardianStorage
+  method: NewGuardianStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmTeacherStorage
+  method: NewTeacherStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmRoomStorage
+  method: NewRoomStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmYardStorage
+  method: NewYardStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmClassStorage
+  method: NewClassStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmUnitStorage
+  method: NewUnitStorage
+  daemons:
+  - BmMongodbDaemon
+
+resources:
+- name: BmSessioninfoResource
+  method: NewSessioninfoResource
+  storages:
+  - BmSessioninfoStorage
+  - BmCategoryStorage
+  - BmImageStorage
+  - BmReservableitemStorage
+- name: BmReservableitemResource
+  method: NewReservableitemResource
+  storages:
+  - BmReservableitemStorage
+  - BmSessioninfoStorage
+  - BmClassStorage
+- name: BmImageResource
+  method: NewImageResource
+  storages:
+  - BmImageStorage
+  - BmSessioninfoStorage
+  - BmBrandStorage
+  - BmYardStorage
+- name: BmCategoryResource
+  method: NewCategoryResource
+  storages:
+  - BmCategoryStorage
+  - BmSessioninfoStorage
+  - BmBrandStorage
+- name: BmApplyResource
+  method: NewApplyResource
+  storages:
+  - BmKidStorage
+  - BmApplyStorage
+  - BmApplicantStorage
+- name: BmKidResource
+  method: NewKidResource
+  storages:
+  - BmKidStorage
+  - BmApplyStorage
+- name: BmApplicantResource
+  method: NewApplicantResource
+  storages:
+  - BmApplicantStorage
+  - BmApplyStorage
+- name: BmBrandResource
+  method: NewBrandResource
+  storages:
+  - BmBrandStorage
+  - BmCategoryStorage
+  - BmImageStorage
+- name: BmStudentResource
+  method: NewStudentResource
+  storages:
+  - BmStudentStorage
+  - BmKidStorage
+  - BmGuardianStorage
+  - BmTeacherStorage
+  - BmClassStorage
+- name: BmGuardianResource
+  method: NewGuardianResource
+  storages:
+  - BmGuardianStorage
+  - BmStudentStorage
+- name: BmTeacherResource
+  method: NewTeacherResource
+  storages:
+  - BmTeacherStorage
+- name: BmRoomResource
+  method: NewRoomResource
+  storages:
+  - BmRoomStorage
+  - BmYardStorage
+- name: BmYardResource
+  method: NewYardResource
+  storages:
+  - BmYardStorage
+  - BmImageStorage
+  - BmRoomStorage
+- name: BmClassResource
+  method: NewClassResource
+  storages:
+  - BmClassStorage
+  - BmSessioninfoStorage
+  - BmReservableitemStorage
+  - BmYardStorage
+  - BmStudentStorage
+  - BmTeacherStorage
+  - BmUnitStorage
+- name: BmUnitResource
+  method: NewUnitResource
+  storages:
+  - BmUnitStorage
+  - BmTeacherStorage
+  - BmClassStorage
+  - BmRoomStorage
+
+models:
+- BmKid
+- BmApply
+- BmApplicant
+- BmSessioninfo
+- BmReservableitem
+- BmCategory
+- BmBrand
+- BmStudent
+- BmGuardian
+- BmTeacher
+- BmRoom
+- BmYard
+- BmClass
+- BmUnit
+
+services:
+- name: bm-kid
+  model: BmKid
+  resource: BmKidResource
+- name: bm-applicant
+  model: BmApplicant
+  resource: BmApplicantResource
+- name: bm-apply
+  model: BmApply
+  resource: BmApplyResource
+- name: bm-sessioninfo
+  model: BmSessioninfo
+  resource: BmSessioninfoResource
+- name: bm-reservable-item
+  model: BmReservableitem
+  resource: BmReservableitemResource
+- name: bm-category
+  model: BmCategory
+  resource: BmCategoryResource
+- name: bm-image
+  model: BmImage
+  resource: BmImageResource
+- name: bm-brand
+  model: BmBrand
+  resource: BmBrandResource
+- name: bm-student
+  model: BmStudent
+  resource: BmStudentResource
+- name: bm-guardian
+  model: BmGuardian
+  resource: BmGuardianResource
+- name: bm-teacher
+  model: BmTeacher
+  resource: BmTeacherResource
+- name: bm-room
+  model: BmRoom
+  resource: BmRoomResource
+- name: bm-yard
+  model: BmYard
+  resource: BmYardResource
+- name: bm-class
+  model: BmClass
+  resource: BmClassResource
+- name: bm-unit
+  model: BmUnit
+  resource: BmUnitResource
+
+daemons:
+- name: BmMongodbDaemon
+  method: NewMongoDBDaemon
+  args:
+    host: primary
+    port: 27017
+    database: ddsaas-demo
+- name: BmRedisDaemon
+  method: NewRedisDBDaemon
+  args:
+    host: redis
+    port: 6379
+    password:
+    database: 0
+
+functions:
+- name: BmProvinceHandler
+  create: NewProvinceHandler
+  daemons:
+  - BmMongodbDaemon
+  method: AllProvinces
+  http: GET
+  args:
+  - name
+- name: BmCityHandler
+  create: NewCityHandler
+  daemons:
+  - BmMongodbDaemon
+  method: AllCities
+  http: GET
+  args:
+  - name
+- name: BmDistrictHandler
+  create: NewDistrictHandler
+  daemons:
+  - BmMongodbDaemon
+  method: AllDistricts
+  http: GET
+  args:
+  - name
+- name: BmUploadToOssHandler
+  create: NewUploadToOssHandler
+  daemons:
+  - BmMongodbDaemon
+  method: UploadToOss
+  http: POST
+  args:
+  - name
+- name: BmAccountHandler
+  create: NewAccountHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: AccountValidation
+  http: POST
+  args:
+  - name
+- name: BmApplicantHandler
+  create: NewApplicantHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: ApplicantValidation
+  http: POST
+  args:
+  - name
+- name: BmWeChatHandler
+  create: NewWeChatHandler
+  daemons:
+  - BmMongodbDaemon
+  method: GetWeChatInfo
+  http: POST
+  args:
+  - name
+
+middlewares:
+- name: BmCheckTokenMiddleware
+  create: NewCheckTokenMiddleware
+  daemons:
+  - BmRedisDaemon
+  args:
+  - name

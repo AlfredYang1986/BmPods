@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	version := "v0"
+	version := "v2"
 	fmt.Println("pod archi begins")
 	var pod = BmPodsDefine.Pod{Name: "alfred test"}
 	pod.RegisterSerFromYAML("Resources/alfredtest.yaml")
