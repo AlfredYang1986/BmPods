@@ -48,6 +48,12 @@ func (s BmSessioninfoStorage) GetOne(id string) (BmModel.Sessioninfo, error) {
 	out := BmModel.Sessioninfo{ID: id}
 	err := s.db.FindOne(&in, &out)
 	if err == nil {
+		if out.CategoryID != "" {
+			cate, err := BmCategoryStorage{db: s.db}.GetOne(out.CategoryID)
+			if err == nil {
+				out.Category = cate
+			}
+		}
 		return out, nil
 	}
 	errMessage := fmt.Sprintf("Sessioninfo for id %s not found", id)

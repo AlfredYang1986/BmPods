@@ -24,7 +24,7 @@ type Apply struct {
 	ReservableId string  `json:"reservable-id" bson:"reservable-id"`
 
 	Kids    []*Kid   `json:"-"`
-	KidsIDs []string `json:"-" bson:"kid-ids"`
+	KidsIDs []string `json:"kid-ids" bson:"kid-ids"`
 
 	ApplicantID string    `json:"applicant-id" bson:"applicant-id"`
 	Applicant   Applicant `json:"-"`
@@ -50,9 +50,9 @@ func (u Apply) GetReferences() []jsonapi.Reference {
 			Relationship: jsonapi.ToOneRelationship,
 		},
 		{
-			Type: "kids",
-			Name: "kids",
-			Relationship:jsonapi.ToManyRelationship,
+			Type:         "kids",
+			Name:         "kids",
+			Relationship: jsonapi.ToManyRelationship,
 		},
 	}
 }
