@@ -80,6 +80,7 @@ resources:
   - BmImageStorage
   - BmSessioninfoStorage
   - BmBrandStorage
+  - BmYardStorage
 - name: BmCategoryResource
   method: NewCategoryResource
   storages:
