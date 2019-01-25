@@ -1,6 +1,8 @@
 package BmModel
 
-import "gopkg.in/mgo.v2/bson"
+import (
+	"gopkg.in/mgo.v2/bson"
+)
 
 // Kid is the Kid that a user consumes in order to get fat and happy
 type Kid struct {
@@ -11,6 +13,9 @@ type Kid struct {
 	Gender       float64       `json:"gender" bson:"gender"`
 	Dob          float64       `json:"dob" bson:"dob"`
 	GuardianRole string        `json:"guardian-role" bson:"guardian-role"`
+
+	ApplicantID string    `json:"applicant-id" bson:"applicant-id"`
+	Applicant   Applicant `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -25,5 +30,13 @@ func (c *Kid) SetID(id string) error {
 }
 
 func (u *Kid) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	for k, v := range parameters {
+		switch k {
+		case "applicant-id":
+			rst[k] = v[0]
+		}
+	}
+
+	return rst
 }
