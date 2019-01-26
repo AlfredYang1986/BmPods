@@ -14,6 +14,7 @@ type Class struct {
 
 	ClassTitle        string  `json:"class-title" bson:"class-title"`
 	Status            float64 `json:"status" bson:"status"` //0活动 1体验课 2普通课程
+	Flag              float64 `json:"flag"`                 //-1=未排课, 0=全部, 1=正在进行, 2=已完成
 	StartDate         float64 `json:"start-date" bson:"start-date"`
 	EndDate           float64 `json:"end-date" bson:"end-date"`
 	CreateTime        float64 `json:"create-time" bson:"create-time"`
@@ -91,17 +92,17 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 	for _, tmpID := range u.UnitsIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   tmpID,
-			Type: "uints",
-			Name: "uints",
+			Type: "units",
+			Name: "units",
 		})
 	}
 
 	if u.YardID != "" {
 		result = append(result, jsonapi.ReferenceID{
-			ID:   u.YardID,
-			Type: "yards",
-			Name: "yard",
-			Relationship:jsonapi.ToOneRelationship,
+			ID:           u.YardID,
+			Type:         "yards",
+			Name:         "yard",
+			Relationship: jsonapi.ToOneRelationship,
 		})
 	}
 	if u.SessioninfoID != "" {
@@ -161,7 +162,7 @@ func (u *Class) SetToManyReferenceIDs(name string, IDs []string) error {
 		u.TeachersIDs = IDs
 		return nil
 	}
-	if name == "uints" {
+	if name == "units" {
 		u.UnitsIDs = IDs
 		return nil
 	}
@@ -179,7 +180,7 @@ func (u *Class) AddToManyIDs(name string, IDs []string) error {
 		u.TeachersIDs = append(u.TeachersIDs, IDs...)
 		return nil
 	}
-	if name == "uints" {
+	if name == "units" {
 		u.UnitsIDs = append(u.UnitsIDs, IDs...)
 		return nil
 	}
@@ -209,7 +210,7 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 			}
 		}
 	}
-	if name == "uints" {
+	if name == "units" {
 		for _, ID := range IDs {
 			for pos, oldID := range u.UnitsIDs {
 				if ID == oldID {
@@ -231,6 +232,12 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			rst[k] = v[0]
 		case "status":
 			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			rst[k] = val
+		case "flag":
+			val, err := strconv.Atoi(v[0])
 			if err != nil {
 				panic(err.Error())
 			}
