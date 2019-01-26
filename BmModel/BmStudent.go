@@ -43,7 +43,7 @@ type Student struct {
 	KidID string `json:"-" bson:"kid-id"`
 	Kid   *Kid   `json:"-"`
 
-	Teacher   *Teacher `json:"-"`
+	Teacher   Teacher `json:"-"`
 	TeacherID string   `json:"-" bson:"teacher-id"`
 
 	Guardians    []*Guardian `json:"-"`

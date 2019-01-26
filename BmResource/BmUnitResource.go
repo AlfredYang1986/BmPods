@@ -50,7 +50,7 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			user.Room = &r
+			user.Room = r
 		}
 
 		if user.TeacherID != "" {
@@ -58,14 +58,14 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			user.Teacher = &r
+			user.Teacher = r
 		}
 		if user.ClassID != "" {
 			r, err := s.BmClassStorage.GetOne(user.ClassID)
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			user.Class = &r
+			user.Class = r
 		}
 
 		result = append(result, *user)
@@ -149,7 +149,7 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		user.Room = &r
+		user.Room = r
 	}
 
 	if user.TeacherID != "" {
@@ -157,14 +157,14 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		user.Teacher = &r
+		user.Teacher = r
 	}
 	if user.ClassID != "" {
 		r, err := s.BmClassStorage.GetOne(user.ClassID)
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		user.Class = &r
+		user.Class = r
 	}
 
 	return &Response{Res: user}, nil

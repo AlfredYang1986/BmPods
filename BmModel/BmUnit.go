@@ -20,11 +20,11 @@ type Unit struct {
 	//Sessionable   sessionable.BmSessionable `json:"Sessionable" jsonapi:"relationships"`
 
 	TeacherID string   `json:'-' bson:"teacher-id"`
-	Teacher   *Teacher `json:"-"`
+	Teacher   Teacher `json:"-"`
 	ClassID   string   `json:'-' bson:"class-id"`
-	Class     *Class   `json:"-"`
+	Class     Class   `json:"-"`
 	RoomID    string   `json:"-" bson:"room-id"`
-	Room      *Room    `json:"-"`
+	Room      Room    `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -82,8 +82,6 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "room",
 		})
 	}
-
-	// TODO: sessionable
 
 	return result
 }

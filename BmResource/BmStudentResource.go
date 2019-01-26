@@ -248,7 +248,7 @@ func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student) error {
 		if err != nil {
 			return err
 		}
-		model.Teacher = &k
+		model.Teacher = k
 	}
 
 	return nil

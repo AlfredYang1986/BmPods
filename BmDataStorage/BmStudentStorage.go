@@ -44,6 +44,20 @@ func (s BmStudentStorage) GetOne(id string) (BmModel.Student, error) {
 	out := BmModel.Student{ID: id}
 	err := s.db.FindOne(&in, &out)
 	if err == nil {
+
+		if out.KidID != "" {
+			k, err := BmKidStorage{db:s.db}.GetOne(out.KidID)
+			if err == nil {
+				out.Kid = &k
+			}
+		}
+		if out.TeacherID != "" {
+			k, err := BmTeacherStorage{db:s.db}.GetOne(out.TeacherID)
+			if err == nil {
+				out.Teacher = k
+			}
+		}
+
 		return out, nil
 	}
 	errMessage := fmt.Sprintf("Student for id %s not found", id)
