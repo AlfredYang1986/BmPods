@@ -77,6 +77,26 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		return &Response{Res: result}, nil
 	}
 
+	flag, fok := r.QueryParams["flag"]
+	if fok {
+		flagInt, err := strconv.Atoi(flag[0])
+		if err != nil {
+			return &Response{}, err
+		}
+		models := s.BmClassStorage.GetAll(r, -1, -1)
+		for _, model := range models {
+			err := s.ResetReferencedModel(model)
+			if err != nil {
+				return &Response{}, err
+			}
+			err = s.FilterClassByFlag(model, flagInt)
+			if err == nil {
+				result = append(result, *model)
+			}
+		}
+		return &Response{Res: result}, nil
+	}
+
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
 		err := s.ResetReferencedModel(model)
@@ -155,7 +175,7 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			return uint(0), &Response{}, err
 		}
 		endIndex := skip + take
-		if endIndex >= count {
+		if endIndex > count {
 			endIndex = count
 		}
 		for _, modelID := range modelRoot.ClassesIDs[skip:endIndex] {
@@ -169,18 +189,44 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			}
 			result = append(result, model)
 		}
-
 		pages = int(math.Ceil(float64(count) / float64(take)))
 		return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages}, nil
 	}
 
-	for _, model := range s.BmClassStorage.GetAll(r, skip, take) {
+	flag, fok := r.QueryParams["flag"]
+	if fok {
+		flagInt, err := strconv.Atoi(flag[0])
+		if err != nil {
+			return 0, &Response{}, err
+		}
+		models := s.BmClassStorage.GetAll(r, -1, -1)
+		for _, model := range models {
+			err := s.ResetReferencedModel(model)
+			if err != nil {
+				return 0, &Response{}, err
+			}
+			err = s.FilterClassByFlag(model, flagInt)
+			if err == nil {
+				result = append(result, *model)
+			}
+		}
+		count = len(result)
+		if skip >= count {
+			return uint(0), &Response{}, err
+		}
+		endIndex := skip + take
+		if endIndex > count {
+			endIndex = count
+		}
+		pages = int(math.Ceil(float64(count) / float64(take)))
+		return uint(count), &Response{Res: result[skip:endIndex], QueryRes: "classes", TotalPage: pages}, nil
+	}
 
+	for _, model := range s.BmClassStorage.GetAll(r, skip, take) {
 		err := s.ResetReferencedModel(model)
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
 		result = append(result, *model)
 	}
 
@@ -278,4 +324,41 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		model.Sessioninfo = item
 	}
 	return nil
+}
+
+func (s BmClassResource) FilterClassByFlag(model *BmModel.Class, flag int) error {
+	switch flag {
+	case 0:
+		if len(model.UnitsIDs) != 0 {
+			model.ReSetCourseCount()
+		}
+		return nil
+	case -1:
+		if len(model.UnitsIDs) == 0 {
+			return nil
+		}
+	case 1:
+		if len(model.UnitsIDs) != 0 {
+			var us BmModel.Units
+			us = model.Units
+			us.SortByEndDate(false)
+			now := float64(time.Now().UnixNano() / 1e6)
+			if us[0].EndDate > now {
+				model.ReSetCourseCount()
+				return nil
+			}
+		}
+	case 2:
+		if len(model.UnitsIDs) != 0 {
+			var us BmModel.Units
+			us = model.Units
+			us.SortByEndDate(false)
+			now := float64(time.Now().UnixNano() / 1e6)
+			if us[0].EndDate <= now {
+				model.ReSetCourseCount()
+				return nil
+			}
+		}
+	}
+	return errors.New("not found")
 }

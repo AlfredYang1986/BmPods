@@ -5,6 +5,7 @@ import (
 	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
 	"strconv"
+	"time"
 )
 
 // Class is a generic database Class
@@ -236,13 +237,23 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 				panic(err.Error())
 			}
 			rst[k] = val
-		case "flag":
-			val, err := strconv.Atoi(v[0])
-			if err != nil {
-				panic(err.Error())
-			}
-			rst[k] = val
 		}
 	}
 	return rst
+}
+
+func (c *Class) ReSetCourseCount() error {
+	if len(c.UnitsIDs) != 0 {
+		c.CourseTotalCount = float64(len(c.UnitsIDs))
+		var us Units
+		us = c.Units
+		us.SortByEndDate(false)
+		now := float64(time.Now().UnixNano() / 1e6)
+		for i, v := range us {
+			if v.EndDate < now {
+				c.CourseExpireCount = float64(len(c.UnitsIDs)) - float64(i)
+			}
+		}
+	}
+	return nil
 }

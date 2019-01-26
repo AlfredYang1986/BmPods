@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
+	"sort"
 )
 
 type Unit struct {
@@ -126,4 +127,59 @@ func (u *Unit) SetToOneReferenceID(name, ID string) error {
 
 func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	return bson.M{}
+}
+
+type Units []*Unit
+
+func (bd Units) SortByStartDate(increasing bool) error {
+	courseUnits := bd
+	if courseUnits == nil {
+		return nil
+	}
+	if increasing {
+		sort.Sort(BmUnitsWrapper{courseUnits, func(cu1, cu2 *Unit) bool {
+			return cu1.StartDate < cu2.StartDate //按开始时间递增排序
+		}})
+	} else {
+		sort.Sort(BmUnitsWrapper{courseUnits, func(cu1, cu2 *Unit) bool {
+			return cu1.StartDate > cu2.StartDate //按开始时间递减排序
+		}})
+	}
+
+	return nil
+}
+
+func (bd Units) SortByEndDate(increasing bool) error {
+	courseUnits := bd
+	if courseUnits == nil {
+		return nil
+	}
+	if increasing {
+		sort.Sort(BmUnitsWrapper{courseUnits, func(cu1, cu2 *Unit) bool {
+			return cu1.EndDate < cu2.EndDate //按结束时间递增排序
+		}})
+	} else {
+		sort.Sort(BmUnitsWrapper{courseUnits, func(cu1, cu2 *Unit) bool {
+			return cu1.EndDate > cu2.EndDate //按结束时间递减排序
+		}})
+	}
+
+	return nil
+}
+
+type BmUnitsWrapper struct {
+	units []*Unit
+	sortBy      func(cu1, cu2 *Unit) bool
+}
+
+func (bd BmUnitsWrapper) Len() int {
+	return len(bd.units)
+}
+
+func (bd BmUnitsWrapper) Swap(i, j int) {
+	bd.units[i], bd.units[j] = bd.units[j], bd.units[i]
+}
+
+func (bd BmUnitsWrapper) Less(i, j int) bool {
+	return bd.sortBy(bd.units[i], bd.units[j])
 }
