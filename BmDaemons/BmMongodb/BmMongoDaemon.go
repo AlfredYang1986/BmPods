@@ -41,12 +41,28 @@ func (m *BmMongodb) InsertBmObject(ptr BmModel.BmModelBase) (string, error) {
 	}
 	defer session.Close()
 
-	oid := m.GenerateModelId_(ptr)
 	v := reflect.ValueOf(ptr).Elem()
 	cn := v.Type().Name()
 	c := session.DB(m.Database).C(cn)
-
 	rst, err := Struct2map(v)
+
+	//TODO:小程序不支持patch更新，使用Function实现. 暂时使用存在就覆盖.
+	fs := reflect.ValueOf(ptr).Elem().FieldByName("ID")
+	origin_id := fs.Interface().(string)
+	if origin_id != "" {
+		origin_oid := bson.ObjectIdHex(origin_id)
+		n, err := c.Find(bson.M{"_id": origin_oid}).Count()
+		if n > 0 {
+			//如果已存在，就覆盖
+			rst["_id"] = origin_oid
+			err = c.Update(bson.M{"_id": origin_oid}, rst)
+			if err == nil {
+				return origin_id, nil
+			}
+		}
+	}
+
+	oid := m.GenerateModelId_(ptr)
 	rst["_id"] = oid
 	err = c.Insert(rst)
 	if err == nil {

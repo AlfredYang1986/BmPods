@@ -6,7 +6,7 @@ import (
 
 // Kid is the Kid that a user consumes in order to get fat and happy
 type Kid struct {
-	ID           string        `json:"-"`
+	ID           string        `json:"id"`
 	Id_          bson.ObjectId `json:"-" bson:"_id"`
 	Name         string        `json:"name" bson:"name"`
 	NickName     string        `json:"nickname" bson:"nickname"`
