@@ -7,6 +7,7 @@ type Room struct {
 	ID  string        `json:"-"`
 	Id_ bson.ObjectId `json:"-" bson:"_id"`
 
+	BrandId  string  `json:"brand-id" bson:"brand-id"`
 	Title    string  `json:"title" bson:"title"`
 	RoomType float64 `json:"room-type" bson:"room-type"`
 	Capacity float64 `json:"capacity" bson:"capacity"`
@@ -24,5 +25,12 @@ func (r *Room) SetID(id string) error {
 }
 
 func (u *Room) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	for k, v := range parameters {
+		switch k {
+		case "brand-id":
+			rst[k] = v[0]
+		}
+	}
+	return rst
 }

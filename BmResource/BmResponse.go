@@ -18,7 +18,7 @@ func (r Response) Metadata() map[string]interface{} {
 	}
 
 
-	if r.QueryRes != "" && r.TotalPage > 0 {
+	if r.QueryRes != "" && r.TotalPage >= 0 {
 		meta["query-res"] = r.QueryRes
 		meta["total-page"] = r.TotalPage
 		meta["total-count"] = r.TotalCount
