@@ -201,14 +201,6 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 	id := s.BmSessioninfoStorage.Insert(model)
 	model.ID = id
 
-	if model.CategoryID != "" {
-		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Category = cate
-	}
-
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 

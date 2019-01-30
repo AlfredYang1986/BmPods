@@ -162,14 +162,6 @@ func (s BmReservableitemResource) Create(obj interface{}, r api2go.Request) (api
 	id := s.BmReservableitemStorage.Insert(model)
 	model.ID = id
 
-	if model.SessioninfoID != "" {
-		sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Sessioninfo = sessioninfo
-	}
-
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 

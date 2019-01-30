@@ -156,6 +156,14 @@ func (s BmApplyResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 
+	if model.ApplicantID != "" {
+		applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Applicant = applicant
+	}
+
 	model.Kids = []*BmModel.Kid{}
 	for _, kID := range model.KidsIDs {
 		choc, err := s.BmKidStorage.GetOne(kID)
