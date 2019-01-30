@@ -139,48 +139,71 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 // FindOne to satisfy `api2go.DataSource` interface
 // this method should return the user with the given ID, otherwise an error
 func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	user, err := s.BmUnitStorage.GetOne(ID)
+	model, err := s.BmUnitStorage.GetOne(ID)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 
-	if user.RoomID != "" {
-		r, err := s.BmRoomStorage.GetOne(user.RoomID)
+	if model.RoomID != "" {
+		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		user.Room = r
+		model.Room = r
 	}
 
-	if user.TeacherID != "" {
-		r, err := s.BmTeacherStorage.GetOne(user.TeacherID)
+	if model.TeacherID != "" {
+		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		user.Teacher = r
+		model.Teacher = r
 	}
-	if user.ClassID != "" {
-		r, err := s.BmClassStorage.GetOne(user.ClassID)
+	if model.ClassID != "" {
+		r, err := s.BmClassStorage.GetOne(model.ClassID)
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		user.Class = r
+		model.Class = r
 	}
 
-	return &Response{Res: user}, nil
+	return &Response{Res: model}, nil
 }
 
 // Create method to satisfy `api2go.DataSource` interface
 func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	user, ok := obj.(BmModel.Unit)
+	model, ok := obj.(BmModel.Unit)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	id := s.BmUnitStorage.Insert(user)
-	user.ID = id
+	id := s.BmUnitStorage.Insert(model)
+	model.ID = id
 
-	return &Response{Res: user, Code: http.StatusCreated}, nil
+	if model.RoomID != "" {
+		r, err := s.BmRoomStorage.GetOne(model.RoomID)
+		if err != nil {
+			return &Response{}, errors.New("error")
+		}
+		model.Room = r
+	}
+
+	if model.TeacherID != "" {
+		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
+		if err != nil {
+			return &Response{}, errors.New("error")
+		}
+		model.Teacher = r
+	}
+	if model.ClassID != "" {
+		r, err := s.BmClassStorage.GetOne(model.ClassID)
+		if err != nil {
+			return &Response{}, errors.New("error")
+		}
+		model.Class = r
+	}
+
+	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
 // Delete to satisfy `api2go.DataSource` interface

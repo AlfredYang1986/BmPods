@@ -5,6 +5,7 @@ import (
 	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
 	"sort"
+	"strconv"
 )
 
 type Unit struct {
@@ -17,15 +18,13 @@ type Unit struct {
 	CourseTime float64 `json:"course-time" bson:"course-time"` //课时
 	BrandId    string  `json:"brand-id" bson:"brand-id"`
 
-	//SessionableId string                    `json:"sessionableId" bson:"sessionableId"`
-	//Sessionable   sessionable.BmSessionable `json:"Sessionable" jsonapi:"relationships"`
-
-	TeacherID string   `json:'-' bson:"teacher-id"`
+	TeacherID string  `json:"teacher-id" bson:"teacher-id"`
 	Teacher   Teacher `json:"-"`
-	ClassID   string   `json:'-' bson:"class-id"`
+	ClassID   string  `json:"class-id" bson:"class-id"`
 	Class     Class   `json:"-"`
-	RoomID    string   `json:"-" bson:"room-id"`
-	Room      Room    `json:"-"`
+	//通过room过滤unit
+	RoomID string `json:"room-id" bson:"room-id"`
+	Room   Room   `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -71,7 +70,7 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 	if u.ClassID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.ClassID,
-			Type: "classs",
+			Type: "classes",
 			Name: "class",
 		})
 	}
@@ -126,7 +125,55 @@ func (u *Unit) SetToOneReferenceID(name, ID string) error {
 }
 
 func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	for k, v := range parameters {
+		switch k {
+		case "brand-id":
+			rst[k] = v[0]
+		case "room-id":
+			rst[k] = v[0]
+		case "status":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			rst[k] = val
+		case "lt[start-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$lt"] = val
+			rst["start-date"] = r
+		case "lte[start-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$lte"] = val
+			rst["start-date"] = r
+		case "gt[start-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gt"] = val
+			rst["start-date"] = r
+		case "gte[start-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gte"] = val
+			rst["start-date"] = r
+		}
+	}
+
+	return rst
 }
 
 type Units []*Unit
@@ -168,8 +215,8 @@ func (bd Units) SortByEndDate(increasing bool) error {
 }
 
 type BmUnitsWrapper struct {
-	units []*Unit
-	sortBy      func(cu1, cu2 *Unit) bool
+	units  []*Unit
+	sortBy func(cu1, cu2 *Unit) bool
 }
 
 func (bd BmUnitsWrapper) Len() int {
