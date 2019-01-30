@@ -67,11 +67,11 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			}
 
 			if model.CategoryID != "" {
-				applicant, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+				cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
 				if err != nil {
 					return &Response{}, err
 				}
-				model.Category = applicant
+				model.Category = cate
 			}
 
 			//result = append(result, model)
@@ -97,11 +97,11 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 		}
 
 		if model.CategoryID != "" {
-			applicant, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+			cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Category = applicant
+			model.Category = cate
 		}
 
 		result = append(result, *model)
@@ -200,6 +200,14 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 
 	id := s.BmSessioninfoStorage.Insert(model)
 	model.ID = id
+
+	if model.CategoryID != "" {
+		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Category = cate
+	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }

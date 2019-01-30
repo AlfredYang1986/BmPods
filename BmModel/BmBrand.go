@@ -22,7 +22,7 @@ type Brand struct {
 	AboutUs    string   `json:"about-us" bson:"about-us"`     //团队
 
 	CategoryID string    `json:"-" bson:"category-id"`
-	Cat        *Category `json:"-"`
+	Cat        Category `json:"-"`
 	ImagesIDs  []string  `json:"-" bson:"image-ids"`
 	Imgs       []*Image  `json:"-"`
 }
