@@ -170,6 +170,38 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			r := make(map[string]interface{})
 			r["$gte"] = val
 			rst["start-date"] = r
+		case "lt[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$lt"] = val
+			rst["end-date"] = r
+		case "lte[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$lte"] = val
+			rst["end-date"] = r
+		case "gt[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gt"] = val
+			rst["end-date"] = r
+		case "gte[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gte"] = val
+			rst["end-date"] = r
 		}
 	}
 

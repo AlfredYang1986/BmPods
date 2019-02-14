@@ -25,8 +25,8 @@ type Class struct {
 
 	Students    []*Student `json:"-"`
 	StudentsIDs []string   `json:"-" bson:"student-ids"`
-	Teachers    []*Teacher `json:"-"`
-	TeachersIDs []string   `json:"-" bson:"teacher-ids"`
+	Duties      []*Duty    `json:"-"`
+	DutiesIDs   []string   `json:"-" bson:"duty-ids"`
 	Units       []*Unit    `json:"-"`
 	UnitsIDs    []string   `json:"-" bson:"unit-ids"`
 
@@ -63,8 +63,8 @@ func (u Class) GetReferences() []jsonapi.Reference {
 			Name: "students",
 		},
 		{
-			Type: "teachers",
-			Name: "teachers",
+			Type: "duties",
+			Name: "duties",
 		},
 		{
 			Type: "units",
@@ -83,11 +83,11 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "students",
 		})
 	}
-	for _, tmpID := range u.TeachersIDs {
+	for _, tmpID := range u.DutiesIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   tmpID,
-			Type: "teachers",
-			Name: "teachers",
+			Type: "duties",
+			Name: "duties",
 		})
 	}
 	for _, tmpID := range u.UnitsIDs {
@@ -123,8 +123,8 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	for key := range u.Students {
 		result = append(result, u.Students[key])
 	}
-	for key := range u.Teachers {
-		result = append(result, u.Teachers[key])
+	for key := range u.Duties {
+		result = append(result, u.Duties[key])
 	}
 	for key := range u.Units {
 		result = append(result, u.Units[key])
@@ -159,8 +159,8 @@ func (u *Class) SetToManyReferenceIDs(name string, IDs []string) error {
 		u.StudentsIDs = IDs
 		return nil
 	}
-	if name == "teachers" {
-		u.TeachersIDs = IDs
+	if name == "duties" {
+		u.DutiesIDs = IDs
 		return nil
 	}
 	if name == "units" {
@@ -177,8 +177,8 @@ func (u *Class) AddToManyIDs(name string, IDs []string) error {
 		u.StudentsIDs = append(u.StudentsIDs, IDs...)
 		return nil
 	}
-	if name == "teachers" {
-		u.TeachersIDs = append(u.TeachersIDs, IDs...)
+	if name == "duties" {
+		u.DutiesIDs = append(u.DutiesIDs, IDs...)
 		return nil
 	}
 	if name == "units" {
@@ -201,12 +201,12 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 			}
 		}
 	}
-	if name == "teachers" {
+	if name == "duties" {
 		for _, ID := range IDs {
-			for pos, oldID := range u.TeachersIDs {
+			for pos, oldID := range u.DutiesIDs {
 				if ID == oldID {
 					// match, this ID must be removed
-					u.TeachersIDs = append(u.TeachersIDs[:pos], u.TeachersIDs[pos+1:]...)
+					u.DutiesIDs = append(u.DutiesIDs[:pos], u.DutiesIDs[pos+1:]...)
 				}
 			}
 		}

@@ -15,7 +15,7 @@ import (
 type BmClassResource struct {
 	BmClassStorage          *BmDataStorage.BmClassStorage
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
-	BmTeacherStorage        *BmDataStorage.BmTeacherStorage
+	BmDutyStorage        *BmDataStorage.BmDutyStorage
 	BmUnitStorage           *BmDataStorage.BmUnitStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
@@ -27,7 +27,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 	var ys *BmDataStorage.BmYardStorage
 	var ss *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmStudentStorage
-	var ts *BmDataStorage.BmTeacherStorage
+	var ds *BmDataStorage.BmDutyStorage
 	var ns *BmDataStorage.BmUnitStorage
 	var rs *BmDataStorage.BmReservableitemStorage
 	for _, arg := range args {
@@ -36,8 +36,8 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			us = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmStudentStorage" {
 			cs = arg.(*BmDataStorage.BmStudentStorage)
-		} else if tp.Name() == "BmTeacherStorage" {
-			ts = arg.(*BmDataStorage.BmTeacherStorage)
+		} else if tp.Name() == "BmDutyStorage" {
+			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmUnitStorage" {
 			ns = arg.(*BmDataStorage.BmUnitStorage)
 		} else if tp.Name() == "BmYardStorage" {
@@ -48,7 +48,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			rs = arg.(*BmDataStorage.BmReservableitemStorage)
 		}
 	}
-	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmTeacherStorage: ts, BmUnitStorage: ns, BmReservableitemStorage: rs}
+	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmUnitStorage: ns, BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -292,13 +292,13 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Students = append(model.Students, &choc)
 	}
-	model.Teachers = []*BmModel.Teacher{}
-	for _, tmpID := range model.TeachersIDs {
-		choc, err := s.BmTeacherStorage.GetOne(tmpID)
+	model.Duties = []*BmModel.Duty{}
+	for _, tmpID := range model.DutiesIDs {
+		choc, err := s.BmDutyStorage.GetOne(tmpID)
 		if err != nil {
 			return err
 		}
-		model.Teachers = append(model.Teachers, &choc)
+		model.Duties = append(model.Duties, &choc)
 	}
 	model.Units = []*BmModel.Unit{}
 	for _, tmpID := range model.UnitsIDs {

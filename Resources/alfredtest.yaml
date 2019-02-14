@@ -59,6 +59,10 @@ storages:
   method: NewUnitStorage
   daemons:
   - BmMongodbDaemon
+- name: BmDutyStorage
+  method: NewDutyStorage
+  daemons:
+  - BmMongodbDaemon
 
 resources:
 - name: BmSessioninfoResource
@@ -145,7 +149,7 @@ resources:
   - BmReservableitemStorage
   - BmYardStorage
   - BmStudentStorage
-  - BmTeacherStorage
+  - BmDutyStorage
   - BmUnitStorage
 - name: BmUnitResource
   method: NewUnitResource
@@ -154,6 +158,11 @@ resources:
   - BmTeacherStorage
   - BmClassStorage
   - BmRoomStorage
+- name: BmDutyResource
+  method: NewDutyResource
+  storages:
+  - BmDutyStorage
+  - BmTeacherStorage
 
 models:
 - BmKid
@@ -170,6 +179,7 @@ models:
 - BmYard
 - BmClass
 - BmUnit
+- BmDuty
 
 services:
 - name: bm-kid
@@ -217,6 +227,9 @@ services:
 - name: bm-unit
   model: BmUnit
   resource: BmUnitResource
+- name: bm-duty
+  model: BmDuty
+  resource: BmDutyResource
 
 daemons:
 - name: BmMongodbDaemon
