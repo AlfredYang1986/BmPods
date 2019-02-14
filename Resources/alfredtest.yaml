@@ -231,21 +231,6 @@ services:
   model: BmDuty
   resource: BmDutyResource
 
-daemons:
-- name: BmMongodbDaemon
-  method: NewMongoDBDaemon
-  args:
-    host: localhost
-    port: 27017
-    database: ddsaas
-- name: BmRedisDaemon
-  method: NewRedisDBDaemon
-  args:
-    host: 127.0.0.1
-    port: 6379
-    password: 
-    database: 0
-
 functions:
 - name: BmProvinceHandler
   create: NewProvinceHandler
@@ -313,3 +298,18 @@ middlewares:
   - BmRedisDaemon
   args:
   - name
+
+daemons:
+- name: BmMongodbDaemon
+  method: NewMongoDBDaemon
+  args:
+    host: 192.168.100.174
+    port: 27017
+    database: ddsaas-demo
+- name: BmRedisDaemon
+  method: NewRedisDBDaemon
+  args:
+    host: 192.168.100.174
+    port: 6379
+    password:
+    database: 0

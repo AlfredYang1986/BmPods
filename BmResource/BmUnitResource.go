@@ -40,35 +40,35 @@ func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitRe
 // FindAll to satisfy api2go data source interface
 func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Unit
-	users := s.BmUnitStorage.GetAll(r, -1, -1)
+	models := s.BmUnitStorage.GetAll(r, -1, -1)
 
-	for _, user := range users {
-		// get all sweets for the user
+	for _, model := range models {
+		// get all sweets for the model
 
-		if user.RoomID != "" {
-			r, err := s.BmRoomStorage.GetOne(user.RoomID)
+		if model.RoomID != "" {
+			r, err := s.BmRoomStorage.GetOne(model.RoomID)
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			user.Room = r
+			model.Room = r
 		}
 
-		if user.TeacherID != "" {
-			r, err := s.BmTeacherStorage.GetOne(user.TeacherID)
+		if model.TeacherID != "" {
+			r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			user.Teacher = r
+			model.Teacher = r
 		}
-		if user.ClassID != "" {
-			r, err := s.BmClassStorage.GetOne(user.ClassID)
+		if model.ClassID != "" {
+			r, err := s.BmClassStorage.GetOne(model.ClassID)
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			user.Class = r
+			model.Class = r
 		}
 
-		result = append(result, *user)
+		result = append(result, *model)
 	}
 
 	return &Response{Res: result}, nil
@@ -183,7 +183,7 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Room = r
 	}
@@ -191,14 +191,14 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 	if model.TeacherID != "" {
 		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Teacher = r
 	}
 	if model.ClassID != "" {
 		r, err := s.BmClassStorage.GetOne(model.ClassID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Class = r
 	}

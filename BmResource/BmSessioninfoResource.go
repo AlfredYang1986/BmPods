@@ -201,6 +201,15 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 	id := s.BmSessioninfoStorage.Insert(model)
 	model.ID = id
 
+	//TODO: 临时版本-在创建的同时加关系
+	if model.CategoryID != "" {
+		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Category = cate
+	}
+
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 

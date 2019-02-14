@@ -163,6 +163,15 @@ func (s BmBrandResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	id := s.BmBrandStorage.Insert(model)
 	model.ID = id
 
+	//TODO: 临时版本-在创建的同时加关系
+	if model.CategoryID != "" {
+		cat, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Cat = cat
+	}
+
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 

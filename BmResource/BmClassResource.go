@@ -263,6 +263,22 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	id := s.BmClassStorage.Insert(model)
 	model.ID = id
 
+	//TODO: 临时版本-在创建的同时加关系
+	if model.YardID != "" {
+		yard, err := s.BmYardStorage.GetOne(model.YardID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Yard = yard
+	}
+	if model.SessioninfoID != "" {
+		item, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Sessioninfo = item
+	}
+
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
