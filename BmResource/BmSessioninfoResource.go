@@ -11,10 +11,10 @@ import (
 )
 
 type BmSessioninfoResource struct {
-	BmImageStorage       *BmDataStorage.BmImageStorage
-	BmSessioninfoStorage *BmDataStorage.BmSessioninfoStorage
-	BmCategoryStorage    *BmDataStorage.BmCategoryStorage
-	BmReservableitemStorage    *BmDataStorage.BmReservableitemStorage
+	BmImageStorage          *BmDataStorage.BmImageStorage
+	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
+	BmCategoryStorage       *BmDataStorage.BmCategoryStorage
+	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmStorage) BmSessioninfoResource {
@@ -35,9 +35,9 @@ func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmSto
 		}
 	}
 	return BmSessioninfoResource{BmSessioninfoStorage: us,
-				BmImageStorage: cs,
-				BmCategoryStorage: ts,
-				BmReservableitemStorage: rs}
+		BmImageStorage:          cs,
+		BmCategoryStorage:       ts,
+		BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface

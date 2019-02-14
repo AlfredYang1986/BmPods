@@ -36,7 +36,7 @@ func (s BmBrandResource) NewBrandResource(args []BmDataStorage.BmStorage) BmBran
 // FindAll to satisfy api2go data source interface
 func (s BmBrandResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Brand
-	models := s.BmBrandStorage.GetAll(r,-1, -1)
+	models := s.BmBrandStorage.GetAll(r, -1, -1)
 
 	for _, model := range models {
 		// get all sweets for the model

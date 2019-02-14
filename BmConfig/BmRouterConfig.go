@@ -3,8 +3,8 @@ package BmConfig
 import "github.com/alfredyang1986/blackmirror/bmconfighandle"
 
 type BmRouterConfig struct {
-	Host string
-	Port string
+	Host   string
+	Port   string
 	TmpDir string
 }
 

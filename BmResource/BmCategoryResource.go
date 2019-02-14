@@ -11,7 +11,7 @@ import (
 
 type BmCategoryResource struct {
 	CategoryStorage *BmDataStorage.BmCategoryStorage
-	BmBrandStorage *BmDataStorage.BmBrandStorage
+	BmBrandStorage  *BmDataStorage.BmBrandStorage
 }
 
 func (c BmCategoryResource) NewCategoryResource(args []BmDataStorage.BmStorage) BmCategoryResource {
@@ -52,7 +52,7 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 		}
 	}
 
-	result := c.CategoryStorage.GetAll(r,-1, -1)
+	result := c.CategoryStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 

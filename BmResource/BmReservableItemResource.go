@@ -14,7 +14,7 @@ import (
 type BmReservableitemResource struct {
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
-	BmClassStorage    *BmDataStorage.BmClassStorage
+	BmClassStorage          *BmDataStorage.BmClassStorage
 }
 
 func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage.BmStorage) BmReservableitemResource {

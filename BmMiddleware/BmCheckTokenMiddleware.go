@@ -9,8 +9,8 @@ import (
 )
 
 type CheckTokenMiddleware struct {
-	Args        []string
-	rd          *BmRedis.BmRedis
+	Args []string
+	rd   *BmRedis.BmRedis
 }
 
 func (ctm CheckTokenMiddleware) NewCheckTokenMiddleware(args ...interface{}) CheckTokenMiddleware {

@@ -47,14 +47,14 @@ func (s BmClassStorage) GetOne(id string) (BmModel.Class, error) {
 	if err == nil {
 
 		if model.YardID != "" {
-			yard, err := BmYardStorage{db:s.db}.GetOne(model.YardID)
+			yard, err := BmYardStorage{db: s.db}.GetOne(model.YardID)
 			if err != nil {
 				return BmModel.Class{}, err
 			}
 			model.Yard = yard
 		}
 		if model.SessioninfoID != "" {
-			item, err := BmSessioninfoStorage{db:s.db}.GetOne(model.SessioninfoID)
+			item, err := BmSessioninfoStorage{db: s.db}.GetOne(model.SessioninfoID)
 			if err != nil {
 				return BmModel.Class{}, err
 			}

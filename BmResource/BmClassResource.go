@@ -15,7 +15,7 @@ import (
 type BmClassResource struct {
 	BmClassStorage          *BmDataStorage.BmClassStorage
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
-	BmDutyStorage        *BmDataStorage.BmDutyStorage
+	BmDutyStorage           *BmDataStorage.BmDutyStorage
 	BmUnitStorage           *BmDataStorage.BmUnitStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage

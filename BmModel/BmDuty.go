@@ -10,7 +10,7 @@ type Duty struct {
 	ID  string        `json:"-"`
 	Id_ bson.ObjectId `json:"-" bson:"_id"`
 
-	TeacherDuty    string  `json:"teacher-duty" bson:"teacher-duty"`
+	TeacherDuty string `json:"teacher-duty" bson:"teacher-duty"`
 
 	TeacherID string  `json:"teacher-id" bson:"teacher-id"`
 	Teacher   Teacher `json:"-"`

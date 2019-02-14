@@ -47,7 +47,7 @@ func (s BmDutyStorage) GetOne(id string) (BmModel.Duty, error) {
 	if err == nil {
 
 		if out.TeacherID != "" {
-			item, err := BmTeacherStorage{db:s.db}.GetOne(out.TeacherID)
+			item, err := BmTeacherStorage{db: s.db}.GetOne(out.TeacherID)
 			if err != nil {
 				return BmModel.Duty{}, err
 			}
