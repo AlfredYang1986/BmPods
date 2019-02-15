@@ -252,6 +252,7 @@ func (c *Class) ReSetCourseCount() error {
 		for i, v := range us {
 			if v.EndDate < now {
 				c.CourseExpireCount = float64(len(c.UnitsIDs)) - float64(i)
+				return nil
 			}
 		}
 	}
