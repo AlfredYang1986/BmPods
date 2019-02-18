@@ -15,6 +15,10 @@ storages:
   method: NewCategoryStorage
   daemons:
   - BmMongodbDaemon
+- name: BmNewCategoryStorage
+  method: NewNewCategoryStorage
+  daemons:
+  - BmMongodbDaemon
 - name: BmImageStorage
   method: NewImageStorage
   daemons:
@@ -89,6 +93,12 @@ resources:
   method: NewCategoryResource
   storages:
   - BmCategoryStorage
+  - BmSessioninfoStorage
+  - BmBrandStorage
+- name: BmNewCategoryResource
+  method: NewNewCategoryResource
+  storages:
+  - BmNewCategoryStorage
   - BmSessioninfoStorage
   - BmBrandStorage
 - name: BmApplyResource
@@ -171,6 +181,7 @@ models:
 - BmSessioninfo
 - BmReservableitem
 - BmCategory
+- BmNewCategory
 - BmBrand
 - BmStudent
 - BmGuardian
@@ -200,6 +211,9 @@ services:
 - name: bm-category
   model: BmCategory
   resource: BmCategoryResource
+- name: bm-newcategory
+  model: BmNewCategory
+  resource: BmNewCategoryResource
 - name: bm-image
   model: BmImage
   resource: BmImageResource
@@ -303,13 +317,13 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-    host: 192.168.100.174
+    host: localhost
     port: 27017
     database: ddsaas-demo
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
-    host: 192.168.100.174
+    host: localhost
     port: 6379
     password:
     database: 0
