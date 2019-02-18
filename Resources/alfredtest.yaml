@@ -100,7 +100,6 @@ resources:
   storages:
   - BmNewCategoryStorage
   - BmSessioninfoStorage
-  - BmBrandStorage
 - name: BmApplyResource
   method: NewApplyResource
   storages:

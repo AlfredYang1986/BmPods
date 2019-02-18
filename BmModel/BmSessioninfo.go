@@ -12,24 +12,28 @@ type Sessioninfo struct {
 	ID  string        `json:"-"`
 	Id_ bson.ObjectId `json:"-" bson:"_id"`
 
-	BrandId      string   `json:"brand-id" bson:"brand-id"`
-	Title        string   `json:"title" bson:"title"`
-	SubTitle     string   `json:"sub-title" bson:"sub-title"`
-	Alb          float64  `json:"alb" bson:"alb"`
-	Aub          float64  `json:"aub" bson:"aub"`
-	Level        string   `json:"level" bson:"level"`
-	Count        float64  `json:"count" bson:"count"`
-	Length       float64  `json:"length" bson:"length"`
-	Description  string   `json:"description" bson:"description"`
-	Harvest      string   `json:"harvest" bson:"harvest"`
-	Accompany    float64  `json:"accompany" bson:"accompany"`
-	Status       float64  `json:"status" bson:"status"` //0活动 1体验课 2普通课程
-	Acquisition  []string `json:"acquisition" bson:"acquisition"`
-	Including    []string `json:"including" bson:"including"`
-	Carrying     []string `json:"carrying" bson:"carrying"`
-	Notice       string   `json:"notice" bson:"notice"`
-	PlayChildren string   `json:"play-children" bson:"play-children"`
-	Cover        string   `json:"cover" bson:"cover"`
+	BrandId             string   `json:"brand-id" bson:"brand-id"`
+	Title               string   `json:"title" bson:"title"`
+	SubTitle            string   `json:"sub-title" bson:"sub-title"`
+	Alb                 float64  `json:"alb" bson:"alb"`
+	Aub                 float64  `json:"aub" bson:"aub"`
+	Level               string   `json:"level" bson:"level"`
+	Count               float64  `json:"count" bson:"count"`
+	Length              float64  `json:"length" bson:"length"`
+	Description         string   `json:"description" bson:"description"`
+	Harvest             string   `json:"harvest" bson:"harvest"`
+	Accompany           float64  `json:"accompany" bson:"accompany"`
+	Status              float64  `json:"status" bson:"status"` //0活动 1体验课 2普通课程
+	Acquisition         []string `json:"acquisition" bson:"acquisition"`
+	Including           []string `json:"including" bson:"including"`
+	Carrying            []string `json:"carrying" bson:"carrying"`
+	Notice              string   `json:"notice" bson:"notice"`
+	PlayChildren        string   `json:"play-children" bson:"play-children"`
+	Cover               string   `json:"cover" bson:"cover"`
+	StandardPrice       float64  `json:"standard-price" bson:"standard-price"`
+	StandardPriceUnit   string   `json:"standard-price-unit" bson:"standard-price-unit"`
+	StandardCourseCount float64  `json:"standard-course-count" bson:"standard-course-count"`
+	CourseObjective     string   `json:"course-objective" bson:"course-objective"`
 
 	Images    []*Image `json:"-"`
 	ImagesIDs []string `json:"-" bson:"image-ids"`
