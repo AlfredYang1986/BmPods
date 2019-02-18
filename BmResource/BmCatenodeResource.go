@@ -9,27 +9,27 @@ import (
 	"reflect"
 )
 
-type BmNewCategoryResource struct {
-	NewCategoryStorage *BmDataStorage.BmNewCategoryStorage
+type BmCatenodeResource struct {
+	CatenodeStorage *BmDataStorage.BmCatenodeStorage
 	BmBrandStorage     *BmDataStorage.BmBrandStorage
 }
 
-func (c BmNewCategoryResource) NewNewCategoryResource(args []BmDataStorage.BmStorage) BmNewCategoryResource {
-	var as *BmDataStorage.BmNewCategoryStorage
+func (c BmCatenodeResource) NewCatenodeResource(args []BmDataStorage.BmStorage) BmCatenodeResource {
+	var as *BmDataStorage.BmCatenodeStorage
 	var bs *BmDataStorage.BmBrandStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
-		if tp.Name() == "BmNewCategoryStorage" {
-			as = arg.(*BmDataStorage.BmNewCategoryStorage)
+		if tp.Name() == "BmCatenodeStorage" {
+			as = arg.(*BmDataStorage.BmCatenodeStorage)
 		} else if tp.Name() == "BmBrandStorage" {
 			bs = arg.(*BmDataStorage.BmBrandStorage)
 		}
 	}
-	return BmNewCategoryResource{NewCategoryStorage: as, BmBrandStorage: bs}
+	return BmCatenodeResource{CatenodeStorage: as, BmBrandStorage: bs}
 }
 
 // FindAll apeolates
-func (c BmNewCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+func (c BmCatenodeResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	brandsID, ok := r.QueryParams["brandsID"]
 	if ok {
 		modelRootID := brandsID[0]
@@ -40,7 +40,7 @@ func (c BmNewCategoryResource) FindAll(r api2go.Request) (api2go.Responder, erro
 		}
 		modelID := modelRoot.CategoryID
 		if modelID != "" {
-			model, err := c.NewCategoryStorage.GetOne(modelID)
+			model, err := c.CatenodeStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
@@ -51,46 +51,46 @@ func (c BmNewCategoryResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			return &Response{}, err
 		}
 	}
-	result := c.NewCategoryStorage.GetAll(r, -1, -1)
+	result := c.CatenodeStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
-func (c BmNewCategoryResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
-	result := []BmModel.NewCategory{}
+func (c BmCatenodeResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
+	result := []BmModel.Catenode{}
 	return 100, &Response{Res: result}, nil
 }
 
 // FindOne ape
-func (c BmNewCategoryResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	res, err := c.NewCategoryStorage.GetOne(ID)
+func (c BmCatenodeResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
+	res, err := c.CatenodeStorage.GetOne(ID)
 	return &Response{Res: res}, err
 }
 
 // Create a new ape
-func (c BmNewCategoryResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	ape, ok := obj.(BmModel.NewCategory)
+func (c BmCatenodeResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
+	ape, ok := obj.(BmModel.Catenode)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	id := c.NewCategoryStorage.Insert(ape)
+	id := c.CatenodeStorage.Insert(ape)
 	ape.ID = id
 	return &Response{Res: ape, Code: http.StatusCreated}, nil
 }
 
 // Delete a ape :(
-func (c BmNewCategoryResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.NewCategoryStorage.Delete(id)
+func (c BmCatenodeResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
+	err := c.CatenodeStorage.Delete(id)
 	return &Response{Code: http.StatusOK}, err
 }
 
 // Update a ape
-func (c BmNewCategoryResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	ape, ok := obj.(BmModel.NewCategory)
+func (c BmCatenodeResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
+	ape, ok := obj.(BmModel.Catenode)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	err := c.NewCategoryStorage.Update(ape)
+	err := c.CatenodeStorage.Update(ape)
 	return &Response{Res: ape, Code: http.StatusNoContent}, err
 }

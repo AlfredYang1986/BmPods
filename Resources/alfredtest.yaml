@@ -15,8 +15,8 @@ storages:
   method: NewCategoryStorage
   daemons:
   - BmMongodbDaemon
-- name: BmNewCategoryStorage
-  method: NewNewCategoryStorage
+- name: BmCatenodeStorage
+  method: NewCatenodeStorage
   daemons:
   - BmMongodbDaemon
 - name: BmImageStorage
@@ -95,11 +95,10 @@ resources:
   - BmCategoryStorage
   - BmSessioninfoStorage
   - BmBrandStorage
-- name: BmNewCategoryResource
-  method: NewNewCategoryResource
+- name: BmCatenodeResource
+  method: NewCatenodeResource
   storages:
-  - BmNewCategoryStorage
-  - BmSessioninfoStorage
+  - BmCatenodeStorage
 - name: BmApplyResource
   method: NewApplyResource
   storages:
@@ -180,7 +179,7 @@ models:
 - BmSessioninfo
 - BmReservableitem
 - BmCategory
-- BmNewCategory
+- BmCatenode
 - BmBrand
 - BmStudent
 - BmGuardian
@@ -210,9 +209,9 @@ services:
 - name: bm-category
   model: BmCategory
   resource: BmCategoryResource
-- name: bm-newcategory
-  model: BmNewCategory
-  resource: BmNewCategoryResource
+- name: bm-catenode
+  model: BmCatenode
+  resource: BmCatenodeResource
 - name: bm-image
   model: BmImage
   resource: BmImageResource
