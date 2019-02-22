@@ -48,15 +48,15 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 			model.Sessioninfo = sessioninfo
 		}
 
-		model.Classes = []*BmModel.Class{}
-		for _, tmpID := range model.ClassesIDs {
+		//model.Classes = []*BmModel.Class{}
+/*		for _, tmpID := range model.ClassesIDs {
 			choc, err := s.BmClassStorage.GetOne(tmpID)
 			if err != nil {
 				return &Response{}, err
 			}
 			model.Classes = append(model.Classes, &choc)
 		}
-
+*/
 		result = append(result, *model)
 	}
 
@@ -139,6 +139,7 @@ func (s BmReservableitemResource) FindOne(ID string, r api2go.Request) (api2go.R
 		}
 		model.Sessioninfo = sessioninfo
 	}
+/*
 	model.Classes = []*BmModel.Class{}
 	for _, tmpID := range model.ClassesIDs {
 		choc, err := s.BmClassStorage.GetOne(tmpID)
@@ -147,7 +148,7 @@ func (s BmReservableitemResource) FindOne(ID string, r api2go.Request) (api2go.R
 		}
 		model.Classes = append(model.Classes, &choc)
 	}
-
+*/
 	return &Response{Res: model}, nil
 }
 

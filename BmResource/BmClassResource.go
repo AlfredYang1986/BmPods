@@ -319,6 +319,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Duties = append(model.Duties, &choc)
 	}
+/*
 	model.Units = []*BmModel.Unit{}
 	for _, tmpID := range model.UnitsIDs {
 		choc, err := s.BmUnitStorage.GetOne(tmpID)
@@ -327,7 +328,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Units = append(model.Units, &choc)
 	}
-
+*/
 	if model.YardID != "" {
 		yard, err := s.BmYardStorage.GetOne(model.YardID)
 		if err != nil {
