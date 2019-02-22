@@ -247,7 +247,10 @@ func (c *Class) ReSetCourseCount() error {
 		c.CourseTotalCount = float64(len(c.UnitsIDs))
 		var us Units
 		us = c.Units
+		us.SortByStartDate(true)
+		c.StartDate = us[0].StartDate
 		us.SortByEndDate(false)
+		c.EndDate = us[0].EndDate
 		now := float64(time.Now().UnixNano() / 1e6)
 		for i, v := range us {
 			if v.EndDate < now {

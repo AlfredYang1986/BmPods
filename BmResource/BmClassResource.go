@@ -245,6 +245,9 @@ func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 	err = s.ResetReferencedModel(&model)
+	if len(model.UnitsIDs) != 0 {
+		model.ReSetCourseCount()
+	}
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}

@@ -48,7 +48,7 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		if model.RoomID != "" {
 			r, err := s.BmRoomStorage.GetOne(model.RoomID)
 			if err != nil {
-				return &Response{}, errors.New("error")
+				return &Response{}, err
 			}
 			model.Room = r
 		}
@@ -56,14 +56,14 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		if model.TeacherID != "" {
 			r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 			if err != nil {
-				return &Response{}, errors.New("error")
+				return &Response{}, err
 			}
 			model.Teacher = r
 		}
 		if model.ClassID != "" {
 			r, err := s.BmClassStorage.GetOne(model.ClassID)
 			if err != nil {
-				return &Response{}, errors.New("error")
+				return &Response{}, err
 			}
 			model.Class = r
 		}
@@ -147,7 +147,7 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Room = r
 	}
@@ -155,14 +155,14 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	if model.TeacherID != "" {
 		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Teacher = r
 	}
 	if model.ClassID != "" {
 		r, err := s.BmClassStorage.GetOne(model.ClassID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Class = r
 	}
