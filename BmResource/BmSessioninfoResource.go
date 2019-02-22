@@ -115,6 +115,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 	var (
 		result                      []BmModel.Sessioninfo
 		number, size, offset, limit string
+		skip, take    int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -146,9 +147,9 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, iter := range s.BmSessioninfoStorage.GetAll(r, int(start), int(sizeI)) {
-			result = append(result, *iter)
-		}
+		
+		skip = int(start)
+		take = int(sizeI)
 
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
@@ -161,9 +162,19 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 			return 0, &Response{}, err
 		}
 
-		for _, iter := range s.BmSessioninfoStorage.GetAll(r, int(offsetI), int(limitI)) {
-			result = append(result, *iter)
+		skip = int(offsetI)
+		take = int(limitI)
+	}
+
+	for _, model := range s.BmReservableitemStorage.GetAll(r, skip, take) {
+		if model.SessioninfoID != "" {
+			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
+			if err != nil {
+				return 0, &Response{}, err
+			}
+			model.Sessioninfo = sessioninfo
 		}
+		result = append(result, model.Sessioninfo)
 	}
 
 	in := BmModel.Sessioninfo{}
