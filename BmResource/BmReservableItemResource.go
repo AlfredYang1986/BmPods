@@ -5,6 +5,7 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
+	"math"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -14,24 +15,20 @@ import (
 type BmReservableitemResource struct {
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
-	BmClassStorage          *BmDataStorage.BmClassStorage
 }
 
 func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage.BmStorage) BmReservableitemResource {
 	var us *BmDataStorage.BmReservableitemStorage
 	var ts *BmDataStorage.BmSessioninfoStorage
-	var cs *BmDataStorage.BmClassStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmReservableitemStorage" {
 			us = arg.(*BmDataStorage.BmReservableitemStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ts = arg.(*BmDataStorage.BmSessioninfoStorage)
-		} else if tp.Name() == "BmClassStorage" {
-			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts, BmClassStorage: cs}
+	return BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -48,15 +45,6 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 			model.Sessioninfo = sessioninfo
 		}
 
-		//model.Classes = []*BmModel.Class{}
-		for _, tmpID := range model.ClassesIDs {
-			choc, err := s.BmClassStorage.GetOne(tmpID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Classes = append(model.Classes, &choc)
-		}
-
 		result = append(result, *model)
 	}
 
@@ -68,7 +56,7 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 	var (
 		result                      []BmModel.Reservableitem
 		number, size, offset, limit string
-		skip, take  int
+		skip, take, pages    int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -132,8 +120,8 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 
 	in := BmModel.Reservableitem{}
 	count := s.BmReservableitemStorage.Count(r, in)
-
-	return uint(count), &Response{Res: result}, nil
+	pages = int(math.Ceil(float64(count) / float64(take)))
+	return uint(count), &Response{Res: result, QueryRes: "reservableitems", TotalPage: pages, TotalCount:count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
@@ -150,16 +138,6 @@ func (s BmReservableitemResource) FindOne(ID string, r api2go.Request) (api2go.R
 		}
 		model.Sessioninfo = sessioninfo
 	}
-
-	model.Classes = []*BmModel.Class{}
-	for _, tmpID := range model.ClassesIDs {
-		choc, err := s.BmClassStorage.GetOne(tmpID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Classes = append(model.Classes, &choc)
-	}
-
 	return &Response{Res: model}, nil
 }
 

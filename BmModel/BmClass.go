@@ -22,6 +22,7 @@ type Class struct {
 	CourseTotalCount  float64 `json:"course-total-count"`
 	CourseExpireCount float64 `json:"course-expire-count"`
 	BrandId           string  `json:"brand-id" bson:"brand-id"`
+	NotExist          float64 `json:"not-exist" bson:"not-exist"`
 
 	Students    []*Student `json:"-"`
 	StudentsIDs []string   `json:"-" bson:"student-ids"`
@@ -232,6 +233,12 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 		case "brand-id":
 			rst[k] = v[0]
 		case "status":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			rst[k] = val
+		case "not-exist":
 			val, err := strconv.ParseFloat(v[0], 64)
 			if err != nil {
 				panic(err.Error())

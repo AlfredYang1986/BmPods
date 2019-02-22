@@ -5,6 +5,7 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
+	"math"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -115,7 +116,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 	var (
 		result                      []BmModel.Sessioninfo
 		number, size, offset, limit string
-		skip, take    int
+		skip, take, pages           int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -147,7 +148,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 		}
 
 		start := sizeI * (numberI - 1)
-		
+
 		skip = int(start)
 		take = int(sizeI)
 
@@ -166,21 +167,30 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 		take = int(limitI)
 	}
 
-	for _, model := range s.BmReservableitemStorage.GetAll(r, skip, take) {
-		if model.SessioninfoID != "" {
-			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
+	for _, model := range s.BmSessioninfoStorage.GetAll(r, skip, take) {
+		model.Images = []*BmModel.Image{}
+		for _, kID := range model.ImagesIDs {
+			choc, err := s.BmImageStorage.GetOne(kID)
 			if err != nil {
 				return 0, &Response{}, err
 			}
-			model.Sessioninfo = sessioninfo
+			model.Images = append(model.Images, &choc)
 		}
-		result = append(result, model.Sessioninfo)
+
+		if model.CategoryID != "" {
+			cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+			if err != nil {
+				return 0, &Response{}, err
+			}
+			model.Category = cate
+		}
+		result = append(result, *model)
 	}
 
 	in := BmModel.Sessioninfo{}
 	count := s.BmSessioninfoStorage.Count(r, in)
-
-	return uint(count), &Response{Res: result}, nil
+	pages = int(math.Ceil(float64(count) / float64(take)))
+	return uint(count), &Response{Res: result, QueryRes: "reservableitems", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
