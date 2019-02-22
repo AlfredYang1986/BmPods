@@ -16,10 +16,10 @@ type BmClassResource struct {
 	BmClassStorage          *BmDataStorage.BmClassStorage
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
 	BmDutyStorage           *BmDataStorage.BmDutyStorage
-	BmUnitStorage           *BmDataStorage.BmUnitStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
 	BmBindReservableClassStorage *BmDataStorage.BmBindReservableClassStorage
+	BmClassUnitBindStorage  *BmDataStorage.BmClassUnitBindStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClassResource {
@@ -28,8 +28,8 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 	var ss *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmStudentStorage
 	var ds *BmDataStorage.BmDutyStorage
-	var ns *BmDataStorage.BmUnitStorage
 	var rs *BmDataStorage.BmBindReservableClassStorage
+	var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmClassStorage" {
@@ -38,17 +38,17 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			cs = arg.(*BmDataStorage.BmStudentStorage)
 		} else if tp.Name() == "BmDutyStorage" {
 			ds = arg.(*BmDataStorage.BmDutyStorage)
-		} else if tp.Name() == "BmUnitStorage" {
-			ns = arg.(*BmDataStorage.BmUnitStorage)
 		} else if tp.Name() == "BmYardStorage" {
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
 		} else if tp.Name() == "BmBindReservableClassStorage" {
 			rs = arg.(*BmDataStorage.BmBindReservableClassStorage)
+		}else if tp.Name() == "BmClassUnitBindStorage" {
+			bs = arg.(*BmDataStorage.BmClassUnitBindStorage)
 		}
 	}
-	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmUnitStorage: ns, BmBindReservableClassStorage: rs}
+	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmClassUnitBindStorage: bs, BmBindReservableClassStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -245,14 +245,6 @@ func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-	err = s.ResetReferencedModel(&model)
-	if len(model.UnitsIDs) != 0 {
-		model.ReSetCourseCount()
-	}
-	if err != nil {
-		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
-	}
-
 	return &Response{Res: model}, nil
 }
 
@@ -321,15 +313,6 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		model.Duties = append(model.Duties, &choc)
 	}
 
-	model.Units = []*BmModel.Unit{}
-	for _, tmpID := range model.UnitsIDs {
-		choc, err := s.BmUnitStorage.GetOne(tmpID)
-		if err != nil {
-			return err
-		}
-		model.Units = append(model.Units, &choc)
-	}
-
 	if model.YardID != "" {
 		yard, err := s.BmYardStorage.GetOne(model.YardID)
 		if err != nil {
@@ -346,40 +329,40 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 	}
 	return nil
 }
-
 func (s BmClassResource) FilterClassByFlag(model *BmModel.Class, flag int) error {
-	switch flag {
+	/*switch flag {
 	case 0:
-		if len(model.UnitsIDs) != 0 {
-			model.ReSetCourseCount()
-		}
-		return nil
+	   if len(model.UnitsIDs) != 0 {
+		  model.ReSetCourseCount()
+	   }
+	   return nil
 	case -1:
-		if len(model.UnitsIDs) == 0 {
-			return nil
-		}
+	   if len(model.UnitsIDs) == 0 {
+		  return nil
+	   }
 	case 1:
-		if len(model.UnitsIDs) != 0 {
-			var us BmModel.Units
-			us = model.Units
-			us.SortByEndDate(false)
-			now := float64(time.Now().UnixNano() / 1e6)
-			if us[0].EndDate > now {
-				model.ReSetCourseCount()
-				return nil
-			}
-		}
+	   if len(model.UnitsIDs) != 0 {
+		  var us BmModel.Units
+		  us = model.Units
+		  us.SortByEndDate(false)
+		  now := float64(time.Now().UnixNano() / 1e6)
+		  if us[0].EndDate > now {
+			 model.ReSetCourseCount()
+			 return nil
+		  }
+	   }
 	case 2:
-		if len(model.UnitsIDs) != 0 {
-			var us BmModel.Units
-			us = model.Units
-			us.SortByEndDate(false)
-			now := float64(time.Now().UnixNano() / 1e6)
-			if us[0].EndDate <= now {
-				model.ReSetCourseCount()
-				return nil
-			}
-		}
-	}
+	   if len(model.UnitsIDs) != 0 {
+		  var us BmModel.Units
+		  us = model.Units
+		  us.SortByEndDate(false)
+		  now := float64(time.Now().UnixNano() / 1e6)
+		  if us[0].EndDate <= now {
+			 model.ReSetCourseCount()
+			 return nil
+		  }
+	   }
+	}*/
 	return errors.New("not found")
-}
+ }
+

@@ -63,6 +63,10 @@ storages:
   method: NewUnitStorage
   daemons:
   - BmMongodbDaemon
+- name: BmClassUnitBindStorage
+  method: NewClassUnitBindStorage
+  daemons:
+  - BmMongodbDaemon
 - name: BmDutyStorage
   method: NewDutyStorage
   daemons:
@@ -157,24 +161,30 @@ resources:
   method: NewClassResource
   storages:
   - BmClassStorage
+  - BmClassUnitBindStorage
   - BmSessioninfoStorage
   - BmBindReservableClassStorage
   - BmYardStorage
   - BmStudentStorage
   - BmDutyStorage
-  - BmUnitStorage
 - name: BmUnitResource
   method: NewUnitResource
   storages:
   - BmUnitStorage
   - BmTeacherStorage
-  - BmClassStorage
+  - BmClassUnitBindStorage
   - BmRoomStorage
 - name: BmDutyResource
   method: NewDutyResource
   storages:
   - BmDutyStorage
   - BmTeacherStorage
+- name: BmClassUnitBindResource
+  method: NewClassUnitBindResource
+  storages:
+  - BmClassUnitBindStorage
+  - BmClassStorage
+  - BmUnitStorage
 - name: BmBindReservableClassResource
   method: NewBindReservableClassResource
   storages:
@@ -197,6 +207,7 @@ models:
 - BmClass
 - BmUnit
 - BmDuty
+- BmClassUnitBind
 - BmBindReservableClass
 
 services:
@@ -246,7 +257,7 @@ services:
   model: BmClass
   resource: BmClassResource
 - name: bm-unit
-  model: BmUnit
+  model: BmUnit   
   resource: BmUnitResource
 - name: bm-duty
   model: BmDuty
@@ -254,6 +265,9 @@ services:
 - name: bm-bind-reservable-class
   model: BmBindReservableClass
   resource: BmBindReservableClassResource
+- name: bm-classunitbind
+  model: BmClassUnitBind
+  resource: BmClassUnitBindResource
 
 functions:
 - name: BmProvinceHandler

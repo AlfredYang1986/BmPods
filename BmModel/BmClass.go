@@ -5,7 +5,6 @@ import (
 	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
 	"strconv"
-	"time"
 )
 
 // Class is a generic database Class
@@ -28,8 +27,7 @@ type Class struct {
 	StudentsIDs []string   `json:"-" bson:"student-ids"`
 	Duties      []*Duty    `json:"-"`
 	DutiesIDs   []string   `json:"-" bson:"duty-ids"`
-	Units       []*Unit    `json:"-"`
-	UnitsIDs    []string   `json:"-" bson:"unit-ids"`
+
 
 	YardID        string      `json:"yard-id" bson:"yard-id"`
 	Yard          Yard        `json:"-"`
@@ -67,10 +65,6 @@ func (u Class) GetReferences() []jsonapi.Reference {
 			Type: "duties",
 			Name: "duties",
 		},
-		{
-			Type: "units",
-			Name: "units",
-		},
 	}
 }
 
@@ -91,13 +85,7 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "duties",
 		})
 	}
-	for _, tmpID := range u.UnitsIDs {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   tmpID,
-			Type: "units",
-			Name: "units",
-		})
-	}
+	
 
 	if u.YardID != "" {
 		result = append(result, jsonapi.ReferenceID{
@@ -127,9 +115,7 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	for key := range u.Duties {
 		result = append(result, u.Duties[key])
 	}
-	for key := range u.Units {
-		result = append(result, u.Units[key])
-	}
+	
 
 	if u.YardID != "" {
 		result = append(result, u.Yard)
@@ -164,10 +150,7 @@ func (u *Class) SetToManyReferenceIDs(name string, IDs []string) error {
 		u.DutiesIDs = IDs
 		return nil
 	}
-	if name == "units" {
-		u.UnitsIDs = IDs
-		return nil
-	}
+	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -182,10 +165,7 @@ func (u *Class) AddToManyIDs(name string, IDs []string) error {
 		u.DutiesIDs = append(u.DutiesIDs, IDs...)
 		return nil
 	}
-	if name == "units" {
-		u.UnitsIDs = append(u.UnitsIDs, IDs...)
-		return nil
-	}
+	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -212,16 +192,7 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 			}
 		}
 	}
-	if name == "units" {
-		for _, ID := range IDs {
-			for pos, oldID := range u.UnitsIDs {
-				if ID == oldID {
-					// match, this ID must be removed
-					u.UnitsIDs = append(u.UnitsIDs[:pos], u.UnitsIDs[pos+1:]...)
-				}
-			}
-		}
-	}
+	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -249,22 +220,4 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	return rst
 }
 
-func (c *Class) ReSetCourseCount() error {
-	if len(c.UnitsIDs) != 0 {
-		c.CourseTotalCount = float64(len(c.UnitsIDs))
-		var us Units
-		us = c.Units
-		us.SortByStartDate(true)
-		c.StartDate = us[0].StartDate
-		us.SortByEndDate(false)
-		c.EndDate = us[0].EndDate
-		now := float64(time.Now().UnixNano() / 1e6)
-		for i, v := range us {
-			if v.EndDate < now {
-				c.CourseExpireCount = float64(len(c.UnitsIDs)) - float64(i)
-				return nil
-			}
-		}
-	}
-	return nil
-}
+

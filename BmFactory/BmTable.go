@@ -29,6 +29,7 @@ var BLACKMIRROR_MODEL_FACTORY = map[string]interface{}{
 	"BmClass":               BmModel.Class{},
 	"BmDuty":                BmModel.Duty{},
 	"BmBindReservableClass": BmModel.BindReservableClass{},
+	"BmClassUnitBind":  BmModel.ClassUnitBind{},
 }
 
 var BLACKMIRROR_RESOURCE_FACTORY = map[string]interface{}{
@@ -50,6 +51,7 @@ var BLACKMIRROR_RESOURCE_FACTORY = map[string]interface{}{
 	"BmClassResource":               BmResource.BmClassResource{},
 	"BmDutyResource":                BmResource.BmDutyResource{},
 	"BmBindReservableClassResource": BmResource.BmBindReservableClassResource{},
+	"BmClassUnitBindResource":  BmResource.BmClassUnitBindResource{},
 }
 
 var BLACKMIRROR_STORAGE_FACTORY = map[string]interface{}{
@@ -71,6 +73,7 @@ var BLACKMIRROR_STORAGE_FACTORY = map[string]interface{}{
 	"BmClassStorage":               BmDataStorage.BmClassStorage{},
 	"BmDutyStorage":                BmDataStorage.BmDutyStorage{},
 	"BmBindReservableClassStorage": BmDataStorage.BmBindReservableClassStorage{},
+	"BmClassUnitBindStorage":  BmDataStorage.BmClassUnitBindStorage{},
 }
 
 var BLACKMIRROR_DAEMON_FACTORY = map[string]interface{}{

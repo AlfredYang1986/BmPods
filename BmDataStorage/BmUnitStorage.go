@@ -54,12 +54,12 @@ func (s BmUnitStorage) GetOne(id string) (BmModel.Unit, error) {
 			}
 			out.Teacher = item
 		}
-		if out.ClassID != "" {
-			item, err := BmClassStorage{db: s.db}.GetOne(out.ClassID)
+		if out.ClassUnitBindID != "" {
+			item, err := BmClassUnitBindStorage{db: s.db}.GetOne(out.ClassUnitBindID)
 			if err != nil {
 				return BmModel.Unit{}, err
 			}
-			out.Class = item
+			out.ClassUnitBind = item
 		}
 		if out.RoomID != "" {
 			item, err := BmRoomStorage{db: s.db}.GetOne(out.RoomID)
