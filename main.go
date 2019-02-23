@@ -9,13 +9,15 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
 	"github.com/julienschmidt/httprouter"
 	"github.com/manyminds/api2go"
+	"os"
 )
 
 func main() {
 	version := "v2"
 	fmt.Println("pod archi begins")
 	var pod = BmPodsDefine.Pod{Name: "alfred test"}
-	pod.RegisterSerFromYAML("Resources/alfredtest.yaml")
+	bmHome := os.Getenv("BM_HOME")
+	pod.RegisterSerFromYAML(bmHome + "/Resources/service-def.yaml")
 
 	var bmRouter BmConfig.BmRouterConfig
 	bmRouter.GenerateConfig()
