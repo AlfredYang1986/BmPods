@@ -13,7 +13,7 @@ type BmImageResource struct {
 	BmImageStorage       *BmDataStorage.BmImageStorage
 	BmSessioninfoStorage *BmDataStorage.BmSessioninfoStorage
 	BmBrandStorage       *BmDataStorage.BmBrandStorage
-	BmYardStorage        *BmDataStorage.BmYardStorage
+	BmYardStorage       *BmDataStorage.BmYardStorage
 }
 
 func (c BmImageResource) NewImageResource(args []BmDataStorage.BmStorage) BmImageResource {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
+	"github.com/alfredyang1986/BmPods/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
@@ -46,15 +46,40 @@ func (s BmClassStorage) GetOne(id string) (BmModel.Class, error) {
 	err := s.db.FindOne(&in, &model)
 	if err == nil {
 
+		model.Students = []*BmModel.Student{}
+		for _, tmpID := range model.StudentsIDs {
+			choc, err := BmStudentStorage{db:s.db}.GetOne(tmpID)
+			if err != nil {
+				return BmModel.Class{}, err
+			}
+			model.Students = append(model.Students, &choc)
+		}
+		model.Teachers = []*BmModel.Teacher{}
+		for _, tmpID := range model.TeachersIDs {
+			choc, err := BmTeacherStorage{db:s.db}.GetOne(tmpID)
+			if err != nil {
+				return BmModel.Class{}, err
+			}
+			model.Teachers = append(model.Teachers, &choc)
+		}
+		model.Units = []*BmModel.Unit{}
+		for _, tmpID := range model.UnitsIDs {
+			choc, err := BmUnitStorage{db:s.db}.GetOne(tmpID)
+			if err != nil {
+				return BmModel.Class{}, err
+			}
+			model.Units = append(model.Units, &choc)
+		}
+
 		if model.YardID != "" {
-			yard, err := BmYardStorage{db: s.db}.GetOne(model.YardID)
+			yard, err := BmYardStorage{db:s.db}.GetOne(model.YardID)
 			if err != nil {
 				return BmModel.Class{}, err
 			}
 			model.Yard = yard
 		}
 		if model.SessioninfoID != "" {
-			item, err := BmSessioninfoStorage{db: s.db}.GetOne(model.SessioninfoID)
+			item, err := BmSessioninfoStorage{db:s.db}.GetOne(model.SessioninfoID)
 			if err != nil {
 				return BmModel.Class{}, err
 			}

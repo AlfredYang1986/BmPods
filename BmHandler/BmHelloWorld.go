@@ -1,25 +1,28 @@
 package BmHandler
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
-	"github.com/julienschmidt/httprouter"
+
 	"github.com/alfredyang1986/BmPods/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
+	"github.com/julienschmidt/httprouter"
 )
 
-type UpdateHandler struct {
+type HelloWorld struct {
 	Method     string
 	HttpMethod string
 	Args       []string
 	db         *BmMongodb.BmMongodb
 }
 
-func (h UpdateHandler) NewUpdateHandler(args ...interface{}) UpdateHandler {
+func (h HelloWorld) NewHelloWorld(args ...interface{}) HelloWorld {
 	var m *BmMongodb.BmMongodb
 	var hm string
 	var md string
 	var ag []string
+	//sts := args[0].([]BmDaemons.BmDaemon)
 	for i, arg := range args {
 		if i == 0 {
 			sts := arg.([]BmDaemons.BmDaemon)
@@ -42,20 +45,18 @@ func (h UpdateHandler) NewUpdateHandler(args ...interface{}) UpdateHandler {
 		} else {
 		}
 	}
-
-	return UpdateHandler{Method: md, HttpMethod: hm, Args: ag, db: m}
+	return HelloWorld{Method: md, HttpMethod: hm, Args: ag, db: m}
 }
 
-func (h UpdateHandler) UpdateFunction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	//TODO:小程序不支持patch更新，使用Function实现.
-
+func (h HelloWorld) HelloWorldHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	fmt.Fprintf(w, "hello-world")
 	return 0
 }
 
-func (h UpdateHandler) GetHttpMethod() string {
+func (h HelloWorld) GetHttpMethod() string {
 	return h.HttpMethod
 }
 
-func (h UpdateHandler) GetHandlerMethod() string {
+func (h HelloWorld) GetHandlerMethod() string {
 	return h.Method
 }

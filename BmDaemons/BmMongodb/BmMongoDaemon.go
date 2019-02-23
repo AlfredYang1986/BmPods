@@ -131,7 +131,7 @@ func (m *BmMongodb) FindMulti(r api2go.Request, ptr BmModel.BmModelBase, out int
 	}
 
 	if err != nil {
-		return err
+		return errors.New("error find multi")
 	}
 
 	return nil

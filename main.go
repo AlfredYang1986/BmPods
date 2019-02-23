@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/alfredyang1986/BmServiceDef/BmApiResolver"
-	"github.com/alfredyang1986/BmServiceDef/BmConfig"
-	"github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
+	"github.com/alfredyang1986/BmPods/BmApiResolver"
+	"github.com/alfredyang1986/BmPods/BmConfig"
+	"github.com/alfredyang1986/BmPods/BmPodsDefine"
 	"github.com/julienschmidt/httprouter"
 	"github.com/manyminds/api2go"
 )
@@ -29,7 +29,7 @@ func main() {
 	pod.RegisterAllMiddleware(api)
 
 	handler := api.Handler().(*httprouter.Router)
-	http.ListenAndServe(":"+bmRouter.Port, handler)
+	http.ListenAndServe(":" + bmRouter.Port, handler)
 
 	fmt.Println("pod archi ends")
 }

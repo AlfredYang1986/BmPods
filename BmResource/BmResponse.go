@@ -2,10 +2,10 @@ package BmResource
 
 // The Response struct implements api2go.Responder
 type Response struct {
-	Res        interface{}
-	Code       int
-	QueryRes   string
-	TotalPage  int
+	Res  interface{}
+	Code int
+	QueryRes string
+	TotalPage int
 	TotalCount int
 }
 
@@ -16,6 +16,7 @@ func (r Response) Metadata() map[string]interface{} {
 		"license":     "blackmirror.tech",
 		"license-url": "http://www.dongdakid.com",
 	}
+
 
 	if r.QueryRes != "" && r.TotalPage >= 0 {
 		meta["query-res"] = r.QueryRes

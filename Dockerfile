@@ -10,7 +10,7 @@ RUN cd /go/src/gopkg.in/mgo.v2 && git checkout -b v2
 
 RUN go get github.com/alfredyang1986/blackmirror
 
-LABEL BmPods.version="2.0.6" maintainer="Jeorch"
+LABEL BmPods.version="2.0.2" maintainer="Jeorch"
 
 RUN go get github.com/alfredyang1986/BmPods
 

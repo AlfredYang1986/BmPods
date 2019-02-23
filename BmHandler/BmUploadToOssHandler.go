@@ -9,13 +9,13 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/alfredyang1986/BmServiceDef/BmConfig"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
+	"github.com/alfredyang1986/BmPods/BmConfig"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/blackmirror/bmalioss"
 	"github.com/alfredyang1986/blackmirror/jsonapi/jsonapiobj"
 	"github.com/hashicorp/go-uuid"
 	"github.com/julienschmidt/httprouter"
+	"github.com/alfredyang1986/BmPods/BmDaemons"
 )
 
 type UploadToOssHandler struct {

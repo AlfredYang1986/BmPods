@@ -22,5 +22,5 @@ func (c *Category) SetID(id string) error {
 }
 
 func (u *Category) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return  bson.M {}
+	return bson.M{}
 }

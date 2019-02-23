@@ -1,8 +1,10 @@
 package BmMiddleware
 
-
 import (
-	modelDef "github.com/alfredyang1986/BmServiceDef/BmMiddleware"
+	"github.com/manyminds/api2go"
+	"net/http"
 )
 
-type BmMiddleware = modelDef.BmMiddleware
+type BmMiddleware interface {
+	DoMiddleware (c api2go.APIContexter, w http.ResponseWriter, r *http.Request)
+}
