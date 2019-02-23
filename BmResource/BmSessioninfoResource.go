@@ -5,16 +5,17 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
+	"math"
 	"net/http"
 	"reflect"
 	"strconv"
 )
 
 type BmSessioninfoResource struct {
-	BmImageStorage       *BmDataStorage.BmImageStorage
-	BmSessioninfoStorage *BmDataStorage.BmSessioninfoStorage
-	BmCategoryStorage    *BmDataStorage.BmCategoryStorage
-	BmReservableitemStorage    *BmDataStorage.BmReservableitemStorage
+	BmImageStorage          *BmDataStorage.BmImageStorage
+	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
+	BmCategoryStorage       *BmDataStorage.BmCategoryStorage
+	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmStorage) BmSessioninfoResource {
@@ -35,9 +36,9 @@ func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmSto
 		}
 	}
 	return BmSessioninfoResource{BmSessioninfoStorage: us,
-				BmImageStorage: cs,
-				BmCategoryStorage: ts,
-				BmReservableitemStorage: rs}
+		BmImageStorage:          cs,
+		BmCategoryStorage:       ts,
+		BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -115,6 +116,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 	var (
 		result                      []BmModel.Sessioninfo
 		number, size, offset, limit string
+		skip, take, pages           int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -146,9 +148,9 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, iter := range s.BmSessioninfoStorage.GetAll(r, int(start), int(sizeI)) {
-			result = append(result, *iter)
-		}
+
+		skip = int(start)
+		take = int(sizeI)
 
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
@@ -161,15 +163,34 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 			return 0, &Response{}, err
 		}
 
-		for _, iter := range s.BmSessioninfoStorage.GetAll(r, int(offsetI), int(limitI)) {
-			result = append(result, *iter)
+		skip = int(offsetI)
+		take = int(limitI)
+	}
+
+	for _, model := range s.BmSessioninfoStorage.GetAll(r, skip, take) {
+		model.Images = []*BmModel.Image{}
+		for _, kID := range model.ImagesIDs {
+			choc, err := s.BmImageStorage.GetOne(kID)
+			if err != nil {
+				return 0, &Response{}, err
+			}
+			model.Images = append(model.Images, &choc)
 		}
+
+		if model.CategoryID != "" {
+			cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+			if err != nil {
+				return 0, &Response{}, err
+			}
+			model.Category = cate
+		}
+		result = append(result, *model)
 	}
 
 	in := BmModel.Sessioninfo{}
 	count := s.BmSessioninfoStorage.Count(r, in)
-
-	return uint(count), &Response{Res: result}, nil
+	pages = int(math.Ceil(float64(count) / float64(take)))
+	return uint(count), &Response{Res: result, QueryRes: "reservableitems", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
@@ -200,6 +221,15 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 
 	id := s.BmSessioninfoStorage.Insert(model)
 	model.ID = id
+
+	//TODO: 临时版本-在创建的同时加关系
+	if model.CategoryID != "" {
+		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Category = cate
+	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }

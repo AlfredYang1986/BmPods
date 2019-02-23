@@ -15,6 +15,10 @@ storages:
   method: NewCategoryStorage
   daemons:
   - BmMongodbDaemon
+- name: BmCatenodeStorage
+  method: NewCatenodeStorage
+  daemons:
+  - BmMongodbDaemon
 - name: BmImageStorage
   method: NewImageStorage
   daemons:
@@ -59,6 +63,18 @@ storages:
   method: NewUnitStorage
   daemons:
   - BmMongodbDaemon
+- name: BmClassUnitBindStorage
+  method: NewClassUnitBindStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmDutyStorage
+  method: NewDutyStorage
+  daemons:
+  - BmMongodbDaemon
+- name: BmBindReservableClassStorage
+  method: NewBindReservableClassStorage
+  daemons:
+  - BmMongodbDaemon
 
 resources:
 - name: BmSessioninfoResource
@@ -87,6 +103,10 @@ resources:
   - BmCategoryStorage
   - BmSessioninfoStorage
   - BmBrandStorage
+- name: BmCatenodeResource
+  method: NewCatenodeResource
+  storages:
+  - BmCatenodeStorage
 - name: BmApplyResource
   method: NewApplyResource
   storages:
@@ -141,19 +161,34 @@ resources:
   method: NewClassResource
   storages:
   - BmClassStorage
+  - BmClassUnitBindStorage
   - BmSessioninfoStorage
-  - BmReservableitemStorage
+  - BmBindReservableClassStorage
   - BmYardStorage
   - BmStudentStorage
-  - BmTeacherStorage
-  - BmUnitStorage
+  - BmDutyStorage
 - name: BmUnitResource
   method: NewUnitResource
   storages:
   - BmUnitStorage
   - BmTeacherStorage
-  - BmClassStorage
+  - BmClassUnitBindStorage
   - BmRoomStorage
+- name: BmDutyResource
+  method: NewDutyResource
+  storages:
+  - BmDutyStorage
+  - BmTeacherStorage
+- name: BmClassUnitBindResource
+  method: NewClassUnitBindResource
+  storages:
+  - BmClassUnitBindStorage
+  - BmClassStorage
+  - BmUnitStorage
+- name: BmBindReservableClassResource
+  method: NewBindReservableClassResource
+  storages:
+  - BmBindReservableClassStorage
 
 models:
 - BmKid
@@ -162,6 +197,7 @@ models:
 - BmSessioninfo
 - BmReservableitem
 - BmCategory
+- BmCatenode
 - BmBrand
 - BmStudent
 - BmGuardian
@@ -170,6 +206,9 @@ models:
 - BmYard
 - BmClass
 - BmUnit
+- BmDuty
+- BmClassUnitBind
+- BmBindReservableClass
 
 services:
 - name: bm-kid
@@ -190,6 +229,9 @@ services:
 - name: bm-category
   model: BmCategory
   resource: BmCategoryResource
+- name: bm-catenode
+  model: BmCatenode
+  resource: BmCatenodeResource
 - name: bm-image
   model: BmImage
   resource: BmImageResource
@@ -215,23 +257,17 @@ services:
   model: BmClass
   resource: BmClassResource
 - name: bm-unit
-  model: BmUnit
+  model: BmUnit   
   resource: BmUnitResource
-
-daemons:
-- name: BmMongodbDaemon
-  method: NewMongoDBDaemon
-  args:
-    host: localhost
-    port: 27017
-    database: ddsaas
-- name: BmRedisDaemon
-  method: NewRedisDBDaemon
-  args:
-    host: 127.0.0.1
-    port: 6379
-    password: 
-    database: 0
+- name: bm-duty
+  model: BmDuty
+  resource: BmDutyResource
+- name: bm-bind-reservable-class
+  model: BmBindReservableClass
+  resource: BmBindReservableClassResource
+- name: bm-classunitbind
+  model: BmClassUnitBind
+  resource: BmClassUnitBindResource
 
 functions:
 - name: BmProvinceHandler
@@ -300,3 +336,18 @@ middlewares:
   - BmRedisDaemon
   args:
   - name
+
+daemons:
+- name: BmMongodbDaemon
+  method: NewMongoDBDaemon
+  args:
+    host: localhost
+    port: 27017
+    database: ddsaas
+- name: BmRedisDaemon
+  method: NewRedisDBDaemon
+  args:
+    host: localhost
+    port: 6379
+    password:
+    database: 0

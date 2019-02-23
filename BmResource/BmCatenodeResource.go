@@ -9,27 +9,27 @@ import (
 	"reflect"
 )
 
-type BmCategoryResource struct {
-	CategoryStorage *BmDataStorage.BmCategoryStorage
-	BmBrandStorage  *BmDataStorage.BmBrandStorage
+type BmCatenodeResource struct {
+	CatenodeStorage *BmDataStorage.BmCatenodeStorage
+	BmBrandStorage     *BmDataStorage.BmBrandStorage
 }
 
-func (c BmCategoryResource) NewCategoryResource(args []BmDataStorage.BmStorage) BmCategoryResource {
-	var as *BmDataStorage.BmCategoryStorage
+func (c BmCatenodeResource) NewCatenodeResource(args []BmDataStorage.BmStorage) BmCatenodeResource {
+	var as *BmDataStorage.BmCatenodeStorage
 	var bs *BmDataStorage.BmBrandStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
-		if tp.Name() == "BmCategoryStorage" {
-			as = arg.(*BmDataStorage.BmCategoryStorage)
+		if tp.Name() == "BmCatenodeStorage" {
+			as = arg.(*BmDataStorage.BmCatenodeStorage)
 		} else if tp.Name() == "BmBrandStorage" {
 			bs = arg.(*BmDataStorage.BmBrandStorage)
 		}
 	}
-	return BmCategoryResource{CategoryStorage: as, BmBrandStorage: bs}
+	return BmCatenodeResource{CatenodeStorage: as, BmBrandStorage: bs}
 }
 
 // FindAll apeolates
-func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+func (c BmCatenodeResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	brandsID, ok := r.QueryParams["brandsID"]
 	if ok {
 		modelRootID := brandsID[0]
@@ -40,7 +40,7 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 		}
 		modelID := modelRoot.CategoryID
 		if modelID != "" {
-			model, err := c.CategoryStorage.GetOne(modelID)
+			model, err := c.CatenodeStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
@@ -51,47 +51,46 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 			return &Response{}, err
 		}
 	}
-
-	result := c.CategoryStorage.GetAll(r, -1, -1)
+	result := c.CatenodeStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
-func (c BmCategoryResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
-	result := []BmModel.Category{}
+func (c BmCatenodeResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
+	result := []BmModel.Catenode{}
 	return 100, &Response{Res: result}, nil
 }
 
 // FindOne ape
-func (c BmCategoryResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	res, err := c.CategoryStorage.GetOne(ID)
+func (c BmCatenodeResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
+	res, err := c.CatenodeStorage.GetOne(ID)
 	return &Response{Res: res}, err
 }
 
 // Create a new ape
-func (c BmCategoryResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	ape, ok := obj.(BmModel.Category)
+func (c BmCatenodeResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
+	ape, ok := obj.(BmModel.Catenode)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	id := c.CategoryStorage.Insert(ape)
+	id := c.CatenodeStorage.Insert(ape)
 	ape.ID = id
 	return &Response{Res: ape, Code: http.StatusCreated}, nil
 }
 
 // Delete a ape :(
-func (c BmCategoryResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.CategoryStorage.Delete(id)
+func (c BmCatenodeResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
+	err := c.CatenodeStorage.Delete(id)
 	return &Response{Code: http.StatusOK}, err
 }
 
 // Update a ape
-func (c BmCategoryResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	ape, ok := obj.(BmModel.Category)
+func (c BmCatenodeResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
+	ape, ok := obj.(BmModel.Catenode)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	err := c.CategoryStorage.Update(ape)
+	err := c.CatenodeStorage.Update(ape)
 	return &Response{Res: ape, Code: http.StatusNoContent}, err
 }

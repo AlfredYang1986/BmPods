@@ -1,4 +1,7 @@
 package BmResource
 
-type BmRes interface {
-}
+import (
+	modelDef "github.com/alfredyang1986/BmServiceDef/BmResource"
+)
+
+type BmRes = modelDef.BmRes

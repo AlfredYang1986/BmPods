@@ -11,27 +11,27 @@ import (
 )
 
 // CategoryStorage stores all users
-type BmCategoryStorage struct {
+type BmCatenodeStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s BmCategoryStorage) NewCategoryStorage(args []BmDaemons.BmDaemon) *BmCategoryStorage {
+func (s BmCatenodeStorage) NewCatenodeStorage(args []BmDaemons.BmDaemon) *BmCatenodeStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &BmCategoryStorage{mdb}
+	return &BmCatenodeStorage{mdb}
 }
 
 // GetAll returns the user map (because we need the ID as key too)
-func (s BmCategoryStorage) GetAll(r api2go.Request, skip int, take int) []*BmModel.Category {
-	in := BmModel.Category{}
-	var out []BmModel.Category
+func (s BmCatenodeStorage) GetAll(r api2go.Request, skip int, take int) []*BmModel.Catenode {
+	in := BmModel.Catenode{}
+	//out := []BmModel.Kid{}
+	var out []BmModel.Catenode
 	err := s.db.FindMulti(r, &in, &out, skip, take)
 	if err == nil {
-		var tmp []*BmModel.Category
-		//tmp := make(map[string]*BmModel.Category)
+		var tmp []*BmModel.Catenode
 		for _, iter := range out {
 			s.db.ResetIdWithId_(&iter)
-			tmp = append(tmp, &iter)
-			//tmp[iter.ID] = &iter
+			tmpIter:=iter
+			tmp = append(tmp, &tmpIter)
 		}
 		return tmp
 	} else {
@@ -40,30 +40,29 @@ func (s BmCategoryStorage) GetAll(r api2go.Request, skip int, take int) []*BmMod
 }
 
 // GetOne user
-func (s BmCategoryStorage) GetOne(id string) (BmModel.Category, error) {
-	in := BmModel.Category{ID: id}
-	out := BmModel.Category{ID: id}
+func (s BmCatenodeStorage) GetOne(id string) (BmModel.Catenode, error) {
+	in := BmModel.Catenode{ID: id}
+	out := BmModel.Catenode{ID: id}
 	err := s.db.FindOne(&in, &out)
 	if err == nil {
 		return out, nil
 	}
 	errMessage := fmt.Sprintf("Category for id %s not found", id)
-	return BmModel.Category{}, api2go.NewHTTPError(errors.New(errMessage), errMessage, http.StatusNotFound)
+	return BmModel.Catenode{}, api2go.NewHTTPError(errors.New(errMessage), errMessage, http.StatusNotFound)
 }
 
 // Insert a user
-func (s *BmCategoryStorage) Insert(c BmModel.Category) string {
+func (s *BmCatenodeStorage) Insert(c BmModel.Catenode) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	return tmp
 }
 
 // Delete one :(
-func (s *BmCategoryStorage) Delete(id string) error {
-	in := BmModel.Category{ID: id}
+func (s *BmCatenodeStorage) Delete(id string) error {
+	in := BmModel.Catenode{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
 		return fmt.Errorf("Category with id %s does not exist", id)
@@ -73,16 +72,16 @@ func (s *BmCategoryStorage) Delete(id string) error {
 }
 
 // Update a user
-func (s *BmCategoryStorage) Update(c BmModel.Category) error {
+func (s *BmCatenodeStorage) Update(c BmModel.Catenode) error {
 	err := s.db.Update(&c)
 	if err != nil {
-		return fmt.Errorf("Category with id does not exist")
+		return fmt.Errorf("Catenode with id does not exist")
 	}
 
 	return nil
 }
 
-func (s *BmCategoryStorage) Count(req api2go.Request, c BmModel.Category) int {
+func (s *BmCatenodeStorage) Count(req api2go.Request, c BmModel.Catenode) int {
 	r, _ := s.db.Count(req, &c)
 	return r
 }

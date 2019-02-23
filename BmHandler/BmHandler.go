@@ -1,6 +1,7 @@
 package BmHandler
 
-type BmHandler interface {
-	GetHttpMethod() string
-	GetHandlerMethod() string
-}
+import (
+	modelDef "github.com/alfredyang1986/BmServiceDef/BmHandler"
+)
+
+type BmHandler = modelDef.BmHandler

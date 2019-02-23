@@ -3,7 +3,7 @@ package BmDataStorage
 import (
 	"errors"
 	"fmt"
-	"github.com/alfredyang1986/BmPods/BmDaemons"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
@@ -46,13 +46,13 @@ func (s BmStudentStorage) GetOne(id string) (BmModel.Student, error) {
 	if err == nil {
 
 		if out.KidID != "" {
-			k, err := BmKidStorage{db:s.db}.GetOne(out.KidID)
+			k, err := BmKidStorage{db: s.db}.GetOne(out.KidID)
 			if err == nil {
 				out.Kid = &k
 			}
 		}
 		if out.TeacherID != "" {
-			k, err := BmTeacherStorage{db:s.db}.GetOne(out.TeacherID)
+			k, err := BmTeacherStorage{db: s.db}.GetOne(out.TeacherID)
 			if err == nil {
 				out.Teacher = k
 			}

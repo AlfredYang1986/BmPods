@@ -1,7 +1,7 @@
 package BmMiddleware
 
 import (
-	"github.com/alfredyang1986/BmPods/BmDaemons"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
 	"github.com/manyminds/api2go"
 	"net/http"
@@ -9,8 +9,8 @@ import (
 )
 
 type CheckTokenMiddleware struct {
-	Args        []string
-	rd          *BmRedis.BmRedis
+	Args []string
+	rd   *BmRedis.BmRedis
 }
 
 func (ctm CheckTokenMiddleware) NewCheckTokenMiddleware(args ...interface{}) CheckTokenMiddleware {

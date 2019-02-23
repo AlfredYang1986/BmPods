@@ -20,9 +20,6 @@ type Reservableitem struct {
 
 	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
 	Sessioninfo   Sessioninfo `json:"-"`
-
-	Classes    []*Class `json:"-"`
-	ClassesIDs []string `json:"-" bson:"class-ids"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -43,10 +40,6 @@ func (u Reservableitem) GetReferences() []jsonapi.Reference {
 			Type: "sessioninfos",
 			Name: "sessioninfo",
 		},
-		{
-			Type: "classes",
-			Name: "classes",
-		},
 	}
 }
 
@@ -62,14 +55,6 @@ func (u Reservableitem) GetReferencedIDs() []jsonapi.ReferenceID {
 		})
 	}
 
-	for _, tmpID := range u.ClassesIDs {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   tmpID,
-			Type: "classes",
-			Name: "classes",
-		})
-	}
-
 	return result
 }
 
@@ -79,9 +64,6 @@ func (u Reservableitem) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 
 	if u.SessioninfoID != "" {
 		result = append(result, u.Sessioninfo)
-	}
-	for key := range u.Classes {
-		result = append(result, u.Classes[key])
 	}
 
 	return result
@@ -94,42 +76,6 @@ func (u *Reservableitem) SetToOneReferenceID(name, ID string) error {
 	}
 
 	return errors.New("There is no to-one relationship with the name " + name)
-}
-
-// SetToManyReferenceIDs sets the leafs reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (u *Reservableitem) SetToManyReferenceIDs(name string, IDs []string) error {
-	if name == "classes" {
-		u.ClassesIDs = IDs
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// AddToManyIDs adds some new leafs that a users loves so much
-func (u *Reservableitem) AddToManyIDs(name string, IDs []string) error {
-	if name == "classes" {
-		u.ClassesIDs = append(u.ClassesIDs, IDs...)
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// DeleteToManyIDs removes some leafs from a users because they made him very sick
-func (u *Reservableitem) DeleteToManyIDs(name string, IDs []string) error {
-	if name == "classes" {
-		for _, ID := range IDs {
-			for pos, oldID := range u.ClassesIDs {
-				if ID == oldID {
-					// match, this ID must be removed
-					u.ClassesIDs = append(u.ClassesIDs[:pos], u.ClassesIDs[pos+1:]...)
-				}
-			}
-		}
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
 }
 
 func (u *Reservableitem) GetConditionsBsonM(parameters map[string][]string) bson.M {

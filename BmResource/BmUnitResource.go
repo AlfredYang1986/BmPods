@@ -14,14 +14,14 @@ type BmUnitResource struct {
 	BmUnitStorage    *BmDataStorage.BmUnitStorage
 	BmRoomStorage    *BmDataStorage.BmRoomStorage
 	BmTeacherStorage *BmDataStorage.BmTeacherStorage
-	BmClassStorage   *BmDataStorage.BmClassStorage
+	BmClassUnitBindStorage   *BmDataStorage.BmClassUnitBindStorage
 }
 
 func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitResource {
 	var us *BmDataStorage.BmUnitStorage
 	var rs *BmDataStorage.BmRoomStorage
 	var ts *BmDataStorage.BmTeacherStorage
-	var cs *BmDataStorage.BmClassStorage
+	var cs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmUnitStorage" {
@@ -30,45 +30,59 @@ func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitRe
 			rs = arg.(*BmDataStorage.BmRoomStorage)
 		} else if tp.Name() == "BmTeacherStorage" {
 			ts = arg.(*BmDataStorage.BmTeacherStorage)
-		} else if tp.Name() == "BmClassStorage" {
-			cs = arg.(*BmDataStorage.BmClassStorage)
+		} else if tp.Name() == "BmClassUnitBindStorage" {
+			cs = arg.(*BmDataStorage.BmClassUnitBindStorage)
 		}
 	}
-	return BmUnitResource{BmUnitStorage: us, BmRoomStorage: rs, BmTeacherStorage: ts, BmClassStorage: cs}
+	return BmUnitResource{BmUnitStorage: us, BmRoomStorage: rs, BmTeacherStorage: ts, BmClassUnitBindStorage: cs}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Unit
-	users := s.BmUnitStorage.GetAll(r, -1, -1)
-
-	for _, user := range users {
-		// get all sweets for the user
-
-		if user.RoomID != "" {
-			r, err := s.BmRoomStorage.GetOne(user.RoomID)
+	_, ok := r.QueryParams["class-id"]
+	if ok {
+		result := []BmModel.Unit{}
+		binds := s.BmClassUnitBindStorage.GetAll(r, -1, -1)
+		for _, bind := range binds {
+			model, err := s.BmUnitStorage.GetOne(bind.UnitID)
 			if err != nil {
-				return &Response{}, errors.New("error")
+				return &Response{}, err
 			}
-			user.Room = r
+			result = append(result, model)
+		}
+		return &Response{Res: result}, nil
+	}
+
+	models := s.BmUnitStorage.GetAll(r, -1, -1)
+
+	for _, model := range models {
+		// get all sweets for the model
+
+		if model.RoomID != "" {
+			r, err := s.BmRoomStorage.GetOne(model.RoomID)
+			if err != nil {
+				return &Response{}, err
+			}
+			model.Room = r
 		}
 
-		if user.TeacherID != "" {
-			r, err := s.BmTeacherStorage.GetOne(user.TeacherID)
+		if model.TeacherID != "" {
+			r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 			if err != nil {
-				return &Response{}, errors.New("error")
+				return &Response{}, err
 			}
-			user.Teacher = r
+			model.Teacher = r
 		}
-		if user.ClassID != "" {
-			r, err := s.BmClassStorage.GetOne(user.ClassID)
+		if model.ClassUnitBindID != "" {
+			r, err := s.BmClassUnitBindStorage.GetOne(model.ClassUnitBindID)
 			if err != nil {
-				return &Response{}, errors.New("error")
+				return &Response{}, err
 			}
-			user.Class = r
+			model.ClassUnitBind = r
 		}
 
-		result = append(result, *user)
+		result = append(result, *model)
 	}
 
 	return &Response{Res: result}, nil
@@ -147,7 +161,7 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Room = r
 	}
@@ -155,16 +169,16 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	if model.TeacherID != "" {
 		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Teacher = r
 	}
-	if model.ClassID != "" {
-		r, err := s.BmClassStorage.GetOne(model.ClassID)
+	if model.ClassUnitBindID != "" {
+		r, err := s.BmClassUnitBindStorage.GetOne(model.ClassUnitBindID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
-		model.Class = r
+		model.ClassUnitBind = r
 	}
 
 	return &Response{Res: model}, nil
@@ -183,7 +197,7 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Room = r
 	}
@@ -191,16 +205,16 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 	if model.TeacherID != "" {
 		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
 		model.Teacher = r
 	}
-	if model.ClassID != "" {
-		r, err := s.BmClassStorage.GetOne(model.ClassID)
+	if model.ClassUnitBindID != "" {
+		r, err := s.BmClassUnitBindStorage.GetOne(model.ClassUnitBindID)
 		if err != nil {
-			return &Response{}, errors.New("error")
+			return &Response{}, err
 		}
-		model.Class = r
+		model.ClassUnitBind = r
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil

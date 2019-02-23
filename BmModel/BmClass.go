@@ -5,7 +5,6 @@ import (
 	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
 	"strconv"
-	"time"
 )
 
 // Class is a generic database Class
@@ -22,13 +21,13 @@ type Class struct {
 	CourseTotalCount  float64 `json:"course-total-count"`
 	CourseExpireCount float64 `json:"course-expire-count"`
 	BrandId           string  `json:"brand-id" bson:"brand-id"`
+	NotExist          float64 `json:"not-exist" bson:"not-exist"`
 
 	Students    []*Student `json:"-"`
 	StudentsIDs []string   `json:"-" bson:"student-ids"`
-	Teachers    []*Teacher `json:"-"`
-	TeachersIDs []string   `json:"-" bson:"teacher-ids"`
-	Units       []*Unit    `json:"-"`
-	UnitsIDs    []string   `json:"-" bson:"unit-ids"`
+	Duties      []*Duty    `json:"-"`
+	DutiesIDs   []string   `json:"-" bson:"duty-ids"`
+
 
 	YardID        string      `json:"yard-id" bson:"yard-id"`
 	Yard          Yard        `json:"-"`
@@ -63,12 +62,8 @@ func (u Class) GetReferences() []jsonapi.Reference {
 			Name: "students",
 		},
 		{
-			Type: "teachers",
-			Name: "teachers",
-		},
-		{
-			Type: "units",
-			Name: "units",
+			Type: "duties",
+			Name: "duties",
 		},
 	}
 }
@@ -83,20 +78,14 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "students",
 		})
 	}
-	for _, tmpID := range u.TeachersIDs {
+	for _, tmpID := range u.DutiesIDs {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   tmpID,
-			Type: "teachers",
-			Name: "teachers",
+			Type: "duties",
+			Name: "duties",
 		})
 	}
-	for _, tmpID := range u.UnitsIDs {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   tmpID,
-			Type: "units",
-			Name: "units",
-		})
-	}
+	
 
 	if u.YardID != "" {
 		result = append(result, jsonapi.ReferenceID{
@@ -123,12 +112,10 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	for key := range u.Students {
 		result = append(result, u.Students[key])
 	}
-	for key := range u.Teachers {
-		result = append(result, u.Teachers[key])
+	for key := range u.Duties {
+		result = append(result, u.Duties[key])
 	}
-	for key := range u.Units {
-		result = append(result, u.Units[key])
-	}
+	
 
 	if u.YardID != "" {
 		result = append(result, u.Yard)
@@ -159,14 +146,11 @@ func (u *Class) SetToManyReferenceIDs(name string, IDs []string) error {
 		u.StudentsIDs = IDs
 		return nil
 	}
-	if name == "teachers" {
-		u.TeachersIDs = IDs
+	if name == "duties" {
+		u.DutiesIDs = IDs
 		return nil
 	}
-	if name == "units" {
-		u.UnitsIDs = IDs
-		return nil
-	}
+	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -177,14 +161,11 @@ func (u *Class) AddToManyIDs(name string, IDs []string) error {
 		u.StudentsIDs = append(u.StudentsIDs, IDs...)
 		return nil
 	}
-	if name == "teachers" {
-		u.TeachersIDs = append(u.TeachersIDs, IDs...)
+	if name == "duties" {
+		u.DutiesIDs = append(u.DutiesIDs, IDs...)
 		return nil
 	}
-	if name == "units" {
-		u.UnitsIDs = append(u.UnitsIDs, IDs...)
-		return nil
-	}
+	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -201,26 +182,17 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 			}
 		}
 	}
-	if name == "teachers" {
+	if name == "duties" {
 		for _, ID := range IDs {
-			for pos, oldID := range u.TeachersIDs {
+			for pos, oldID := range u.DutiesIDs {
 				if ID == oldID {
 					// match, this ID must be removed
-					u.TeachersIDs = append(u.TeachersIDs[:pos], u.TeachersIDs[pos+1:]...)
+					u.DutiesIDs = append(u.DutiesIDs[:pos], u.DutiesIDs[pos+1:]...)
 				}
 			}
 		}
 	}
-	if name == "units" {
-		for _, ID := range IDs {
-			for pos, oldID := range u.UnitsIDs {
-				if ID == oldID {
-					// match, this ID must be removed
-					u.UnitsIDs = append(u.UnitsIDs[:pos], u.UnitsIDs[pos+1:]...)
-				}
-			}
-		}
-	}
+	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -237,23 +209,15 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 				panic(err.Error())
 			}
 			rst[k] = val
+		case "not-exist":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			rst[k] = val
 		}
 	}
 	return rst
 }
 
-func (c *Class) ReSetCourseCount() error {
-	if len(c.UnitsIDs) != 0 {
-		c.CourseTotalCount = float64(len(c.UnitsIDs))
-		var us Units
-		us = c.Units
-		us.SortByEndDate(false)
-		now := float64(time.Now().UnixNano() / 1e6)
-		for i, v := range us {
-			if v.EndDate < now {
-				c.CourseExpireCount = float64(len(c.UnitsIDs)) - float64(i)
-			}
-		}
-	}
-	return nil
-}
+

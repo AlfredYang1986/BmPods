@@ -1,11 +1,11 @@
 package BmHandler
 
 import (
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
+	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"reflect"
-	"github.com/julienschmidt/httprouter"
-	"github.com/alfredyang1986/BmPods/BmDaemons"
-	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
 )
 
 type UpdateHandler struct {
