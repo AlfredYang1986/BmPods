@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/alfredyang1986/BmPods/BmDaemons"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
 	"github.com/julienschmidt/httprouter"
 )

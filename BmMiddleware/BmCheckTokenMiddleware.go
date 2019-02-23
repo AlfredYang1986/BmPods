@@ -1,7 +1,7 @@
 package BmMiddleware
 
 import (
-	"github.com/alfredyang1986/BmPods/BmDaemons"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
 	"github.com/manyminds/api2go"
 	"net/http"

@@ -343,7 +343,7 @@ daemons:
   args:
     host: localhost
     port: 27017
-    database: ddsaas-demo
+    database: ddsaas
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
