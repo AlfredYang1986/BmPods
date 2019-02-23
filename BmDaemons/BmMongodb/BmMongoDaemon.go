@@ -177,6 +177,24 @@ func (m *BmMongodb) Update(ptr BmModel.BmModelBase) error {
 	return nil
 }
 
+func (m *BmMongodb) Query (condi bson.M, tName string, ptr BmModel.BmModelBase) error {
+		session, err := mgo.Dial(m.Host + ":" + m.Port)
+	if err != nil {
+		return errors.New("dial db error")
+	}
+	defer session.Close()
+
+	c := session.DB(m.Database).C(tName)
+
+	err = c.Find(condi).One(ptr)
+	if err != nil {
+		return errors.New("error update by id")
+	}
+
+	m.ResetIdWithId_(ptr)
+	return nil
+}
+
 func (m *BmMongodb) Count(r api2go.Request, ptr BmModel.BmModelBase) (int, error) {
 	session, err := mgo.Dial(m.Host + ":" + m.Port)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
 	"net/http"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // BmBindReservableClassStorage stores all of the tasty modelleaf, needs to be injected into
@@ -76,6 +77,15 @@ func (s *BmBindReservableClassStorage) Delete(id string) error {
 // Update updates an existing modelleaf
 func (s *BmBindReservableClassStorage) Update(c BmModel.BindReservableClass) error {
 	err := s.db.Update(&c)
+	if err != nil {
+		return fmt.Errorf("BindReservableClass with id does not exist")
+	}
+
+	return nil
+}
+
+func (s * BmBindReservableClassStorage) Query (condi bson.M, out *BmModel.BindReservableClass) error {
+	err := s.db.Query(condi, "BmBindReservableClassStorage", out)
 	if err != nil {
 		return fmt.Errorf("BindReservableClass with id does not exist")
 	}

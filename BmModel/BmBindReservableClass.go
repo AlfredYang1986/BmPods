@@ -24,3 +24,17 @@ func (c *BindReservableClass) SetID(id string) error {
 func (u *BindReservableClass) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	return bson.M{}
 }
+
+func (u * BindReservableClass) GetConditionsWithClassId() bson.M {
+	return bson.M{"class-id": u.ClassId}
+}
+
+func (u * BindReservableClass) GetConditionsWithResId() bson.M {
+	return bson.M{"reservableitem-id": u.ReservableitemId}
+}
+
+func (u * BindReservableClass) GetConditionsWithResIdAndClsId() bson.M {
+	return bson.M{
+		"reservableitem-id": u.ReservableitemId,
+		"class-id": u.ClassId}
+}
