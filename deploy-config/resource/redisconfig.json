@@ -1,6 +1,0 @@
-{
-  "Host":"redis",
-  "Port":"6379",
-  "DB":0,
-  "Password": ""
-}
