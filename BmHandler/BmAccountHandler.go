@@ -19,9 +19,6 @@ import (
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmPods/BmModel"
 
-	"github.com/alfredyang1986/blackmirror/bmcommon/bmsingleton"
-	"github.com/alfredyang1986/blackmirror/jsonapi"
-	"github.com/alfredyang1986/blackmirror/jsonapi/jsonapiobj"
 )
 
 type AccountHandler struct {
@@ -65,8 +62,10 @@ func (h AccountHandler) NewAccountHandler(args ...interface{}) AccountHandler {
 	}
 
 	//TODO: Register这边为了使用blackmirror的FromJSONAPI 2中风格迥异的Model
-	fac := bmsingleton.GetFactoryInstance()
-	fac.RegisterModel("Account", &BmModel.Account{})
+	// 登陆授权流程不走JsonApi，直接利用Golang原生的json转Object的逻辑去实现这个逻辑
+	// 同时拆分的意思是利用yaml流程还是走handler，不是将它拆分用老架构
+	//fac := bmsingleton.GetFactoryInstance()
+	//fac.RegisterModel("Account", &BmModel.Account{})
 
 	return AccountHandler{Method: md, HttpMethod: hm, Args: ag, db: m, rd: r}
 }
@@ -80,16 +79,12 @@ func (h AccountHandler) AccountValidation(w http.ResponseWriter, r *http.Request
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return 1
 	}
-	sjson := string(body)
-	rst, _ := jsonapi.FromJsonAPI(sjson)
-	model := rst.(BmModel.Account)
+	res := BmModel.Account{}
+	json.Unmarshal(body, &res)
 	var out BmModel.Account
+	cond := bson.M{"account": res.Account, "password": res.Password}
+	err = h.db.FindOneByCondition(&res, &out, cond)
 
-	cond := bson.M{"account": model.Account, "password": model.Password}
-
-	err = h.db.FindOneByCondition(&model, &out, cond)
-
-	jso := jsonapiobj.JsResult{}
 	response := map[string]interface{}{
 		"status": "",
 		"result": nil,
@@ -108,16 +103,15 @@ func (h AccountHandler) AccountValidation(w http.ResponseWriter, r *http.Request
 		response["result"] = out
 		response["error"] = err
 
-		jso.Obj = response
+		//reval, _ := json.Marshal(response)
 		enc := json.NewEncoder(w)
-		enc.Encode(jso.Obj)
+		enc.Encode(response)
 		return 0
 	} else {
 		response["status"] = "error"
 		response["error"] = "账户或密码错误！"
-		jso.Obj = response
 		enc := json.NewEncoder(w)
-		enc.Encode(jso.Obj)
+		enc.Encode(response)
 		return 1
 	}
 }
