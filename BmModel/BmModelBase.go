@@ -1,7 +1,7 @@
 package BmModel
 
-import "gopkg.in/mgo.v2/bson"
+import (
+	dbf "github.com/alfredyang1986/BmServiceDef/BmModel"
+)
 
-type BmModelBase interface {
-	GetConditionsBsonM(parameters map[string][]string) bson.M
-}
+type BmModelBase = dbf.BmModelBase
