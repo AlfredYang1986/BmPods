@@ -48,22 +48,25 @@ func (s BmUnitStorage) GetOne(id string) (BmModel.Unit, error) {
 
 		//双重绑定
 		if out.TeacherID != "" {
-			t_in := BmModel.Teacher{ID: id}
-			t_out := BmModel.Teacher{ID: id}
-			s.db.FindOne(&t_in, &t_out)
-			out.Teacher = t_out
+			item, err := BmTeacherStorage{db: s.db}.GetOne(out.TeacherID)
+			if err != nil {
+				return BmModel.Unit{}, err
+			}
+			out.Teacher = item
 		}
-		if out.ClassID != "" {
-			t_in := BmModel.Class{ID: id}
-			t_out := BmModel.Class{ID: id}
-			s.db.FindOne(&t_in, &t_out)
-			out.Class = t_out
+		if out.ClassUnitBindID != "" {
+			item, err := BmClassUnitBindStorage{db: s.db}.GetOne(out.ClassUnitBindID)
+			if err != nil {
+				return BmModel.Unit{}, err
+			}
+			out.ClassUnitBind = item
 		}
 		if out.RoomID != "" {
-			t_in := BmModel.Room{ID: id}
-			t_out := BmModel.Room{ID: id}
-			s.db.FindOne(&t_in, &t_out)
-			out.Room = t_out
+			item, err := BmRoomStorage{db: s.db}.GetOne(out.RoomID)
+			if err != nil {
+				return BmModel.Unit{}, err
+			}
+			out.Room = item
 		}
 
 		return out, nil

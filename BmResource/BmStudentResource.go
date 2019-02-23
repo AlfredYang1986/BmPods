@@ -204,6 +204,22 @@ func (s BmStudentResource) Create(obj interface{}, r api2go.Request) (api2go.Res
 	id := s.BmStudentStorage.Insert(model)
 	model.ID = id
 
+	//TODO: 临时版本-在创建的同时加关系
+	if model.KidID != "" {
+		k, err := s.BmKidStorage.GetOne(model.KidID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Kid = &k
+	}
+	if model.TeacherID != "" {
+		k, err := s.BmTeacherStorage.GetOne(model.TeacherID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Teacher = k
+	}
+
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 

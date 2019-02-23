@@ -6,5 +6,5 @@ import (
 )
 
 type BmMiddleware interface {
-	DoMiddleware (c api2go.APIContexter, w http.ResponseWriter, r *http.Request)
+	DoMiddleware(c api2go.APIContexter, w http.ResponseWriter, r *http.Request)
 }

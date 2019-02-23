@@ -145,7 +145,7 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	in := BmModel.Apply{}
 	count = s.BmApplyStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
-	return uint(count), &Response{Res: result, QueryRes:"applies", TotalPage:pages, TotalCount:count}, nil
+	return uint(count), &Response{Res: result, QueryRes: "applies", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
@@ -185,6 +185,15 @@ func (s BmApplyResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	model.CreateTime = float64(time.Now().UnixNano() / 1e6)
 	id := s.BmApplyStorage.Insert(model)
 	model.ID = id
+
+	//TODO: 临时版本-在创建的同时加关系
+	if model.ApplicantID != "" {
+		applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Applicant = applicant
+	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }

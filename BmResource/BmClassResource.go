@@ -15,11 +15,11 @@ import (
 type BmClassResource struct {
 	BmClassStorage          *BmDataStorage.BmClassStorage
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
-	BmTeacherStorage        *BmDataStorage.BmTeacherStorage
-	BmUnitStorage           *BmDataStorage.BmUnitStorage
+	BmDutyStorage           *BmDataStorage.BmDutyStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
-	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
+	BmBindReservableClassStorage *BmDataStorage.BmBindReservableClassStorage
+	BmClassUnitBindStorage  *BmDataStorage.BmClassUnitBindStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClassResource {
@@ -27,28 +27,28 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 	var ys *BmDataStorage.BmYardStorage
 	var ss *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmStudentStorage
-	var ts *BmDataStorage.BmTeacherStorage
-	var ns *BmDataStorage.BmUnitStorage
-	var rs *BmDataStorage.BmReservableitemStorage
+	var ds *BmDataStorage.BmDutyStorage
+	var rs *BmDataStorage.BmBindReservableClassStorage
+	var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmClassStorage" {
 			us = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmStudentStorage" {
 			cs = arg.(*BmDataStorage.BmStudentStorage)
-		} else if tp.Name() == "BmTeacherStorage" {
-			ts = arg.(*BmDataStorage.BmTeacherStorage)
-		} else if tp.Name() == "BmUnitStorage" {
-			ns = arg.(*BmDataStorage.BmUnitStorage)
+		} else if tp.Name() == "BmDutyStorage" {
+			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmYardStorage" {
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
-		} else if tp.Name() == "BmReservableitemStorage" {
-			rs = arg.(*BmDataStorage.BmReservableitemStorage)
+		} else if tp.Name() == "BmBindReservableClassStorage" {
+			rs = arg.(*BmDataStorage.BmBindReservableClassStorage)
+		}else if tp.Name() == "BmClassUnitBindStorage" {
+			bs = arg.(*BmDataStorage.BmClassUnitBindStorage)
 		}
 	}
-	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmTeacherStorage: ts, BmUnitStorage: ns, BmReservableitemStorage: rs}
+	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmClassUnitBindStorage: bs, BmBindReservableClassStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -56,15 +56,11 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Class
 
 	//查詢 reservable 下的 classes
-	reservableitemsID, ok := r.QueryParams["reservableitemsID"]
+	_, ok := r.QueryParams["reservableitem-id"]
 	if ok {
-		modelRootID := reservableitemsID[0]
-		modelRoot, err := s.BmReservableitemStorage.GetOne(modelRootID)
-		if err != nil {
-			return &Response{}, err
-		}
-		for _, modelID := range modelRoot.ClassesIDs {
-			model, err := s.BmClassStorage.GetOne(modelID)
+		modelBinds := s.BmBindReservableClassStorage.GetAll(r)
+		for _, modelBind := range modelBinds {
+			model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
 			if err != nil {
 				return &Response{}, err
 			}
@@ -72,7 +68,9 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			result = append(result, model)
+			if model.NotExist == 0 {
+				result = append(result, model)
+			}
 		}
 		return &Response{Res: result}, nil
 	}
@@ -90,7 +88,7 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 				return &Response{}, err
 			}
 			err = s.FilterClassByFlag(model, flagInt)
-			if err == nil {
+			if err == nil && model.NotExist == 0 {
 				result = append(result, *model)
 			}
 		}
@@ -103,7 +101,9 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		if err != nil {
 			return &Response{}, err
 		}
-		result = append(result, *model)
+		if model.NotExist == 0 {
+			result = append(result, *model)
+		}
 	}
 
 	return &Response{Res: result}, nil
@@ -163,23 +163,20 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		take = int(limitI)
 	}
 
-	reservableitemsID, ok := r.QueryParams["reservableitemsID"]
-	if ok {
-		modelRootID := reservableitemsID[0]
-		modelRoot, err := s.BmReservableitemStorage.GetOne(modelRootID)
-		if err != nil {
-			return uint(0), &Response{}, err
-		}
-		count = len(modelRoot.ClassesIDs)
+	//查詢 reservable 下的 classes
+	_, rcok := r.QueryParams["reservableitem-id"]
+	if rcok {
+		modelBinds := s.BmBindReservableClassStorage.GetAll(r)
+		count = len(modelBinds)
 		if skip >= count {
-			return uint(0), &Response{}, err
+			return uint(0), &Response{}, errors.New("no more data")
 		}
 		endIndex := skip + take
 		if endIndex > count {
 			endIndex = count
 		}
-		for _, modelID := range modelRoot.ClassesIDs[skip:endIndex] {
-			model, err := s.BmClassStorage.GetOne(modelID)
+		for _, modelBind := range modelBinds[skip:endIndex] {
+			model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
@@ -187,10 +184,12 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
-			result = append(result, model)
+			if model.NotExist == 0 {
+				result = append(result, model)
+			}
 		}
 		pages = int(math.Ceil(float64(count) / float64(take)))
-		return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages}, nil
+		return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages, TotalCount:count}, nil
 	}
 
 	flag, fok := r.QueryParams["flag"]
@@ -206,7 +205,7 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 				return 0, &Response{}, err
 			}
 			err = s.FilterClassByFlag(model, flagInt)
-			if err == nil {
+			if err == nil && model.NotExist == 0 {
 				result = append(result, *model)
 			}
 		}
@@ -227,7 +226,9 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		if err != nil {
 			return 0, &Response{}, err
 		}
-		result = append(result, *model)
+		if model.NotExist == 0 {
+			result = append(result, *model)
+		}
 	}
 
 	in := BmModel.Class{}
@@ -244,11 +245,6 @@ func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-	err = s.ResetReferencedModel(&model)
-	if err != nil {
-		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
-	}
-
 	return &Response{Res: model}, nil
 }
 
@@ -262,6 +258,22 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	model.CreateTime = float64(time.Now().UnixNano() / 1e6)
 	id := s.BmClassStorage.Insert(model)
 	model.ID = id
+
+	//TODO: 临时版本-在创建的同时加关系
+	if model.YardID != "" {
+		yard, err := s.BmYardStorage.GetOne(model.YardID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Yard = yard
+	}
+	if model.SessioninfoID != "" {
+		item, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Sessioninfo = item
+	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
@@ -292,21 +304,13 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Students = append(model.Students, &choc)
 	}
-	model.Teachers = []*BmModel.Teacher{}
-	for _, tmpID := range model.TeachersIDs {
-		choc, err := s.BmTeacherStorage.GetOne(tmpID)
+	model.Duties = []*BmModel.Duty{}
+	for _, tmpID := range model.DutiesIDs {
+		choc, err := s.BmDutyStorage.GetOne(tmpID)
 		if err != nil {
 			return err
 		}
-		model.Teachers = append(model.Teachers, &choc)
-	}
-	model.Units = []*BmModel.Unit{}
-	for _, tmpID := range model.UnitsIDs {
-		choc, err := s.BmUnitStorage.GetOne(tmpID)
-		if err != nil {
-			return err
-		}
-		model.Units = append(model.Units, &choc)
+		model.Duties = append(model.Duties, &choc)
 	}
 
 	if model.YardID != "" {
@@ -325,40 +329,40 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 	}
 	return nil
 }
-
 func (s BmClassResource) FilterClassByFlag(model *BmModel.Class, flag int) error {
-	switch flag {
+	/*switch flag {
 	case 0:
-		if len(model.UnitsIDs) != 0 {
-			model.ReSetCourseCount()
-		}
-		return nil
+	   if len(model.UnitsIDs) != 0 {
+		  model.ReSetCourseCount()
+	   }
+	   return nil
 	case -1:
-		if len(model.UnitsIDs) == 0 {
-			return nil
-		}
+	   if len(model.UnitsIDs) == 0 {
+		  return nil
+	   }
 	case 1:
-		if len(model.UnitsIDs) != 0 {
-			var us BmModel.Units
-			us = model.Units
-			us.SortByEndDate(false)
-			now := float64(time.Now().UnixNano() / 1e6)
-			if us[0].EndDate > now {
-				model.ReSetCourseCount()
-				return nil
-			}
-		}
+	   if len(model.UnitsIDs) != 0 {
+		  var us BmModel.Units
+		  us = model.Units
+		  us.SortByEndDate(false)
+		  now := float64(time.Now().UnixNano() / 1e6)
+		  if us[0].EndDate > now {
+			 model.ReSetCourseCount()
+			 return nil
+		  }
+	   }
 	case 2:
-		if len(model.UnitsIDs) != 0 {
-			var us BmModel.Units
-			us = model.Units
-			us.SortByEndDate(false)
-			now := float64(time.Now().UnixNano() / 1e6)
-			if us[0].EndDate <= now {
-				model.ReSetCourseCount()
-				return nil
-			}
-		}
-	}
+	   if len(model.UnitsIDs) != 0 {
+		  var us BmModel.Units
+		  us = model.Units
+		  us.SortByEndDate(false)
+		  now := float64(time.Now().UnixNano() / 1e6)
+		  if us[0].EndDate <= now {
+			 model.ReSetCourseCount()
+			 return nil
+		  }
+	   }
+	}*/
 	return errors.New("not found")
-}
+ }
+

@@ -20,8 +20,8 @@ type Unit struct {
 
 	TeacherID string  `json:"teacher-id" bson:"teacher-id"`
 	Teacher   Teacher `json:"-"`
-	ClassID   string  `json:"class-id" bson:"class-id"`
-	Class     Class   `json:"-"`
+	ClassUnitBindID   string  `json:"classunitbind-id" bson:"classunitbind-id"`
+	ClassUnitBind     ClassUnitBind   `json:"-"`
 	//通过room过滤unit
 	RoomID string `json:"room-id" bson:"room-id"`
 	Room   Room   `json:"-"`
@@ -46,8 +46,8 @@ func (u Unit) GetReferences() []jsonapi.Reference {
 			Name: "teacher",
 		},
 		{
-			Type: "classes",
-			Name: "class",
+			Type: "classunitbinds",
+			Name: "classunitbind",
 		},
 		{
 			Type: "rooms",
@@ -67,11 +67,11 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "teacher",
 		})
 	}
-	if u.ClassID != "" {
+	if u.ClassUnitBindID != "" {
 		result = append(result, jsonapi.ReferenceID{
-			ID:   u.ClassID,
-			Type: "classes",
-			Name: "class",
+			ID:   u.ClassUnitBindID,
+			Type: "classunitbinds",
+			Name: "classunitbind",
 		})
 	}
 
@@ -93,8 +93,8 @@ func (u Unit) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	if u.TeacherID != "" {
 		result = append(result, u.Teacher)
 	}
-	if u.ClassID != "" {
-		result = append(result, u.Class)
+	if u.ClassUnitBindID != "" {
+		result = append(result, u.ClassUnitBind)
 	}
 
 	if u.RoomID != "" {
@@ -111,8 +111,8 @@ func (u *Unit) SetToOneReferenceID(name, ID string) error {
 		u.TeacherID = ID
 		return nil
 	}
-	if name == "class" {
-		u.ClassID = ID
+	if name == "classunitbind" {
+		u.ClassUnitBindID = ID
 		return nil
 	}
 
@@ -170,6 +170,38 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			r := make(map[string]interface{})
 			r["$gte"] = val
 			rst["start-date"] = r
+		case "lt[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$lt"] = val
+			rst["end-date"] = r
+		case "lte[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$lte"] = val
+			rst["end-date"] = r
+		case "gt[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gt"] = val
+			rst["end-date"] = r
+		case "gte[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$gte"] = val
+			rst["end-date"] = r
 		}
 	}
 

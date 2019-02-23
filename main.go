@@ -29,7 +29,7 @@ func main() {
 	pod.RegisterAllMiddleware(api)
 
 	handler := api.Handler().(*httprouter.Router)
-	http.ListenAndServe(":" + bmRouter.Port, handler)
+	http.ListenAndServe(":"+bmRouter.Port, handler)
 
 	fmt.Println("pod archi ends")
 }

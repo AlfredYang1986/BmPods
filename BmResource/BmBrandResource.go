@@ -36,7 +36,7 @@ func (s BmBrandResource) NewBrandResource(args []BmDataStorage.BmStorage) BmBran
 // FindAll to satisfy api2go data source interface
 func (s BmBrandResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Brand
-	models := s.BmBrandStorage.GetAll(r,-1, -1)
+	models := s.BmBrandStorage.GetAll(r, -1, -1)
 
 	for _, model := range models {
 		// get all sweets for the model
@@ -162,6 +162,15 @@ func (s BmBrandResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 
 	id := s.BmBrandStorage.Insert(model)
 	model.ID = id
+
+	//TODO: 临时版本-在创建的同时加关系
+	if model.CategoryID != "" {
+		cat, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Cat = cat
+	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
