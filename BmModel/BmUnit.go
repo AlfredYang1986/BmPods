@@ -129,6 +129,8 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			rst[k] = v[0]
 		case "room-id":
 			rst[k] = v[0]
+		case "class-id":
+			rst[k] = v[0]
 		case "status":
 			val, err := strconv.ParseFloat(v[0], 64)
 			if err != nil {
