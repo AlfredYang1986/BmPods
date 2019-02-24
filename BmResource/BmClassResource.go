@@ -295,6 +295,7 @@ func (s BmClassResource) Update(obj interface{}, r api2go.Request) (api2go.Respo
 	}
 
 	err := s.BmClassStorage.Update(model)
+	s.ResetReferencedModel(&model)
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
 

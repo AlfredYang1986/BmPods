@@ -33,7 +33,7 @@ type Class struct {
 	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
 	Sessioninfo   Sessioninfo `json:"-"`
 
-	ReservableID  string `json:"reservable-id" bson:"reservalbe-id"`
+	ReservableID  string `json:"reservable-id" bson:"reservable-id"`
 	Reservableitem Reservableitem `json:"-"`
 }
 
