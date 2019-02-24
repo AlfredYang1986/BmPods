@@ -15,6 +15,7 @@ type BmUnitResource struct {
 	BmRoomStorage    *BmDataStorage.BmRoomStorage
 	BmTeacherStorage *BmDataStorage.BmTeacherStorage
 	BmClassStorage   *BmDataStorage.BmClassStorage
+	BmClassResource *BmClassResource
 }
 
 func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitResource {
@@ -22,6 +23,7 @@ func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitRe
 	var rs *BmDataStorage.BmRoomStorage
 	var ts *BmDataStorage.BmTeacherStorage
 	var cs *BmDataStorage.BmClassStorage
+	var cr *BmClassResource
 
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
@@ -33,9 +35,11 @@ func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitRe
 			ts = arg.(*BmDataStorage.BmTeacherStorage)
 		}else if tp.Name() == "BmClassStorage" {
 			cs = arg.(*BmDataStorage.BmClassStorage)
+		} else if tp.Name() == "BmClassResource" {
+			cr = arg.(*BmClassResource)
 		}
 	}
-	return BmUnitResource{BmUnitStorage: us, BmRoomStorage: rs, BmTeacherStorage: ts, BmClassStorage: cs}
+	return BmUnitResource{BmUnitStorage: us, BmRoomStorage: rs, BmTeacherStorage: ts, BmClassStorage: cs, BmClassResource: cr}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -76,11 +80,11 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			model.Teacher = r
 		}
 		if model.ClassID != "" {
-			r, err := s.BmClassStorage.GetOne(model.ClassID)
+			r, err := s.BmClassResource.FindOne(model.ClassID, r)
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Class = r
+			model.Class = r.Result().(BmModel.Class)
 		}
 		result = append(result, *model)
 	}
@@ -144,10 +148,29 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		}
 	}
 
+	reval := []BmModel.Unit{}
+	for _, model := range result {
+		if model.RoomID != "" {
+			r, _ := s.BmRoomStorage.GetOne(model.RoomID)
+			model.Room = r
+		}
+
+		if model.TeacherID != "" {
+			r, _ := s.BmTeacherStorage.GetOne(model.TeacherID)
+			model.Teacher = r
+		}
+		if model.ClassID != "" {
+			r, _ := s.BmClassResource.FindOne(model.ClassID, r)
+			model.Class = r.Result().(BmModel.Class)
+		}
+
+		reval = append(reval, model)
+	}
+
 	in := BmModel.Unit{}
 	count := s.BmUnitStorage.Count(r, in)
 
-	return uint(count), &Response{Res: result}, nil
+	return uint(count), &Response{Res: reval}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
@@ -174,13 +197,12 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 		model.Teacher = r
 	}
 	if model.ClassID != "" {
-		r, err := s.BmClassStorage.GetOne(model.ClassID)
+		r, err := s.BmClassResource.FindOne(model.ClassID, r)
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Class = r
+		model.Class = r.Result().(BmModel.Class)
 	}
-
 
 	return &Response{Res: model}, nil
 }
@@ -211,6 +233,13 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 		model.Teacher = r
 	}
 
+	if model.ClassID != "" {
+		r, err := s.BmClassResource.FindOne(model.ClassID, r)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Class = r.Result().(BmModel.Class)
+	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
@@ -223,11 +252,11 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 
 //Update stores all changes on the user
 func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	user, ok := obj.(BmModel.Unit)
+	model, ok := obj.(BmModel.Unit)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	err := s.BmUnitStorage.Update(user)
-	return &Response{Res: user, Code: http.StatusNoContent}, err
+	err := s.BmUnitStorage.Update(model)
+	return &Response{Res: model, Code: http.StatusNoContent}, err
 }

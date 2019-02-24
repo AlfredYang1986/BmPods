@@ -101,8 +101,6 @@ func (u Unit) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Class)
 	}
 
-	// TODO: sessionable
-
 	return result
 }
 
