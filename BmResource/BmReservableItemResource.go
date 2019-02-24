@@ -17,7 +17,7 @@ type BmReservableitemResource struct {
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
 }
 
-func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage.BmStorage) BmReservableitemResource {
+func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage.BmStorage) *BmReservableitemResource {
 	var us *BmDataStorage.BmReservableitemStorage
 	var ts *BmDataStorage.BmSessioninfoStorage
 	for _, arg := range args {
@@ -28,7 +28,7 @@ func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage
 			ts = arg.(*BmDataStorage.BmSessioninfoStorage)
 		}
 	}
-	return BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts}
+	return &BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts}
 }
 
 // FindAll to satisfy api2go data source interface

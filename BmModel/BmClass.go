@@ -31,7 +31,6 @@ type Class struct {
 	YardID        string      `json:"yard-id" bson:"yard-id"`
 	Yard          Yard        `json:"-"`
 
-
 	ReservableID  string `json:"reservable-id" bson:"reservable-id"`
 	Reservableitem Reservableitem `json:"-"`
 }

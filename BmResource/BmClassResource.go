@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	"time"
+	"fmt"
 )
 
 type BmClassResource struct {
@@ -18,6 +19,7 @@ type BmClassResource struct {
 	BmDutyStorage           *BmDataStorage.BmDutyStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
+	BmReservableitemResource *BmReservableitemResource
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClassResource {
@@ -26,9 +28,11 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 	var cs *BmDataStorage.BmStudentStorage
 	var ds *BmDataStorage.BmDutyStorage
 	var rs *BmDataStorage.BmReservableitemStorage
+	var rr *BmReservableitemResource
 	//var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
+		fmt.Println(tp.Name())
 		if tp.Name() == "BmClassStorage" {
 			us = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmStudentStorage" {
@@ -39,9 +43,11 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmReservableitemStorage" {
 			rs = arg.(*BmDataStorage.BmReservableitemStorage)
+		} else if tp.Name() == "BmReservableitemResource" {
+			rr = arg.(interface{}).(*BmReservableitemResource)
 		}
 	}
-	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs}
+	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs, BmReservableitemResource: rr}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -316,11 +322,13 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 	}
 	
 	if model.ReservableID != "" {
-		item, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
+		//item, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
+		response, err := s.BmReservableitemResource.FindOne(model.ReservableID, api2go.Request{})
+		item := response.Result()
 		if err != nil {
 			return err
 		}
-		model.Reservableitem = item
+		model.Reservableitem = item.(BmModel.Reservableitem)
 	}
 	return nil
 }
