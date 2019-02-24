@@ -78,54 +78,6 @@ func (u *Reservableitem) SetToOneReferenceID(name, ID string) error {
 	return errors.New("There is no to-one relationship with the name " + name)
 }
 
-func (u *Reservableitem) SetToManyReferenceIDs(name string, IDs []string) error {
-	if name == "classes" {
-		return errors.New("only add one relationship are suppored with the name" + name)
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// AddToManyIDs adds some new leafs that a users loves so much
-func (u *Reservableitem) AddToManyIDs(name string, IDs []string) error {
-	if name == "classes" {
-		// TODO: 判断存在性
-		//tmps := Binding.BmBindReservableClassStorage{}
-		//for _, iter := range IDs {
-		//	in := BindReservableClass{}
-		//	fmt.Println(tmps)
-		//	in.Id_ = bson.NewObjectId()
-		//	in.ID = in.Id_.Hex()
-		//	in.ClassId = iter
-		//	in.ReservableitemId = u.ID
-		//
-		//	tmps.Insert(in)
-		//}
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// DeleteToManyIDs removes some leafs from a users because they made him very sick
-func (u *Reservableitem) DeleteToManyIDs(name string, IDs []string) error {
-	if name == "classes" {
-		//tmps := BmDataStorage.BmBindReservableClassStorage{}
-		//// TODO: 判断存在性
-		//for _, iter := range IDs {
-		//	out := BindReservableClass{}
-		//	condi := bson.M{
-		//		"reservableitem-id": u.ID,
-		//		"class-id": iter}
-		//	err := tmps.Query(condi, &out)
-		//	if err != nil {
-		//		tmps.Delete(out.ID)
-		//	}
-		//}
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
 func (u *Reservableitem) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	for k, v := range parameters {

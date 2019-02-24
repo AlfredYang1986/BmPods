@@ -18,8 +18,7 @@ type BmClassResource struct {
 	BmDutyStorage           *BmDataStorage.BmDutyStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
-	BmBindReservableClassStorage *BmDataStorage.BmBindReservableClassStorage
-	BmClassUnitBindStorage  *BmDataStorage.BmClassUnitBindStorage
+	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClassResource {
@@ -28,8 +27,8 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 	var ss *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmStudentStorage
 	var ds *BmDataStorage.BmDutyStorage
-	var rs *BmDataStorage.BmBindReservableClassStorage
-	var bs *BmDataStorage.BmClassUnitBindStorage
+	var rs *BmDataStorage.BmReservableitemStorage
+	//var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmClassStorage" {
@@ -42,13 +41,11 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
-		} else if tp.Name() == "BmBindReservableClassStorage" {
-			rs = arg.(*BmDataStorage.BmBindReservableClassStorage)
-		}else if tp.Name() == "BmClassUnitBindStorage" {
-			bs = arg.(*BmDataStorage.BmClassUnitBindStorage)
+		} else if tp.Name() == "BmReservableitemResource" {
+			rs = arg.(*BmDataStorage.BmReservableitemStorage)
 		}
 	}
-	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmClassUnitBindStorage: bs, BmBindReservableClassStorage: rs}
+	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -56,44 +53,46 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Class
 
 	//查詢 reservable 下的 classes
-	_, ok := r.QueryParams["reservableitem-id"]
-	if ok {
-		modelBinds := s.BmBindReservableClassStorage.GetAll(r)
-		for _, modelBind := range modelBinds {
-			model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
-			if err != nil {
-				return &Response{}, err
-			}
-			err = s.ResetReferencedModel(&model)
-			if err != nil {
-				return &Response{}, err
-			}
-			if model.NotExist == 0 {
-				result = append(result, model)
-			}
-		}
-		return &Response{Res: result}, nil
-	}
+	//_, ok := r.QueryParams["reservableitem-id"]
+	//if ok {
+	//	modelBinds := s.BmBindReservableClassStorage.GetAll(r)
+	//	for _, modelBind := range modelBinds {
+	//		model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
+	//		if err != nil {
+	//			return &Response{}, err
+	//		}
+	//		err = s.ResetReferencedModel(&model)
+	//		if err != nil {
+	//			return &Response{}, err
+	//		}
+	//		if model.NotExist == 0 {
+	//			result = append(result, model)
+	//		}
+	//	}
+	//	return &Response{Res: result}, nil
+	//}
 
-	flag, fok := r.QueryParams["flag"]
-	if fok {
-		flagInt, err := strconv.Atoi(flag[0])
-		if err != nil {
-			return &Response{}, err
-		}
-		models := s.BmClassStorage.GetAll(r, -1, -1)
-		for _, model := range models {
-			err := s.ResetReferencedModel(model)
-			if err != nil {
-				return &Response{}, err
-			}
-			err = s.FilterClassByFlag(model, flagInt)
-			if err == nil && model.NotExist == 0 {
-				result = append(result, *model)
-			}
-		}
-		return &Response{Res: result}, nil
-	}
+	// 写这个的人必须弹鸡鸡，无视数据库的所有规则，强制遍历所有自己filter
+	// 那还要数据库做啥呢 。。。。
+	//flag, fok := r.QueryParams["flag"]
+	//if fok {
+	//	flagInt, err := strconv.Atoi(flag[0])
+	//	if err != nil {
+	//		return &Response{}, err
+	//	}
+	//	models := s.BmClassStorage.GetAll(r, -1, -1)
+	//	for _, model := range models {
+	//		err := s.ResetReferencedModel(model)
+	//		if err != nil {
+	//			return &Response{}, err
+	//		}
+	//		err = s.FilterClassByFlag(model, flagInt)
+	//		if err == nil && model.NotExist == 0 {
+	//			result = append(result, *model)
+	//		}
+	//	}
+	//	return &Response{Res: result}, nil
+	//}
 
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
@@ -164,62 +163,62 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	}
 
 	//查詢 reservable 下的 classes
-	_, rcok := r.QueryParams["reservableitem-id"]
-	if rcok {
-		modelBinds := s.BmBindReservableClassStorage.GetAll(r)
-		count = len(modelBinds)
-		if skip >= count {
-			return uint(0), &Response{}, errors.New("no more data")
-		}
-		endIndex := skip + take
-		if endIndex > count {
-			endIndex = count
-		}
-		for _, modelBind := range modelBinds[skip:endIndex] {
-			model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
-			if err != nil {
-				return uint(0), &Response{}, err
-			}
-			err = s.ResetReferencedModel(&model)
-			if err != nil {
-				return uint(0), &Response{}, err
-			}
-			if model.NotExist == 0 {
-				result = append(result, model)
-			}
-		}
-		pages = int(math.Ceil(float64(count) / float64(take)))
-		return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages, TotalCount:count}, nil
-	}
-
-	flag, fok := r.QueryParams["flag"]
-	if fok {
-		flagInt, err := strconv.Atoi(flag[0])
-		if err != nil {
-			return 0, &Response{}, err
-		}
-		models := s.BmClassStorage.GetAll(r, -1, -1)
-		for _, model := range models {
-			err := s.ResetReferencedModel(model)
-			if err != nil {
-				return 0, &Response{}, err
-			}
-			err = s.FilterClassByFlag(model, flagInt)
-			if err == nil && model.NotExist == 0 {
-				result = append(result, *model)
-			}
-		}
-		count = len(result)
-		if skip >= count {
-			return uint(0), &Response{}, err
-		}
-		endIndex := skip + take
-		if endIndex > count {
-			endIndex = count
-		}
-		pages = int(math.Ceil(float64(count) / float64(take)))
-		return uint(count), &Response{Res: result[skip:endIndex], QueryRes: "classes", TotalPage: pages}, nil
-	}
+	//_, rcok := r.QueryParams["reservableitem-id"]
+	//if rcok {
+	//	modelBinds := s.BmBindReservableClassStorage.GetAll(r)
+	//	count = len(modelBinds)
+	//	if skip >= count {
+	//		return uint(0), &Response{}, errors.New("no more data")
+	//	}
+	//	endIndex := skip + take
+	//	if endIndex > count {
+	//		endIndex = count
+	//	}
+	//	for _, modelBind := range modelBinds[skip:endIndex] {
+	//		model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
+	//		if err != nil {
+	//			return uint(0), &Response{}, err
+	//		}
+	//		err = s.ResetReferencedModel(&model)
+	//		if err != nil {
+	//			return uint(0), &Response{}, err
+	//		}
+	//		if model.NotExist == 0 {
+	//			result = append(result, model)
+	//		}
+	//	}
+	//	pages = int(math.Ceil(float64(count) / float64(take)))
+	//	return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages, TotalCount:count}, nil
+	//}
+	//
+	//flag, fok := r.QueryParams["flag"]
+	//if fok {
+	//	flagInt, err := strconv.Atoi(flag[0])
+	//	if err != nil {
+	//		return 0, &Response{}, err
+	//	}
+	//	models := s.BmClassStorage.GetAll(r, -1, -1)
+	//	for _, model := range models {
+	//		err := s.ResetReferencedModel(model)
+	//		if err != nil {
+	//			return 0, &Response{}, err
+	//		}
+	//		err = s.FilterClassByFlag(model, flagInt)
+	//		if err == nil && model.NotExist == 0 {
+	//			result = append(result, *model)
+	//		}
+	//	}
+	//	count = len(result)
+	//	if skip >= count {
+	//		return uint(0), &Response{}, err
+	//	}
+	//	endIndex := skip + take
+	//	if endIndex > count {
+	//		endIndex = count
+	//	}
+	//	pages = int(math.Ceil(float64(count) / float64(take)))
+	//	return uint(count), &Response{Res: result[skip:endIndex], QueryRes: "classes", TotalPage: pages}, nil
+	//}
 
 	for _, model := range s.BmClassStorage.GetAll(r, skip, take) {
 		err := s.ResetReferencedModel(model)
@@ -326,6 +325,9 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 			return err
 		}
 		model.Sessioninfo = item
+	}
+	if model.ReservableID != "" {
+		//item, err := s.BmRes
 	}
 	return nil
 }

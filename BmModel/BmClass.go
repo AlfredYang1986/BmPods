@@ -28,11 +28,13 @@ type Class struct {
 	Duties      []*Duty    `json:"-"`
 	DutiesIDs   []string   `json:"-" bson:"duty-ids"`
 
-
 	YardID        string      `json:"yard-id" bson:"yard-id"`
 	Yard          Yard        `json:"-"`
 	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
 	Sessioninfo   Sessioninfo `json:"-"`
+
+	ReservableID  string `json:"reservable-id" bason:"reservalbe-id"`
+	Reservalbeitem Reservableitem `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -64,6 +66,10 @@ func (u Class) GetReferences() []jsonapi.Reference {
 		{
 			Type: "duties",
 			Name: "duties",
+		},
+		{
+			Type: "reservableitems",
+			Name: "reservableitem",
 		},
 	}
 }
@@ -102,6 +108,13 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "sessioninfo",
 		})
 	}
+	if u.ReservableID != "" {
+		result = append(result, jsonapi.ReferenceID{
+			ID:   u.ReservableID,
+			Type: "reservableitems",
+			Name: "reservableitem",
+		})
+	}
 
 	return result
 }
@@ -123,6 +136,9 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	if u.SessioninfoID != "" {
 		result = append(result, u.Sessioninfo)
 	}
+	if u.SessioninfoID != "" {
+		result = append(result, u.Reservalbeitem)
+	}
 
 	return result
 }
@@ -134,6 +150,10 @@ func (u *Class) SetToOneReferenceID(name, ID string) error {
 	}
 	if name == "sessioninfo" {
 		u.SessioninfoID = ID
+		return nil
+	}
+	if name == "reservableitem" {
+		u.ReservableID = ID
 		return nil
 	}
 
@@ -215,6 +235,8 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 				panic(err.Error())
 			}
 			rst[k] = val
+		case "reservable-id" :
+			rst[k] = v[0]
 		}
 	}
 	return rst
