@@ -14,7 +14,7 @@ type Class struct {
 
 	ClassTitle        string  `json:"class-title" bson:"class-title"`
 	Status            float64 `json:"status" bson:"status"` //0活动 1体验课 2普通课程
-	Flag              float64 `json:"flag"`                 //-1=未排课, 0=全部, 1=正在进行, 2=已完成
+	Flag              float64 `json:"flag" bson:"flag"`                 //-1=未排课, 0=全部, 1=正在进行, 2=已完成
 	StartDate         float64 `json:"start-date" bson:"start-date"`
 	EndDate           float64 `json:"end-date" bson:"end-date"`
 	CreateTime        float64 `json:"create-time" bson:"create-time"`
@@ -34,9 +34,7 @@ type Class struct {
 	Sessioninfo   Sessioninfo `json:"-"`
 
 	ReservableID  string `json:"reservable-id" bson:"reservalbe-id"`
-	Reservalbeitem Reservableitem `json:"-"`
-
-	//flag int 'json:"-" bson
+	Reservableitem Reservableitem `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -93,7 +91,6 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "duties",
 		})
 	}
-	
 
 	if u.YardID != "" {
 		result = append(result, jsonapi.ReferenceID{
@@ -130,7 +127,6 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	for key := range u.Duties {
 		result = append(result, u.Duties[key])
 	}
-	
 
 	if u.YardID != "" {
 		result = append(result, u.Yard)
@@ -138,8 +134,8 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	if u.SessioninfoID != "" {
 		result = append(result, u.Sessioninfo)
 	}
-	if u.SessioninfoID != "" {
-		result = append(result, u.Reservalbeitem)
+	if u.ReservableID != "" {
+		result = append(result, u.Reservableitem)
 	}
 
 	return result
@@ -187,7 +183,6 @@ func (u *Class) AddToManyIDs(name string, IDs []string) error {
 		u.DutiesIDs = append(u.DutiesIDs, IDs...)
 		return nil
 	}
-	
 
 	return errors.New("There is no to-many relationship with the name " + name)
 }
@@ -215,7 +210,6 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 		}
 	}
 	
-
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 

@@ -41,7 +41,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
-		} else if tp.Name() == "BmReservableitemResource" {
+		} else if tp.Name() == "BmReservableitemStorage" {
 			rs = arg.(*BmDataStorage.BmReservableitemStorage)
 		}
 	}
@@ -244,6 +244,10 @@ func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
+	err = s.ResetReferencedModel(&model)
+	if err != nil {
+		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
+	}
 	return &Response{Res: model}, nil
 }
 
@@ -331,7 +335,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		if err != nil {
 			return err
 		}
-		model.Reservalbeitem = item
+		model.Reservableitem = item
 	}
 	return nil
 }
