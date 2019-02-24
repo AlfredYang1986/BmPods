@@ -10,7 +10,6 @@ import (
 	"reflect"
 	"strconv"
 	"time"
-	"fmt"
 )
 
 type BmClassResource struct {
@@ -32,7 +31,6 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 	//var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
-		fmt.Println(tp.Name())
 		if tp.Name() == "BmClassStorage" {
 			us = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmStudentStorage" {
@@ -236,7 +234,7 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	count = s.BmClassStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
 
-	return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages}, nil
+	return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
@@ -263,17 +261,7 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	model.CreateTime = float64(time.Now().UnixNano() / 1e6)
 	id := s.BmClassStorage.Insert(model)
 	model.ID = id
-
-	//TODO: 临时版本-在创建的同时加关系
-	if model.YardID != "" {
-		yard, err := s.BmYardStorage.GetOne(model.YardID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Yard = yard
-	}
-
-
+	s.ResetReferencedModel(&model)
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
