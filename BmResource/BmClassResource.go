@@ -17,14 +17,12 @@ type BmClassResource struct {
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
 	BmDutyStorage           *BmDataStorage.BmDutyStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
-	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClassResource {
 	var us *BmDataStorage.BmClassStorage
 	var ys *BmDataStorage.BmYardStorage
-	var ss *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmStudentStorage
 	var ds *BmDataStorage.BmDutyStorage
 	var rs *BmDataStorage.BmReservableitemStorage
@@ -39,13 +37,11 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) BmClas
 			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmYardStorage" {
 			ys = arg.(*BmDataStorage.BmYardStorage)
-		} else if tp.Name() == "BmSessioninfoStorage" {
-			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
 		} else if tp.Name() == "BmReservableitemStorage" {
 			rs = arg.(*BmDataStorage.BmReservableitemStorage)
 		}
 	}
-	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs}
+	return BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -270,13 +266,7 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 		}
 		model.Yard = yard
 	}
-	if model.SessioninfoID != "" {
-		item, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Sessioninfo = item
-	}
+
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
@@ -324,13 +314,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Yard = yard
 	}
-	if model.SessioninfoID != "" {
-		item, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
-		if err != nil {
-			return err
-		}
-		model.Sessioninfo = item
-	}
+	
 	if model.ReservableID != "" {
 		item, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
 		if err != nil {
