@@ -20,11 +20,13 @@ type Unit struct {
 
 	TeacherID string  `json:"teacher-id" bson:"teacher-id"`
 	Teacher   Teacher `json:"-"`
-	ClassUnitBindID   string  `json:"classunitbind-id" bson:"classunitbind-id"`
-	ClassUnitBind     ClassUnitBind   `json:"-"`
+
 	//通过room过滤unit
 	RoomID string `json:"room-id" bson:"room-id"`
 	Room   Room   `json:"-"`
+
+	ClassID  string `json:"class-id" bson:"class-id"`
+	Class    Class `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -46,12 +48,12 @@ func (u Unit) GetReferences() []jsonapi.Reference {
 			Name: "teacher",
 		},
 		{
-			Type: "classunitbinds",
-			Name: "classunitbind",
-		},
-		{
 			Type: "rooms",
 			Name: "room",
+		},
+		{
+			Type: "classes",
+			Name: "class",
 		},
 	}
 }
@@ -67,19 +69,18 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "teacher",
 		})
 	}
-	if u.ClassUnitBindID != "" {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   u.ClassUnitBindID,
-			Type: "classunitbinds",
-			Name: "classunitbind",
-		})
-	}
-
 	if u.RoomID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.RoomID,
 			Type: "rooms",
 			Name: "room",
+		})
+	}
+	if u.ClassID != "" {
+		result = append(result, jsonapi.ReferenceID{
+			ID:   u.ClassID,
+			Type: "classes",
+			Name: "class",
 		})
 	}
 
@@ -93,12 +94,11 @@ func (u Unit) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	if u.TeacherID != "" {
 		result = append(result, u.Teacher)
 	}
-	if u.ClassUnitBindID != "" {
-		result = append(result, u.ClassUnitBind)
-	}
-
 	if u.RoomID != "" {
 		result = append(result, u.Room)
+	}
+	if u.ClassID != "" {
+		result = append(result, u.Class)
 	}
 
 	// TODO: sessionable
@@ -111,13 +111,12 @@ func (u *Unit) SetToOneReferenceID(name, ID string) error {
 		u.TeacherID = ID
 		return nil
 	}
-	if name == "classunitbind" {
-		u.ClassUnitBindID = ID
-		return nil
-	}
-
 	if name == "room" {
 		u.RoomID = ID
+		return nil
+	}
+	if name == "class" {
+		u.ClassID = ID
 		return nil
 	}
 
