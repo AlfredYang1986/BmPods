@@ -17,6 +17,7 @@ type BmClassResource struct {
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
 	BmDutyStorage           *BmDataStorage.BmDutyStorage
 	BmYardStorage           *BmDataStorage.BmYardStorage
+	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 	BmReservableitemResource *BmReservableitemResource
 }
@@ -24,10 +25,11 @@ type BmClassResource struct {
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmClassResource {
 	var us *BmDataStorage.BmClassStorage
 	var ys *BmDataStorage.BmYardStorage
+	var ss *BmDataStorage.BmSessioninfoStorage
 	var cs *BmDataStorage.BmStudentStorage
 	var ds *BmDataStorage.BmDutyStorage
 	var rs *BmDataStorage.BmReservableitemStorage
-	var rr *BmReservableitemResource
+	var rr *BmReservableitemResource   
 	//var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
@@ -35,7 +37,9 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 			us = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmStudentStorage" {
 			cs = arg.(*BmDataStorage.BmStudentStorage)
-		} else if tp.Name() == "BmDutyStorage" {
+		} else if tp.Name() == "BmSessioninfoStorage" {
+			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
+		}else if tp.Name() == "BmDutyStorage" {
 			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmYardStorage" {
 			ys = arg.(*BmDataStorage.BmYardStorage)
@@ -45,7 +49,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 			rr = arg.(interface{}).(*BmReservableitemResource)
 		}
 	}
-	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs, BmReservableitemResource: rr}
+	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs, BmReservableitemResource: rr}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -307,6 +311,13 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 			return err
 		}
 		model.Yard = yard
+	}
+	if model.SessioninfoID != "" {
+		sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
+		if err != nil {
+			return err
+		}
+		model.Sessioninfo = sessioninfo
 	}
 	
 	if model.ReservableID != "" {
