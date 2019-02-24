@@ -33,8 +33,10 @@ type Class struct {
 	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
 	Sessioninfo   Sessioninfo `json:"-"`
 
-	ReservableID  string `json:"reservable-id" bason:"reservalbe-id"`
+	ReservableID  string `json:"reservable-id" bson:"reservalbe-id"`
 	Reservalbeitem Reservableitem `json:"-"`
+
+	//flag int 'json:"-" bson
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -237,9 +239,34 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			rst[k] = val
 		case "reservable-id" :
 			rst[k] = v[0]
+		case "flag":
+			tmp, err := u.flagConditions(v[0])
+			if err != nil {
+				rst[k] = tmp
+			}
 		}
 	}
 	return rst
 }
 
+func (u *Class) flagConditions(flag string) (bson.M, error) {
+	flagInt, err := strconv.Atoi(flag)
+	if err != nil {
+		return bson.M{}, errors.New("parse flag errors")
+	}
+
+	switch flagInt {
+	case -1:
+		//return bson.M{ "unit-ids": {$eq : {$size: 0}}}
+		return bson.M{ "unit-ids": bson.M{ "$size": 0 }}, nil
+	case 0:
+		return bson.M{}, nil
+	case 1:
+		return bson.M{ "unit-ids": bson.M{ "$eq" : bson.M{ "$size": 0 }}}, nil
+	case 2:
+		return bson.M{ "not-implement": 1}, nil
+	default:
+		return bson.M{}, errors.New("not implement")
+	}
+}
 
