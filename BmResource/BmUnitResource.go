@@ -174,11 +174,11 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 		model.Teacher = r
 	}
 	if model.ClassID != "" {
-		r, err := s.BmTeacherStorage.GetOne(model.TeacherID)
+		r, err := s.BmClassStorage.GetOne(model.ClassID)
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Teacher = r
+		model.Class = r
 	}
 
 
