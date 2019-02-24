@@ -53,6 +53,13 @@ func (s BmClassStorage) GetOne(id string) (BmModel.Class, error) {
 			}
 			model.Yard = yard
 		}
+		if model.SessioninfoID != "" {
+			Sessioninfo, err := BmSessioninfoStorage{db: s.db}.GetOne(model.SessioninfoID)
+			if err != nil {
+				return BmModel.Class{}, err
+			}
+			model.Sessioninfo = Sessioninfo
+		}
 		
 
 		return model, nil

@@ -30,6 +30,8 @@ type Class struct {
 
 	YardID        string      `json:"yard-id" bson:"yard-id"`
 	Yard          Yard        `json:"-"`
+	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
+	Sessioninfo   Sessioninfo `json:"-"`
 
 	ReservableID  string `json:"reservable-id" bson:"reservable-id"`
 	Reservableitem Reservableitem `json:"-"`
@@ -52,6 +54,10 @@ func (u Class) GetReferences() []jsonapi.Reference {
 		{
 			Type: "yards",
 			Name: "yard",
+		},
+		{
+			Type: "sessioninfos",
+			Name: "sessioninfo",
 		},
 		{
 			Type: "students",
@@ -94,6 +100,13 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 			Relationship: jsonapi.ToOneRelationship,
 		})
 	}
+	if u.SessioninfoID != "" {
+		result = append(result, jsonapi.ReferenceID{
+			ID:           u.SessioninfoID,
+			Type:         "sessioninfos",
+			Name:         "sessioninfo",
+		})
+	}
 	
 	if u.ReservableID != "" {
 		result = append(result, jsonapi.ReferenceID{
@@ -120,6 +133,9 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Yard)
 	}
 
+	if u.SessioninfoID != "" {
+		result = append(result, u.Sessioninfo)
+	}
 	if u.ReservableID != "" {
 		result = append(result, u.Reservableitem)
 	}
@@ -135,6 +151,10 @@ func (u *Class) SetToOneReferenceID(name, ID string) error {
 	
 	if name == "reservableitem" {
 		u.ReservableID = ID
+		return nil
+	}
+	if name == "sessioninfo" {
+		u.SessioninfoID = ID
 		return nil
 	}
 
