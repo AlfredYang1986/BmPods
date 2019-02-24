@@ -5,7 +5,7 @@ import (
 	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
 	"strconv"
-
+)
 
 // Reservableitem is a generic database Reservableitem
 type Reservableitem struct {
