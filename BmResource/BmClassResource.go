@@ -327,7 +327,11 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		model.Sessioninfo = item
 	}
 	if model.ReservableID != "" {
-		//item, err := s.BmRes
+		item, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
+		if err != nil {
+			return err
+		}
+		model.Reservalbeitem = item
 	}
 	return nil
 }
