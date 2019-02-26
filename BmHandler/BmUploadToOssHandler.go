@@ -98,7 +98,6 @@ func (h UploadToOssHandler) UploadToOss(w http.ResponseWriter, r *http.Request, 
 			"file": fn,
 		}
 
-		//bmalioss.QuerySTSToken()
 		bmalioss.PushOneObject("bmsass", fn, localDir)
 
 		response := map[string]interface{}{

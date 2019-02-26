@@ -1,11 +1,13 @@
 package BmMiddleware
 
 import (
+	"fmt"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
 	"github.com/manyminds/api2go"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 type CheckTokenMiddleware struct {
@@ -39,20 +41,19 @@ func (ctm CheckTokenMiddleware) NewCheckTokenMiddleware(args ...interface{}) Che
 }
 
 func (ctm CheckTokenMiddleware) DoMiddleware(c api2go.APIContexter, w http.ResponseWriter, r *http.Request) {
-	//path := r.URL.Path
-	//if strings.HasSuffix(path, "AccountValidation") || strings.HasSuffix(path, "ApplicantValidation") {
-	//	fmt.Println("login from ", path)
-	//} else {
-	//	fmt.Println("Check Token!")
-	//	auth := r.Header.Get("Authorization")
-	//	arr := strings.Split(auth, " ")
-	//	if len(arr) < 2 || arr[0] != "bearer" {
-	//		panic("Auth Failed!")
-	//	}
-	//	token := arr[1]
-	//	err := ctm.rd.CheckToken(token)
-	//	if err != nil {
-	//		panic(err.Error())
-	//	}
-	//}
+	path := r.URL.Path
+	if strings.HasSuffix(path, "AccountValidation") || strings.HasSuffix(path, "ApplicantValidation") {
+		fmt.Println("login from ", path)
+	} else {
+		auth := r.Header.Get("Authorization")
+		arr := strings.Split(auth, " ")
+		if len(arr) < 2 || arr[0] != "bearer" {
+			panic("Auth Failed!")
+		}
+		token := arr[1]
+		err := ctm.rd.CheckToken(token)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
 }

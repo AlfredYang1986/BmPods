@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("pod archi begins")
 	var pod = BmPodsDefine.Pod{Name: "alfred test"}
 	bmHome := os.Getenv("BM_HOME")
-	pod.RegisterSerFromYAML(bmHome + "/Resources/service-def.yaml")
+	pod.RegisterSerFromYAML(bmHome + "/resource/service-def.yaml")
 
 	var bmRouter BmConfig.BmRouterConfig
 	bmRouter.GenerateConfig()
@@ -31,6 +31,7 @@ func main() {
 	pod.RegisterAllMiddleware(api)
 
 	handler := api.Handler().(*httprouter.Router)
+	pod.RegisterPanicHandler(handler)
 	http.ListenAndServe(":"+bmRouter.Port, handler)
 
 	fmt.Println("pod archi ends")
