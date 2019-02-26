@@ -36,7 +36,7 @@ func ErrInstance() *tBMError {
 							Pointer: "#titleField",
 						},
 						Meta: map[string]interface{}{
-							"creator": "api2go",
+							"creator": "jeorch",
 						},
 					},
 				}},
@@ -53,7 +53,7 @@ func ErrInstance() *tBMError {
 							Pointer: "#titleField",
 						},
 						Meta: map[string]interface{}{
-							"creator": "api2go",
+							"creator": "jeorch",
 						},
 					},
 				}},
