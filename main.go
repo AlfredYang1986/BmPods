@@ -15,7 +15,9 @@ import (
 func main() {
 	version := "v2"
 	fmt.Println("pod archi begins")
-	var pod = BmPodsDefine.Pod{Name: "alfred test"}
+
+	fac := BmFactory.BmTable{}
+	var pod = BmPodsDefine.Pod{ Name: "alfred test", Factory:fac }
 	bmHome := os.Getenv("BM_HOME")
 	pod.RegisterSerFromYAML(bmHome + "/resource/service-def.yaml")
 
