@@ -1,14 +1,16 @@
 package BmFactory
 
 import (
-	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
-	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
-	"github.com/alfredyang1986/BmPods/BmDataStorage"
-	"github.com/alfredyang1986/BmPods/BmHandler"
-	"github.com/alfredyang1986/BmPods/BmMiddleware"
-	"github.com/alfredyang1986/BmPods/BmModel"
-	"github.com/alfredyang1986/BmPods/BmResource"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"github.com/PharbersDeveloper/NtmPods/BmDataStorage"
+	"github.com/PharbersDeveloper/NtmPods/BmHandler"
+	"github.com/PharbersDeveloper/NtmPods/BmMiddleware"
+	"github.com/PharbersDeveloper/NtmPods/BmModel"
+	"github.com/PharbersDeveloper/NtmPods/BmResource"
 )
+
+type BmTable struct {}
 
 var BLACKMIRROR_MODEL_FACTORY = map[string]interface{}{
 	"BmKid":                 BmModel.Kid{},
@@ -96,26 +98,26 @@ var BLACKMIRROR_MIDDLEWARE_FACTORY = map[string]interface{}{
 	"BmCheckTokenMiddleware": BmMiddleware.CheckTokenMiddleware{},
 }
 
-func GetModelByName(name string) interface{} {
+func (t BmTable) GetModelByName(name string) interface{} {
 	return BLACKMIRROR_MODEL_FACTORY[name]
 }
 
-func GetResourceByName(name string) interface{} {
+func (t BmTable) GetResourceByName(name string) interface{} {
 	return BLACKMIRROR_RESOURCE_FACTORY[name]
 }
 
-func GetStorageByName(name string) interface{} {
+func (t BmTable) GetStorageByName(name string) interface{} {
 	return BLACKMIRROR_STORAGE_FACTORY[name]
 }
 
-func GetDaemonByName(name string) interface{} {
+func (t BmTable) GetDaemonByName(name string) interface{} {
 	return BLACKMIRROR_DAEMON_FACTORY[name]
 }
 
-func GetFunctionByName(name string) interface{} {
+func (t BmTable) GetFunctionByName(name string) interface{} {
 	return BLACKMIRROR_FUNCTION_FACTORY[name]
 }
 
-func GetMiddlewareByName(name string) interface{} {
+func (t BmTable) GetMiddlewareByName(name string) interface{} {
 	return BLACKMIRROR_MIDDLEWARE_FACTORY[name]
 }
