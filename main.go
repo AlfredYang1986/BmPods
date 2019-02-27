@@ -23,7 +23,7 @@ func main() {
 	pod.RegisterSerFromYAML(bmHome + "/resource/service-def.yaml")
 
 	var bmRouter BmConfig.BmRouterConfig
-	bmRouter.GenerateConfig()
+	bmRouter.GenerateConfig("BM_HOME")
 
 	addr := bmRouter.Host + ":" + bmRouter.Port
 	fmt.Println("Listening on ", addr)
