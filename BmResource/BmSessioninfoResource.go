@@ -2,6 +2,7 @@ package BmResource
 
 import (
 	"errors"
+	//"fmt"
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/manyminds/api2go"
@@ -57,14 +58,11 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			if err != nil {
 				return &Response{}, err
 			}
-
 			model.Images = []*BmModel.Image{}
-			for _, kID := range model.ImagesIDs {
-				choc, err := s.BmImageStorage.GetOne(kID)
-				if err != nil {
-					return &Response{}, err
-				}
-				model.Images = append(model.Images, &choc)
+			r.QueryParams["imageids"]=model.ImagesIDs
+			imageids:=s.BmImageStorage.GetAll(r)
+			for _,image:= range imageids {	
+				model.Images = append(model.Images, &image)
 			}
 
 			if model.CategoryID != "" {
@@ -85,16 +83,13 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 
 	var result []BmModel.Sessioninfo
 	models := s.BmSessioninfoStorage.GetAll(r, -1, -1)
-
 	for _, model := range models {
 		// get all sweets for the model
 		model.Images = []*BmModel.Image{}
-		for _, kID := range model.ImagesIDs {
-			choc, err := s.BmImageStorage.GetOne(kID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Images = append(model.Images, &choc)
+		r.QueryParams["imageids"]=model.ImagesIDs
+		imageids:=s.BmImageStorage.GetAll(r)
+		for _,image:= range imageids {	
+			model.Images = append(model.Images, &image)
 		}
 
 		if model.CategoryID != "" {
@@ -169,12 +164,10 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 
 	for _, model := range s.BmSessioninfoStorage.GetAll(r, skip, take) {
 		model.Images = []*BmModel.Image{}
-		for _, kID := range model.ImagesIDs {
-			choc, err := s.BmImageStorage.GetOne(kID)
-			if err != nil {
-				return 0, &Response{}, err
-			}
-			model.Images = append(model.Images, &choc)
+		r.QueryParams["imageids"]=model.ImagesIDs
+		imageids:=s.BmImageStorage.GetAll(r)
+		for _,image:= range imageids {	
+			model.Images = append(model.Images, &image)
 		}
 
 		if model.CategoryID != "" {
@@ -200,15 +193,12 @@ func (s BmSessioninfoResource) FindOne(ID string, r api2go.Request) (api2go.Resp
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-
 	model.Images = []*BmModel.Image{}
-	for _, kID := range model.ImagesIDs {
-		choc, err := s.BmImageStorage.GetOne(kID)
-		if err != nil {
-			return &Response{}, err
+		r.QueryParams["imageids"]=model.ImagesIDs
+		imageids:=s.BmImageStorage.GetAll(r)
+		for _,image:= range imageids {	
+			model.Images = append(model.Images, &image)
 		}
-		model.Images = append(model.Images, &choc)
-	}
 	return &Response{Res: model}, nil
 }
 

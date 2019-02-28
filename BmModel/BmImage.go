@@ -1,6 +1,9 @@
 package BmModel
 
-import "gopkg.in/mgo.v2/bson"
+import (
+	bson "gopkg.in/mgo.v2/bson"
+	"fmt"
+)
 
 // Image is the Image that a user consumes in order to get fat and happy
 type Image struct {
@@ -23,5 +26,20 @@ func (c *Image) SetID(id string) error {
 }
 
 func (u *Image) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	r:=make(map[string]interface{})
+	var ids []bson.ObjectId
+	for k, v := range parameters {
+		switch k {
+		case "imageids":
+			//fmt.Println(v)
+			for i:=0;i<len(v);i++{
+				fmt.Println(bson.ObjectId(v[i]))
+				ids=append(ids,bson.ObjectIdHex(v[i]))
+			}
+			r["$in"]=ids
+			rst["_id"] = r
+		}
+	}
+	return rst
 }
