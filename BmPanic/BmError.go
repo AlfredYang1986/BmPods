@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/manyminds/api2go"
 	"net/http"
+	"strconv"
 	"sync"
 )
 
@@ -93,5 +94,7 @@ func (e *tBMError) ErrorReval(err interface{}, w http.ResponseWriter) {
 	resetlHTTPErrorID(hr)
 	enc := json.NewEncoder(w)
 	w.Header().Add("Content-Type", "application/json")
+	statusCode,  _ := strconv.Atoi(hr.Errors[0].Status)
+	w.WriteHeader(statusCode)
 	enc.Encode(hr)
 }
