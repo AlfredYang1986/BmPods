@@ -3,7 +3,7 @@ package BmMiddleware
 import (
 	"fmt"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
-	"github.com/alfredyang1986/BmPods/BmDaemons/BmRedis"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/manyminds/api2go"
 	"net/http"
 	"reflect"

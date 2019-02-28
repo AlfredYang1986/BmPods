@@ -14,7 +14,7 @@ type Class struct {
 
 	ClassTitle        string  `json:"class-title" bson:"class-title"`
 	Status            float64 `json:"status" bson:"status"` //0活动 1体验课 2普通课程
-	Flag              float64 `json:"flag" bson:"flag"`                 //-1=未排课, 0=全部, 1=正在进行, 2=已完成
+	Flag              float64 `json:"flag" bson:"flag"`     //-1=未排课, 0=全部, 1=正在进行, 2=已完成
 	StartDate         float64 `json:"start-date" bson:"start-date"`
 	EndDate           float64 `json:"end-date" bson:"end-date"`
 	CreateTime        float64 `json:"create-time" bson:"create-time"`
@@ -23,17 +23,15 @@ type Class struct {
 	BrandId           string  `json:"brand-id" bson:"brand-id"`
 	NotExist          float64 `json:"not-exist" bson:"not-exist"`
 
-	Students    []*Student `json:"-"`
-	StudentsIDs []string   `json:"-" bson:"student-ids"`
-	Duties      []*Duty    `json:"-"`
-	DutiesIDs   []string   `json:"-" bson:"duty-ids"`
-
-	YardID        string      `json:"yard-id" bson:"yard-id"`
-	Yard          Yard        `json:"-"`
-	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
-	Sessioninfo   Sessioninfo `json:"-"`
-
-	ReservableID  string `json:"reservable-id" bson:"reservable-id"`
+	Students       []*Student     `json:"-"`
+	StudentsIDs    []string       `json:"-" bson:"student-ids"`
+	Duties         []*Duty        `json:"-"`
+	DutiesIDs      []string       `json:"-" bson:"duty-ids"`
+	YardID         string         `json:"yard-id" bson:"yard-id"`
+	Yard           Yard           `json:"-"`
+	SessioninfoID  string         `json:"sessioninfo-id" bson:"sessioninfo-id"`
+	Sessioninfo    Sessioninfo    `json:"-"`
+	ReservableID   string         `json:"reservable-id" bson:"reservable-id"`
 	Reservableitem Reservableitem `json:"-"`
 }
 
@@ -102,12 +100,12 @@ func (u Class) GetReferencedIDs() []jsonapi.ReferenceID {
 	}
 	if u.SessioninfoID != "" {
 		result = append(result, jsonapi.ReferenceID{
-			ID:           u.SessioninfoID,
-			Type:         "sessioninfos",
-			Name:         "sessioninfo",
+			ID:   u.SessioninfoID,
+			Type: "sessioninfos",
+			Name: "sessioninfo",
 		})
 	}
-	
+
 	if u.ReservableID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.ReservableID,
@@ -148,7 +146,7 @@ func (u *Class) SetToOneReferenceID(name, ID string) error {
 		u.YardID = ID
 		return nil
 	}
-	
+
 	if name == "reservableitem" {
 		u.ReservableID = ID
 		return nil
@@ -171,7 +169,7 @@ func (u *Class) SetToManyReferenceIDs(name string, IDs []string) error {
 		u.DutiesIDs = IDs
 		return nil
 	}
-	
+
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
@@ -211,7 +209,7 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 			}
 		}
 	}
-	
+
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
@@ -233,7 +231,7 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 				panic(err.Error())
 			}
 			rst[k] = val
-		case "reservable-id" :
+		case "reservable-id":
 			rst[k] = v[0]
 		case "flag":
 			tmp, err := u.flagConditions(v[0])
@@ -254,15 +252,14 @@ func (u *Class) flagConditions(flag string) (bson.M, error) {
 	switch flagInt {
 	case -1:
 		//return bson.M{ "unit-ids": {$eq : {$size: 0}}}
-		return bson.M{ "unit-ids": bson.M{ "$size": 0 }}, nil
+		return bson.M{"unit-ids": bson.M{"$size": 0}}, nil
 	case 0:
 		return bson.M{}, nil
 	case 1:
-		return bson.M{ "unit-ids": bson.M{ "$eq" : bson.M{ "$size": 0 }}}, nil
+		return bson.M{"unit-ids": bson.M{"$eq": bson.M{"$size": 0}}}, nil
 	case 2:
-		return bson.M{ "not-implement": 1}, nil
+		return bson.M{"not-implement": 1}, nil
 	default:
 		return bson.M{}, errors.New("not implement")
 	}
 }
-

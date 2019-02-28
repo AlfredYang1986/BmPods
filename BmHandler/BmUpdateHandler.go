@@ -2,7 +2,7 @@ package BmHandler
 
 import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
-	"github.com/alfredyang1986/BmPods/BmDaemons/BmMongodb"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"reflect"

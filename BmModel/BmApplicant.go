@@ -15,6 +15,7 @@ type Applicant struct {
 	Pic             string  `json:"pic" bson:"pic"`
 	RegisterPhone   string  `json:"regi-phone" bson:"regi-phone"`
 	WeChatOpenid    string  `json:"wechat-openid" bson:"wechat-openid"`
+	UnionID         string  `json:"union-id" bson:"union-id"`
 	WeChatBindPhone string  `json:"wechat-bind-phone" bson:"wechat-bind-phone"`
 }
 

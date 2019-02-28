@@ -31,7 +31,7 @@ func ErrInstance() *tBMError {
 						Status: "401",
 						Code:   "001",
 						Title:  "Auth error!",
-						Detail: "Auth error!",
+						Detail: "No token found!",
 						Source: &api2go.ErrorSource{
 							Pointer: "#titleField",
 						},
@@ -81,12 +81,14 @@ func resetlHTTPErrorID(input api2go.HTTPError) {
 	}
 }
 
-func (e *tBMError) ErrorReval(ec string, w http.ResponseWriter) {
+func (e *tBMError) ErrorReval(err interface{}, w http.ResponseWriter) {
+	es := err.(string)
 	var hr api2go.HTTPError
-	if e.IsErrorDefined(ec) {
-		hr = e.m[ec]
+	if e.IsErrorDefined(es) {
+		hr = e.m[es]
 	} else {
 		hr = e.m["no defind error!"]
+		hr.Errors[0].Detail = es
 	}
 	resetlHTTPErrorID(hr)
 	enc := json.NewEncoder(w)

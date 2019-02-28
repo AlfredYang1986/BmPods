@@ -3,11 +3,11 @@ package BmFactory
 import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"github.com/PharbersDeveloper/NtmPods/BmDataStorage"
-	"github.com/PharbersDeveloper/NtmPods/BmHandler"
-	"github.com/PharbersDeveloper/NtmPods/BmMiddleware"
-	"github.com/PharbersDeveloper/NtmPods/BmModel"
-	"github.com/PharbersDeveloper/NtmPods/BmResource"
+	"github.com/alfredyang1986/BmPods/BmDataStorage"
+	"github.com/alfredyang1986/BmPods/BmHandler"
+	"github.com/alfredyang1986/BmPods/BmMiddleware"
+	"github.com/alfredyang1986/BmPods/BmModel"
+	"github.com/alfredyang1986/BmPods/BmResource"
 )
 
 type BmTable struct {}
