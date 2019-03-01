@@ -41,12 +41,29 @@ func ErrInstance() *tBMError {
 						},
 					},
 				}},
+				"token not exist": api2go.HTTPError{Errors: []api2go.Error{
+					{
+						Links: &api2go.ErrorLinks{
+							About: "http://login",
+						},
+						Status: "401",
+						Code:   "001",
+						Title:  "Auth error!",
+						Detail: "token not exist!",
+						Source: &api2go.ErrorSource{
+							Pointer: "#titleField",
+						},
+						Meta: map[string]interface{}{
+							"creator": "jeorch",
+						},
+					},
+				}},
 				"no defind error!": api2go.HTTPError{Errors: []api2go.Error{
 					{
 						Links: &api2go.ErrorLinks{
 							About: "http://404",
 						},
-						Status: "404",
+						Status: "400",
 						Code:   "9999",
 						Title:  "no defind error!",
 						Detail: "no defind error!",
