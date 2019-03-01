@@ -41,6 +41,13 @@ func (s BmBrandResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	for _, model := range models {
 		// get all sweets for the model
 		model.Imgs = []*BmModel.Image{}
+		r.QueryParams["imageids"]=model.ImagesIDs
+		imageids:=s.BmImageStorage.GetAll(r)
+		for _,image:= range imageids {	
+			model.Imgs = append(model.Imgs, &image)
+		}
+/*
+		model.Imgs = []*BmModel.Image{}
 		for _, kID := range model.ImagesIDs {
 			choc, err := s.BmImageStorage.GetOne(kID)
 			if err != nil {
@@ -48,7 +55,7 @@ func (s BmBrandResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			}
 			model.Imgs = append(model.Imgs, &choc)
 		}
-
+*/
 		if model.CategoryID != "" {
 			cat, err := s.BmCategoryStorage.GetOne(model.CategoryID)
 			if err != nil {
@@ -134,13 +141,11 @@ func (s BmBrandResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	}
 
 	model.Imgs = []*BmModel.Image{}
-	for _, kID := range model.ImagesIDs {
-		choc, err := s.BmImageStorage.GetOne(kID)
-		if err != nil {
-			return &Response{}, err
+		r.QueryParams["imageids"]=model.ImagesIDs
+		imageids:=s.BmImageStorage.GetAll(r)
+		for _,image:= range imageids {	
+			model.Imgs = append(model.Imgs, &image)
 		}
-		model.Imgs = append(model.Imgs, &choc)
-	}
 
 	if model.CategoryID != "" {
 		cat, err := s.BmCategoryStorage.GetOne(model.CategoryID)
