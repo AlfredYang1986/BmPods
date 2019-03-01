@@ -97,12 +97,12 @@ func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 // FindOne to satisfy `api2go.DataSource` interface
 // this method should return the user with the given ID, otherwise an error
 func (s BmTeacherResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	user, err := s.BmTeacherStorage.GetOne(ID)
+	model, err := s.BmTeacherStorage.GetOne(ID)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 
-	return &Response{Res: user}, nil
+	return &Response{Res: model}, nil
 }
 
 // Create method to satisfy `api2go.DataSource` interface
@@ -121,17 +121,25 @@ func (s BmTeacherResource) Create(obj interface{}, r api2go.Request) (api2go.Res
 
 // Delete to satisfy `api2go.DataSource` interface
 func (s BmTeacherResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := s.BmTeacherStorage.Delete(id)
+	model, err := s.BmTeacherStorage.GetOne(id)
+	if err != nil {
+		return &Response{}, err
+	}
+	model.Archive = 1.0
+	err = s.BmTeacherStorage.Update(model)
+	if err != nil {
+		return &Response{}, err
+	}
 	return &Response{Code: http.StatusNoContent}, err
 }
 
 //Update stores all changes on the user
 func (s BmTeacherResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
-	user, ok := obj.(BmModel.Teacher)
+	model, ok := obj.(BmModel.Teacher)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	err := s.BmTeacherStorage.Update(user)
-	return &Response{Res: user, Code: http.StatusNoContent}, err
+	err := s.BmTeacherStorage.Update(model)
+	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
