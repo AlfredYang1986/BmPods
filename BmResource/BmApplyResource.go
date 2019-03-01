@@ -43,6 +43,13 @@ func (s BmApplyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	for _, model := range models {
 		// get all sweets for the model
 		model.Kids = []*BmModel.Kid{}
+		r.QueryParams["kidsids"]=model.KidsIDs
+		kids:=s.BmKidStorage.GetAll(r)
+		for _,kid:= range kids {	
+			model.Kids = append(model.Kids, &kid)
+		}
+/*
+		model.Kids = []*BmModel.Kid{}
 		for _, kID := range model.KidsIDs {
 			choc, err := s.BmKidStorage.GetOne(kID)
 			if err != nil {
@@ -50,7 +57,7 @@ func (s BmApplyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			}
 			model.Kids = append(model.Kids, &choc)
 		}
-
+*/
 		if model.ApplicantID != "" {
 			applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
 			if err != nil {
@@ -123,12 +130,10 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	for _, model := range s.BmApplyStorage.GetAll(r, skip, take) {
 
 		model.Kids = []*BmModel.Kid{}
-		for _, kID := range model.KidsIDs {
-			choc, err := s.BmKidStorage.GetOne(kID)
-			if err != nil {
-				return 0, &Response{}, err
-			}
-			model.Kids = append(model.Kids, &choc)
+		r.QueryParams["kidsids"]=model.KidsIDs
+		kids:=s.BmKidStorage.GetAll(r)
+		for _,kid:= range kids {	
+			model.Kids = append(model.Kids, &kid)
 		}
 
 		if model.ApplicantID != "" {
@@ -165,12 +170,10 @@ func (s BmApplyResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	}
 
 	model.Kids = []*BmModel.Kid{}
-	for _, kID := range model.KidsIDs {
-		choc, err := s.BmKidStorage.GetOne(kID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Kids = append(model.Kids, &choc)
+	r.QueryParams["kidsids"]=model.KidsIDs
+	kids:=s.BmKidStorage.GetAll(r)
+	for _,kid:= range kids {	
+		model.Kids = append(model.Kids, &kid)
 	}
 	return &Response{Res: model}, nil
 }
