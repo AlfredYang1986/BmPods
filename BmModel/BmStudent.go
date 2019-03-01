@@ -48,6 +48,7 @@ type Student struct {
 
 	Guardians    []*Guardian `json:"-"`
 	GuardiansIDs []string    `json:"-" bson:"guardian-ids"`
+	Archive     float64 `json:"archive" bson:"archive"` //表示在校或离校?
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -180,6 +181,7 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	r:=make(map[string]interface{})
 	var ids []bson.ObjectId
+	rst["archive"] = float64(0) //不传archive默认只查询在校的，传0只查在校的，传1只查离校的，传-1查全部【包含所有】
 	for k, v := range parameters {
 		switch k {
 		case "brand-id":
@@ -196,6 +198,16 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
+		case "archive":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			if val == -1 {
+				delete(rst, k)
+			} else {
+				rst[k] = val
+			}
 		}
 	}
 	return rst

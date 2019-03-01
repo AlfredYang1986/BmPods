@@ -2,7 +2,7 @@ package BmModel
 
 import (
 	bson "gopkg.in/mgo.v2/bson"
-	"fmt"
+	//"fmt"
 )
 
 // Image is the Image that a user consumes in order to get fat and happy
@@ -32,9 +32,7 @@ func (u *Image) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	for k, v := range parameters {
 		switch k {
 		case "imageids":
-			//fmt.Println(v)
 			for i:=0;i<len(v);i++{
-				fmt.Println(bson.ObjectId(v[i]))
 				ids=append(ids,bson.ObjectIdHex(v[i]))
 			}
 			r["$in"]=ids

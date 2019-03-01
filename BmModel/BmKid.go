@@ -2,6 +2,7 @@ package BmModel
 
 import (
 	"gopkg.in/mgo.v2/bson"
+	"strconv"
 )
 
 // Kid is the Kid that a user consumes in order to get fat and happy
@@ -16,6 +17,7 @@ type Kid struct {
 
 	ApplicantID string    `json:"applicant-id" bson:"applicant-id"`
 	Applicant   Applicant `json:"-"`
+	Archive     float64 `json:"archive" bson:"archive"` //表示归档？
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -33,6 +35,7 @@ func (u *Kid) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	r:=make(map[string]interface{})
 	var ids []bson.ObjectId
+	rst["archive"] = float64(0) //不传archive默认只查询存在的，传0只查存在的，传1只查归档的，传-1查全部【包含所有】
 	for k, v := range parameters {
 		switch k {
 		case "applicant-id":
@@ -43,6 +46,16 @@ func (u *Kid) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
+		case "archive":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			if val == -1 {
+				delete(rst, k)
+			} else {
+				rst[k] = val
+			}
 		}
 	}
 	return rst
