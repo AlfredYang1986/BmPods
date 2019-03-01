@@ -98,9 +98,10 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	//	return &Response{Res: result}, nil
 	//}
 
+
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
-		err := s.ResetReferencedModel(model)
+		err := s.ResetReferencedModel(model,&r)
 		if err != nil {
 			return &Response{}, err
 		}
@@ -225,7 +226,7 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	//}
 
 	for _, model := range s.BmClassStorage.GetAll(r, skip, take) {
-		err := s.ResetReferencedModel(model)
+		err := s.ResetReferencedModel(model,&r)
 		if err != nil {
 			return 0, &Response{}, err
 		}
@@ -248,7 +249,7 @@ func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-	err = s.ResetReferencedModel(&model)
+	err = s.ResetReferencedModel(&model,&r)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
@@ -265,7 +266,7 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	model.CreateTime = float64(time.Now().UnixNano() / 1e6)
 	id := s.BmClassStorage.Insert(model)
 	model.ID = id
-	s.ResetReferencedModel(&model)
+	s.ResetReferencedModel(&model,&r)
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
@@ -283,12 +284,25 @@ func (s BmClassResource) Update(obj interface{}, r api2go.Request) (api2go.Respo
 	}
 
 	err := s.BmClassStorage.Update(model)
-	s.ResetReferencedModel(&model)
+	s.ResetReferencedModel(&model,&r)
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
 
-func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
+func (s BmClassResource) ResetReferencedModel(model *BmModel.Class,r *api2go.Request) error {
 	model.Students = []*BmModel.Student{}
+	r.QueryParams["studentsids"]=model.StudentsIDs
+	students:=s.BmStudentStorage.GetAll(*r,-1,-1)
+	for _,student:= range students {	
+		model.Students = append(model.Students, student)
+	}
+
+	model.Duties = []*BmModel.Duty{}
+	r.QueryParams["dutiesids"]=model.DutiesIDs
+	duties:=s.BmDutyStorage.GetAll(*r,-1,-1)
+	for _,duty:= range duties {	
+		model.Duties = append(model.Duties, duty)
+	}
+/*
 	for _, tmpID := range model.StudentsIDs {
 		choc, err := s.BmStudentStorage.GetOne(tmpID)
 		if err != nil {
@@ -296,6 +310,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Students = append(model.Students, &choc)
 	}
+
 	model.Duties = []*BmModel.Duty{}
 	for _, tmpID := range model.DutiesIDs {
 		choc, err := s.BmDutyStorage.GetOne(tmpID)
@@ -304,7 +319,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class) error {
 		}
 		model.Duties = append(model.Duties, &choc)
 	}
-
+*/
 	if model.YardID != "" {
 		yard, err := s.BmYardStorage.GetOne(model.YardID)
 		if err != nil {

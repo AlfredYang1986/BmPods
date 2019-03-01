@@ -178,6 +178,8 @@ func (u *Student) DeleteToManyIDs(name string, IDs []string) error {
 
 func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
+	r:=make(map[string]interface{})
+	var ids []bson.ObjectId
 	for k, v := range parameters {
 		switch k {
 		case "brand-id":
@@ -188,6 +190,12 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 				panic(err.Error())
 			}
 			rst[k] = val
+		case "studentsids":
+			for i:=0;i<len(v);i++{
+				ids=append(ids,bson.ObjectIdHex(v[i]))
+			}
+			r["$in"]=ids
+			rst["_id"] = r
 		}
 	}
 	return rst

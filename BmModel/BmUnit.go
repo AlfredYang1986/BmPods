@@ -123,6 +123,8 @@ func (u *Unit) SetToOneReferenceID(name, ID string) error {
 
 func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
+	r:=make(map[string]interface{})
+	var ids []bson.ObjectId
 	for k, v := range parameters {
 		switch k {
 		case "brand-id":
@@ -201,6 +203,12 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			r := make(map[string]interface{})
 			r["$gte"] = val
 			rst["end-date"] = r
+		case "unitesids":
+			for i:=0;i<len(v);i++{
+				ids=append(ids,bson.ObjectIdHex(v[i]))
+			}
+			r["$in"]=ids
+			rst["_id"] = r
 		}
 	}
 
