@@ -61,7 +61,7 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			err = s.ResetReferencedModel(&model)
+			err = s.ResetReferencedModel(&model,&r)
 			if err != nil {
 				return &Response{}, err
 			}
@@ -73,7 +73,7 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
 	models := s.BmStudentStorage.GetAll(r, -1, -1)
 	for _, model := range models {
-		err := s.ResetReferencedModel(model)
+		err := s.ResetReferencedModel(model,&r)
 		if err != nil {
 			return &Response{}, err
 		}
@@ -153,7 +153,7 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
-			err = s.ResetReferencedModel(&model)
+			err = s.ResetReferencedModel(&model,&r)
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
@@ -165,7 +165,7 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 	}
 
 	for _, model := range s.BmStudentStorage.GetAll(r, skip, take) {
-		err := s.ResetReferencedModel(model)
+		err := s.ResetReferencedModel(model,&r)
 		if err != nil {
 			return uint(0), &Response{}, err
 		}
@@ -185,7 +185,7 @@ func (s BmStudentResource) FindOne(ID string, r api2go.Request) (api2go.Responde
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-	err = s.ResetReferencedModel(&model)
+	err = s.ResetReferencedModel(&model,&r)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
@@ -240,9 +240,15 @@ func (s BmStudentResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 	return &Response{Res: user, Code: http.StatusNoContent}, err
 }
 
-func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student) error {
+func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student,r *api2go.Request) error {
 
 	model.Guardians = []*BmModel.Guardian{}
+	r.QueryParams["guardiansids"]=model.GuardiansIDs
+	guardians:=s.BmGuardianStorage.GetAll(*r)
+	for _,guardian:= range guardians {	
+		model.Guardians = append(model.Guardians, &guardian)
+	}
+/*			
 	for _, chocolateID := range model.GuardiansIDs {
 		choc, err := s.BmGuardianStorage.GetOne(chocolateID)
 		if err != nil {
@@ -250,7 +256,7 @@ func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student) error {
 		}
 		model.Guardians = append(model.Guardians, &choc)
 	}
-
+*/
 	if model.KidID != "" {
 		k, err := s.BmKidStorage.GetOne(model.KidID)
 		if err != nil {
