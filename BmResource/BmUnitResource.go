@@ -250,11 +250,13 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 	if err != nil {
 		return &Response{}, err
 	}
-	model.Archive = 1.0
-	err = s.BmUnitStorage.Update(model)
-	if err != nil {
-		return &Response{}, err
+	if model.Archive==0{
+		err=s.BmUnitStorage.Delete(model.ID)
+		if err != nil {
+			return &Response{}, err
+		}
 	}
+	
 	return &Response{Code: http.StatusNoContent}, err
 }
 
@@ -269,8 +271,19 @@ func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 	if err != nil {
 		return &Response{}, err
 	}
-	room.IsUnit=1
-	err = s.BmRoomStorage.Update(room)
-	err = s.BmUnitStorage.Update(model)
+	if room.IsUnit==0{
+		room.IsUnit=1
+		err = s.BmRoomStorage.Update(room)
+		if err != nil {
+			return &Response{}, err
+		}
+	}
+
+	if model.Archive==0{
+		err = s.BmUnitStorage.Update(model)
+		if err != nil {
+			return &Response{}, err
+		}
+	}
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }

@@ -27,7 +27,8 @@ type Unit struct {
 
 	ClassID  string `json:"class-id" bson:"class-id"`
 	Class    Class `json:"-"`
-	Archive     float64 `json:"archive" bson:"archive"` //表示结束或未结束?
+	Archive     float64 `json:"archive" bson:"archive"` //表示尚未执行，正在执行，尚未结束?
+
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -126,7 +127,6 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	r:=make(map[string]interface{})
 	var ids []bson.ObjectId
-	rst["archive"] = float64(0) //不传archive默认只查询未结束的，传0只查未结束的，传1只查结束的，传-1查全部【包含所有】
 	for k, v := range parameters {
 		switch k {
 		case "brand-id":
@@ -211,16 +211,6 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
-		case "archive":
-			val, err := strconv.ParseFloat(v[0], 64)
-			if err != nil {
-				panic(err.Error())
-			}
-			if val == -1 {
-				delete(rst, k)
-			} else {
-				rst[k] = val
-			}
 		}
 	}
 
