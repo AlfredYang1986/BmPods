@@ -161,17 +161,31 @@ func (c BmRoomResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 
 // Delete a choc :(
 func (c BmRoomResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.BmRoomStorage.Delete(id)
-	return &Response{Code: http.StatusOK}, err
+	model, err := c.BmRoomStorage.GetOne(id)
+	if err != nil {
+		return &Response{}, err
+	}
+	if model.Archive==0{
+		if model.IsUnit == 0{
+			model.Archive = 1.0
+			err = c.BmRoomStorage.Update(model)
+			if err != nil {
+				return &Response{}, err
+			}
+		}
+	}
+	return &Response{Code: http.StatusNoContent}, err
 }
 
 // Update a choc
 func (c BmRoomResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	choc, ok := obj.(BmModel.Room)
+	var err error
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
-
-	err := c.BmRoomStorage.Update(choc)
+	if choc.Archive==0&&choc.IsUnit==0{
+		err = c.BmRoomStorage.Update(choc)
+	}
 	return &Response{Res: choc, Code: http.StatusNoContent}, err
 }

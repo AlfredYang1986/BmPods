@@ -261,10 +261,16 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 //Update stores all changes on the user
 func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	model, ok := obj.(BmModel.Unit)
+	var err error 
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
-
-	err := s.BmUnitStorage.Update(model)
+	room, err:=s.BmRoomStorage.GetOne(model.RoomID)
+	if err != nil {
+		return &Response{}, err
+	}
+	room.IsUnit=1
+	err = s.BmRoomStorage.Update(room)
+	err = s.BmUnitStorage.Update(model)
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
