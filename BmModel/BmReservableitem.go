@@ -20,6 +20,7 @@ type Reservableitem struct {
 
 	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
 	Sessioninfo   Sessioninfo `json:"-"`
+	Archive  float64 `json:"archive" bson:"archive"` //表示未结束或已结束=归档？ 
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

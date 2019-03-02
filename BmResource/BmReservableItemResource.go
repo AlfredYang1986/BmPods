@@ -166,7 +166,15 @@ func (s BmReservableitemResource) Create(obj interface{}, r api2go.Request) (api
 
 // Delete to satisfy `api2go.DataSource` interface
 func (s BmReservableitemResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := s.BmReservableitemStorage.Delete(id)
+	model, err := s.BmReservableitemStorage.GetOne(id)
+	if err != nil {
+		return &Response{}, err
+	}
+	model.Archive = 1.0
+	err = s.BmReservableitemStorage.Update(model)
+	if err != nil {
+		return &Response{}, err
+	}
 	return &Response{Code: http.StatusNoContent}, err
 }
 
