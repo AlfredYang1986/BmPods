@@ -225,15 +225,7 @@ func (s BmStudentResource) Create(obj interface{}, r api2go.Request) (api2go.Res
 
 // Delete to satisfy `api2go.DataSource` interface
 func (s BmStudentResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	model, err := s.BmStudentStorage.GetOne(id)
-	if err != nil {
-		return &Response{}, err
-	}
-	model.Archive = 1.0
-	err = s.BmStudentStorage.Update(model)
-	if err != nil {
-		return &Response{}, err
-	}
+	err := s.BmKidStorage.Delete(id)
 	return &Response{Code: http.StatusNoContent}, err
 }
 
