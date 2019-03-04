@@ -1,16 +1,17 @@
 package BmFactory
 
 import (
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmHandler"
 	"github.com/alfredyang1986/BmPods/BmMiddleware"
 	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/alfredyang1986/BmPods/BmResource"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmSms"
 )
 
-type BmTable struct {}
+type BmTable struct{}
 
 var BLACKMIRROR_MODEL_FACTORY = map[string]interface{}{
 	"BmKid":                 BmModel.Kid{},
@@ -81,6 +82,7 @@ var BLACKMIRROR_STORAGE_FACTORY = map[string]interface{}{
 var BLACKMIRROR_DAEMON_FACTORY = map[string]interface{}{
 	"BmMongodbDaemon": BmMongodb.BmMongodb{},
 	"BmRedisDaemon":   BmRedis.BmRedis{},
+	"BmSmsDaemon":     BmSms.BmSms{},
 }
 
 var BLACKMIRROR_FUNCTION_FACTORY = map[string]interface{}{
@@ -92,6 +94,7 @@ var BLACKMIRROR_FUNCTION_FACTORY = map[string]interface{}{
 	"BmApplicantHandler":   BmHandler.ApplicantHandler{},
 	"BmWeChatHandler":      BmHandler.WeChatHandler{},
 	"BmCommonPanicHandle":  BmHandler.CommonPanicHandle{},
+	"BmSmsHandler":         BmHandler.SmsHandler{},
 }
 
 var BLACKMIRROR_MIDDLEWARE_FACTORY = map[string]interface{}{
