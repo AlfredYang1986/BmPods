@@ -33,6 +33,7 @@ type Class struct {
 	Sessioninfo    Sessioninfo    `json:"-"`
 	ReservableID   string         `json:"reservable-id" bson:"reservable-id"`
 	Reservableitem Reservableitem `json:"-"`
+	Archive     float64 `json:"archive" bson:"archive"` //表示新班级/已安排/进行中/已结束或停课
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
