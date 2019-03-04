@@ -102,7 +102,7 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
 		now := float64(time.Now().UnixNano() / 1e6)
-		if model.DutiesIDs[0] != ""||model.StudentsIDs[0] != ""||model.ReservableID != ""{
+		if len(model.DutiesIDs) != 0||len(model.StudentsIDs) != 0||model.ReservableID != ""{
 			model.Execute=1
 		}
 		if now > model.StartDate && now <= model.EndDate{
@@ -236,7 +236,7 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 
 	for _, model := range s.BmClassStorage.GetAll(r, skip, take) {
 		now := float64(time.Now().UnixNano() / 1e6)
-		if model.DutiesIDs[0] != ""||model.StudentsIDs[0] != ""||model.ReservableID != ""{
+		if len(model.DutiesIDs) != 0||len(model.StudentsIDs) != 0||model.ReservableID != ""{
 			model.Execute=1
 		}
 		if now > model.StartDate && now <= model.EndDate{
@@ -265,7 +265,7 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmClassStorage.GetOne(ID)
 	now := float64(time.Now().UnixNano() / 1e6)
-	if model.DutiesIDs[0] != ""||model.StudentsIDs[0] != ""||model.ReservableID != ""{
+	if len(model.DutiesIDs) != 0||len(model.StudentsIDs) != 0||model.ReservableID != ""{
 		model.Execute=1
 	}
 	if now > model.StartDate && now <= model.EndDate{
@@ -300,13 +300,22 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 // Delete to satisfy `api2go.DataSource` interface
 func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmClassStorage.GetOne(id)
+	now := float64(time.Now().UnixNano() / 1e6)
+	if len(model.DutiesIDs) != 0||len(model.StudentsIDs) != 0||model.ReservableID != ""{
+		model.Execute=1
+	}
+	if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else if now > model.EndDate{
+		model.Execute=3
+	}
 	if err != nil {
 		return &Response{}, err
 	}
-	if model.Execute==0.0{
+	if model.Execute==0{
 		s.BmClassStorage.Delete(id)
 	}
-	if model.Execute==1.0{
+	if model.Execute==1{
 		model.Execute = 4.0
 	}
 	

@@ -280,6 +280,14 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 	if err != nil {
 		return &Response{}, err
 	}
+	now := float64(time.Now().UnixNano() / 1e6)
+	if now <= model.StartDate {
+		model.Execute=0
+	}else if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else{
+		model.Execute=1
+	}
 	if model.Execute==0{
 		model.Archive = 1.0
 		err = s.BmUnitStorage.Update(model)

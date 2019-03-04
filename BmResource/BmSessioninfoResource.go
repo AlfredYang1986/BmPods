@@ -226,8 +226,7 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 
 // Delete to satisfy `api2go.DataSource` interface
 func (s BmSessioninfoResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := s.BmSessioninfoStorage.Delete(id)
-	return &Response{Code: http.StatusNoContent}, err
+	panic("sessioninfo不可被删除")
 }
 
 //Update stores all changes on the model
