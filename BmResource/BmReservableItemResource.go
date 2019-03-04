@@ -37,6 +37,14 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 	models := s.BmReservableitemStorage.GetAll(r, -1, -1)
 
 	for _, model := range models {
+		now := float64(time.Now().UnixNano() / 1e6)
+		if now <= model.StartDate {
+			model.Execute=0
+		}else if now > model.StartDate && now <= model.EndDate{
+			model.Execute=2
+		}else{
+			model.Execute=1
+		}
 		if model.SessioninfoID != "" {
 			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
 			if err != nil {
@@ -107,7 +115,15 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 		take = int(limitI)
 	}
 	for _, model := range s.BmReservableitemStorage.GetAll(r, skip, take) {
-		if model.SessioninfoID != "" {
+		now := float64(time.Now().UnixNano() / 1e6)
+		if now <= model.StartDate {
+			model.Execute=0
+		}else if now > model.StartDate && now <= model.EndDate{
+			model.Execute=2
+		}else{
+			model.Execute=1
+		}
+		if model.SessioninfoID != "" {			
 			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
 			if err != nil {
 				return 0, &Response{}, err
@@ -130,6 +146,14 @@ func (s BmReservableitemResource) FindOne(ID string, r api2go.Request) (api2go.R
 	model, err := s.BmReservableitemStorage.GetOne(ID)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
+	}
+	now := float64(time.Now().UnixNano() / 1e6)
+	if now <= model.StartDate {
+		model.Execute=0
+	}else if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else{
+		model.Execute=1
 	}
 	if model.SessioninfoID != "" {
 		sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)

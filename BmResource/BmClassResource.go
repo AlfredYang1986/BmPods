@@ -101,6 +101,15 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
+		now := float64(time.Now().UnixNano() / 1e6)
+		if model.DutiesIDs[0] != ""||model.StudentsIDs[0] != ""||model.ReservableID != ""{
+			model.Execute=1
+		}
+		if now > model.StartDate && now <= model.EndDate{
+			model.Execute=2
+		}else if now > model.EndDate{
+			model.Execute=3
+		}
 		err := s.ResetReferencedModel(model,&r)
 		if err != nil {
 			return &Response{}, err
@@ -226,6 +235,15 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	//}
 
 	for _, model := range s.BmClassStorage.GetAll(r, skip, take) {
+		now := float64(time.Now().UnixNano() / 1e6)
+		if model.DutiesIDs[0] != ""||model.StudentsIDs[0] != ""||model.ReservableID != ""{
+			model.Execute=1
+		}
+		if now > model.StartDate && now <= model.EndDate{
+			model.Execute=2
+		}else if now > model.EndDate{
+			model.Execute=3
+		}
 		err := s.ResetReferencedModel(model,&r)
 		if err != nil {
 			return 0, &Response{}, err
@@ -246,6 +264,15 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 // this method should return the modelRoot with the given ID, otherwise an error
 func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmClassStorage.GetOne(ID)
+	now := float64(time.Now().UnixNano() / 1e6)
+	if model.DutiesIDs[0] != ""||model.StudentsIDs[0] != ""||model.ReservableID != ""{
+		model.Execute=1
+	}
+	if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else if now > model.EndDate{
+		model.Execute=3
+	}
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
@@ -276,15 +303,11 @@ func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, 
 	if err != nil {
 		return &Response{}, err
 	}
-	if model.Archive==0{
+	if model.Execute==0.0{
 		s.BmClassStorage.Delete(id)
 	}
-	if model.Archive==1{
-		model.Archive = 4.0
-		err = s.BmClassStorage.Update(model)
-		if err != nil {
-			return &Response{}, err
-		}
+	if model.Execute==1.0{
+		model.Execute = 4.0
 	}
 	
 	return &Response{Code: http.StatusNoContent}, err

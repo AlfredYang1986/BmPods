@@ -33,7 +33,8 @@ type Class struct {
 	Sessioninfo    Sessioninfo    `json:"-"`
 	ReservableID   string         `json:"reservable-id" bson:"reservable-id"`
 	Reservableitem Reservableitem `json:"-"`
-	Archive     float64 `json:"archive" bson:"archive"` //表示新班级/已安排/进行中/已结束或停课
+	Archive     float64 `json:"archive" bson:"archive"` //表示是否归档
+	Execute     float64  //表示新班级/已安排/进行中/已结束或停课
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -216,6 +217,7 @@ func (u *Class) DeleteToManyIDs(name string, IDs []string) error {
 
 func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
+	rst["archive"] = float64(0) //不传archive默认只查询存在的，传0只查存在的，传1只查归档的，传-1查全部【包含所有】
 	for k, v := range parameters {
 		switch k {
 		case "brand-id":
@@ -238,6 +240,16 @@ func (u *Class) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			tmp, err := u.flagConditions(v[0])
 			if err != nil {
 				rst[k] = tmp
+			}
+		case "archive":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			if val == -1 {
+				delete(rst, k)
+			} else {
+				rst[k] = val
 			}
 		}
 	}
