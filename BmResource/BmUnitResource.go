@@ -251,7 +251,7 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 		return &Response{}, err
 	}
 	if model.Archive==0{
-		err=s.BmUnitStorage.Delete(model.ID)
+		err=s.BmUnitStorage.Delete(id)
 		if err != nil {
 			return &Response{}, err
 		}

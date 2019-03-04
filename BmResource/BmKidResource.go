@@ -72,15 +72,7 @@ func (c BmKidResource) Create(obj interface{}, r api2go.Request) (api2go.Respond
 
 // Delete a choc :(
 func (c BmKidResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	model, err := c.BmKidStorage.GetOne(id)
-	if err != nil {
-		return &Response{}, err
-	}
-	model.Archive = 1.0
-	err = c.BmKidStorage.Update(model)
-	if err != nil {
-		return &Response{}, err
-	}
+	err := c.BmKidStorage.Delete(id)
 	return &Response{Code: http.StatusNoContent}, err
 }
 
