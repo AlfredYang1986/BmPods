@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 type BmUnitResource struct {
@@ -60,10 +61,17 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	}*/
 
 	models := s.BmUnitStorage.GetAll(r, -1, -1)
-
+	
 	for _, model := range models {
 		// get all sweets for the model
-
+		now := float64(time.Now().UnixNano() / 1e6)
+		if now <= model.StartDate {
+			model.Execute=0
+		}else if now > model.StartDate && now <= model.EndDate{
+			model.Execute=2
+		}else{
+			model.Execute=1
+		}
 		if model.RoomID != "" {
 			r, err := s.BmRoomStorage.GetOne(model.RoomID)
 			if err != nil {
@@ -150,6 +158,14 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 
 	reval := []BmModel.Unit{}
 	for _, model := range result {
+		now := float64(time.Now().UnixNano() / 1e6)
+		if now <= model.StartDate {
+			model.Execute=0
+		}else if now > model.StartDate && now <= model.EndDate{
+			model.Execute=2
+		}else{
+			model.Execute=1
+		}
 		if model.RoomID != "" {
 			r, _ := s.BmRoomStorage.GetOne(model.RoomID)
 			model.Room = r
@@ -180,7 +196,14 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-
+	now := float64(time.Now().UnixNano() / 1e6)
+	if now <= model.StartDate {
+		model.Execute=0
+	}else if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else{
+		model.Execute=1
+	}
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
@@ -216,7 +239,14 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 
 	id := s.BmUnitStorage.Insert(model)
 	model.ID = id
-
+	now := float64(time.Now().UnixNano() / 1e6)
+	if now <= model.StartDate {
+		model.Execute=0
+	}else if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else{
+		model.Execute=1
+	}
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
@@ -250,13 +280,17 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 	if err != nil {
 		return &Response{}, err
 	}
-	if model.Archive==0{
-		err=s.BmUnitStorage.Delete(id)
+	if model.Execute==0{
+		model.Archive = 1.0
+		err = s.BmUnitStorage.Update(model)
 		if err != nil {
 			return &Response{}, err
 		}
 	}
-	
+	if model.Execute==1{
+		panic("已结束，不可删除")
+	}
+
 	return &Response{Code: http.StatusNoContent}, err
 }
 
@@ -279,11 +313,13 @@ func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 		}
 	}
 
-	if model.Archive==0{
+	if model.Execute==0{
 		err = s.BmUnitStorage.Update(model)
 		if err != nil {
 			return &Response{}, err
 		}
+	}else if model.Execute==1{
+		panic("已结束，不可编辑")
 	}
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }

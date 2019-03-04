@@ -13,6 +13,7 @@ type Unit struct {
 	Id_ bson.ObjectId `json:"-" bson:"_id"`
 
 	Status     float64 `json:"status" bson:"status"`
+	Execute    float64  //表示是否执行
 	StartDate  float64 `json:"start-date" bson:"start-date"`
 	EndDate    float64 `json:"end-date" bson:"end-date"`
 	CourseTime float64 `json:"course-time" bson:"course-time"` //课时
@@ -27,7 +28,7 @@ type Unit struct {
 
 	ClassID  string `json:"class-id" bson:"class-id"`
 	Class    Class `json:"-"`
-	Archive     float64 `json:"archive" bson:"archive"` //表示尚未执行，正在执行，尚未结束?
+	Archive     float64 `json:"archive" bson:"archive"` //表示是否归档？
 
 }
 
@@ -126,6 +127,7 @@ func (u *Unit) SetToOneReferenceID(name, ID string) error {
 func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	r:=make(map[string]interface{})
+	rst["archive"] = float64(0) //不传archive默认只查询存在的，传0只查存在的，传1只查归档的，传-1查全部【包含所有】
 	var ids []bson.ObjectId
 	for k, v := range parameters {
 		switch k {
@@ -211,6 +213,16 @@ func (u *Unit) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
+		case "archive":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			if val == -1 {
+				delete(rst, k)
+			} else {
+				rst[k] = val
+			}
 		}
 	}
 

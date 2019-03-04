@@ -14,7 +14,7 @@ type Room struct {
 	Title    string  `json:"title" bson:"title"`
 	RoomType float64 `json:"room-type" bson:"room-type"`
 	Capacity float64 `json:"capacity" bson:"capacity"`
-	Archive  float64 `json:"archive" bson:"archive"` //表示开放或不开放=归档？ 
+	Archive  float64 `json:"archive" bson:"archive"` //表示是否归档？ 
 	IsUnit   float64 `json:"isunit" bson:"isunit"`   //表示未排课或已排课=归档？ 
 }
 
