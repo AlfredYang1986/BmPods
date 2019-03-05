@@ -83,6 +83,23 @@ func (h GenerateSmsHandler) GenerateSmsCode(w http.ResponseWriter, r *http.Reque
 		"error":  nil,
 	}
 	json.Unmarshal(body, &sms)
+
+	//TODO:部署环境下干掉此测试后门
+	if sms.Phone == "17600642781" {
+		sr := SmsRecord{}
+		sr.Phone = sms.Phone
+		sr.Code = "ok"
+		err = h.r.PushPhoneCode(sms.Phone, "1111", time.Minute * 5)
+		if err != nil {
+			panic(err.Error())
+		}
+		response["status"] = "ok"
+		response["result"] = sr
+		enc := json.NewEncoder(w)
+		enc.Encode(response)
+		return 0
+	}
+
 	rcode := GenerateRandNumber()
 	err, res := h.s.SendMsg(sms.Phone, rcode)
 	if err != nil {
@@ -98,7 +115,7 @@ func (h GenerateSmsHandler) GenerateSmsCode(w http.ResponseWriter, r *http.Reque
 	fmt.Println(m)
 
 	code, ok := m["Code"]
-	if ok {
+	if ok  {
 		sr := SmsRecord{}
 		sr.Phone = sms.Phone
 		sr.Code = code.(string)
