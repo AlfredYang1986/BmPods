@@ -94,7 +94,8 @@ var BLACKMIRROR_FUNCTION_FACTORY = map[string]interface{}{
 	"BmApplicantHandler":   BmHandler.ApplicantHandler{},
 	"BmWeChatHandler":      BmHandler.WeChatHandler{},
 	"BmCommonPanicHandle":  BmHandler.CommonPanicHandle{},
-	"BmSmsHandler":         BmHandler.SmsHandler{},
+	"BmGenerateSmsHandler": BmHandler.GenerateSmsHandler{},
+	"BmVerifiedSmsHandler": BmHandler.VerifiedSmsHandler{},
 }
 
 var BLACKMIRROR_MIDDLEWARE_FACTORY = map[string]interface{}{

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmSms"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
@@ -12,15 +13,17 @@ import (
 	"reflect"
 )
 
-type SmsHandler struct {
+type VerifiedSmsHandler struct {
 	Method     string
 	HttpMethod string
 	Args       []string
-	d          *BmSms.BmSms
+	s          *BmSms.BmSms
+	r          *BmRedis.BmRedis
 }
 
-func (h SmsHandler) NewSmsHandler(args ...interface{}) SmsHandler {
-	var d *BmSms.BmSms
+func (h VerifiedSmsHandler) NewVerifiedSmsHandler(args ...interface{}) VerifiedSmsHandler {
+	var s *BmSms.BmSms
+	var r *BmRedis.BmRedis
 	var hm string
 	var md string
 	var ag []string
@@ -31,7 +34,10 @@ func (h SmsHandler) NewSmsHandler(args ...interface{}) SmsHandler {
 				tp := reflect.ValueOf(dm).Interface()
 				tm := reflect.ValueOf(tp).Elem().Type()
 				if tm.Name() == "BmSms" {
-					d = dm.(*BmSms.BmSms)
+					s = dm.(*BmSms.BmSms)
+				}
+				if tm.Name() == "BmRedis" {
+					r = dm.(*BmRedis.BmRedis)
 				}
 			}
 		} else if i == 1 {
@@ -47,14 +53,10 @@ func (h SmsHandler) NewSmsHandler(args ...interface{}) SmsHandler {
 		}
 	}
 
-	return SmsHandler{Method: md, HttpMethod: hm, Args: ag, d: d}
+	return VerifiedSmsHandler{Method: md, HttpMethod: hm, Args: ag, s: s, r: r}
 }
 
-type Sms struct {
-	Phone  string `json:"phone" bson:"phone"`
-}
-
-func (h SmsHandler) VerifiedSmsCode(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+func (h VerifiedSmsHandler) VerifiedSmsCode(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	//TODO:小程序不支持patch更新，使用Function实现.
 	w.Header().Add("Content-Type", "application/json")
 
@@ -64,23 +66,27 @@ func (h SmsHandler) VerifiedSmsCode(w http.ResponseWriter, r *http.Request, _ ht
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return 1
 	}
-	sms := Sms{}
-	json.Unmarshal(body, &sms)
-	err, res := h.d.SendMsg(sms.Phone)
+	sr := SmsRecord{}
+	json.Unmarshal(body, &sr)
+	err, res := h.s.VerifyCode(sr.BizId, sr.Phone)
 	if err != nil {
-		log.Printf("Error reading body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
+		log.Printf("Error VerifiedSmsCode: %v", err)
+		http.Error(w, "VerifiedSmsCode failed", http.StatusBadRequest)
 		return 1
 	}
 	fmt.Println(res)
+	fmt.Println(res.GetHttpContentString())
+	m := make(map[string]interface{})
+	err = json.Unmarshal(res.GetHttpContentBytes(), &m)
+	fmt.Println(m)
 
 	return 0
 }
 
-func (h SmsHandler) GetHttpMethod() string {
+func (h VerifiedSmsHandler) GetHttpMethod() string {
 	return h.HttpMethod
 }
 
-func (h SmsHandler) GetHandlerMethod() string {
+func (h VerifiedSmsHandler) GetHandlerMethod() string {
 	return h.Method
 }
