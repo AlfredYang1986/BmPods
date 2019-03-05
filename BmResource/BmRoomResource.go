@@ -161,20 +161,7 @@ func (c BmRoomResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 
 // Delete a choc :(
 func (c BmRoomResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	model, err := c.BmRoomStorage.GetOne(id)
-	if err != nil {
-		return &Response{}, err
-	}
-	if model.Archive==0{
-		if model.IsUnit == 0{
-			model.Archive = 1.0
-			err = c.BmRoomStorage.Update(model)
-			if err != nil {
-				return &Response{}, err
-			}
-		}
-	}
-	return &Response{Code: http.StatusNoContent}, err
+	panic("不可以删除教室")
 }
 
 // Update a choc
@@ -186,6 +173,8 @@ func (c BmRoomResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 	}
 	if choc.Archive==0&&choc.IsUnit==0{
 		err = c.BmRoomStorage.Update(choc)
+	}else if choc.Archive==1{
+		panic("该房间未开放，不允许修改")
 	}
 	return &Response{Res: choc, Code: http.StatusNoContent}, err
 }

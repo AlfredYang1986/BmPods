@@ -15,7 +15,7 @@ type BmDutyResource struct {
 	BmTeacherStorage *BmDataStorage.BmTeacherStorage
 }
 
-func (s BmDutyResource) NewDutyResource(args []BmDataStorage.BmStorage) BmDutyResource {
+func (s BmDutyResource) NewDutyResource(args []BmDataStorage.BmStorage) *BmDutyResource {
 	var ds *BmDataStorage.BmDutyStorage
 	var ts *BmDataStorage.BmTeacherStorage
 	for _, arg := range args {
@@ -26,7 +26,7 @@ func (s BmDutyResource) NewDutyResource(args []BmDataStorage.BmStorage) BmDutyRe
 			ts = arg.(*BmDataStorage.BmTeacherStorage)
 		}
 	}
-	return BmDutyResource{BmDutyStorage: ds, BmTeacherStorage: ts}
+	return &BmDutyResource{BmDutyStorage: ds, BmTeacherStorage: ts}
 }
 
 // FindAll to satisfy api2go data source interface
