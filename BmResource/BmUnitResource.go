@@ -239,14 +239,7 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 
 	id := s.BmUnitStorage.Insert(model)
 	model.ID = id
-	now := float64(time.Now().UnixNano() / 1e6)
-	if now <= model.StartDate {
-		model.Execute=0
-	}else if now > model.StartDate && now <= model.EndDate{
-		model.Execute=2
-	}else{
-		model.Execute=1
-	}
+	
 	if model.RoomID != "" {
 		r, err := s.BmRoomStorage.GetOne(model.RoomID)
 		if err != nil {
@@ -320,7 +313,14 @@ func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 			return &Response{}, err
 		}
 	}
-
+	now := float64(time.Now().UnixNano() / 1e6)
+	if now <= model.StartDate {
+		model.Execute=0
+	}else if now > model.StartDate && now <= model.EndDate{
+		model.Execute=2
+	}else{
+		model.Execute=1
+	}
 	if model.Execute==0{
 		err = s.BmUnitStorage.Update(model)
 		if err != nil {
