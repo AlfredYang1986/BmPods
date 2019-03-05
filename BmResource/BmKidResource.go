@@ -72,8 +72,7 @@ func (c BmKidResource) Create(obj interface{}, r api2go.Request) (api2go.Respond
 
 // Delete a choc :(
 func (c BmKidResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.BmKidStorage.Delete(id)
-	return &Response{Code: http.StatusNoContent}, err
+	panic("不可删除")
 }
 
 // Update a choc

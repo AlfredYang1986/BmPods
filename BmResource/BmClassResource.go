@@ -320,7 +320,9 @@ func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, 
 		s.BmClassStorage.Delete(id)
 	}
 	if model.Execute==1{
-		model.Execute = 4.0
+		panic("只允许停课，不允许删除")
+	}else{
+		panic("不允许删除")
 	}
 	
 	return &Response{Code: http.StatusNoContent}, err
