@@ -354,8 +354,8 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class,r *api2go.Req
 	}
 	items := response.Result()
 	duties := items.([]BmModel.Duty)
-	for _,duty:=range duties{
-		model.Duties = append(model.Duties,&duty)
+	for i,_:=range duties{
+		model.Duties = append(model.Duties,&duties[i])
 	}
 	
 /*
