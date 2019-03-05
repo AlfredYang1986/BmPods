@@ -63,13 +63,11 @@ type Sms struct {
 }
 
 type SmsRecord struct {
-	BizId string `json:"biz-id" bson:"biz-id"`
 	Phone string `json:"phone" bson:"phone"`
 	Code  string `json:"code" bson:"code"`
 }
 
 func (h GenerateSmsHandler) GenerateSmsCode(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	//TODO:小程序不支持patch更新，使用Function实现.
 	w.Header().Add("Content-Type", "application/json")
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -85,7 +83,8 @@ func (h GenerateSmsHandler) GenerateSmsCode(w http.ResponseWriter, r *http.Reque
 		"error":  nil,
 	}
 	json.Unmarshal(body, &sms)
-	err, res := h.s.SendMsg(sms.Phone, GenerateRandNumber())
+	rcode := GenerateRandNumber()
+	err, res := h.s.SendMsg(sms.Phone, rcode)
 	if err != nil {
 		log.Printf("Error SendMsg: %v", err)
 		response["status"] = "error"
@@ -98,14 +97,15 @@ func (h GenerateSmsHandler) GenerateSmsCode(w http.ResponseWriter, r *http.Reque
 	err = json.Unmarshal(res.GetHttpContentBytes(), &m)
 	fmt.Println(m)
 
-
-	bizId, ok := m["BizId"]
+	code, ok := m["Code"]
 	if ok {
 		sr := SmsRecord{}
 		sr.Phone = sms.Phone
-		sr.BizId = bizId.(string)
-
-		sr.Code = "ok"
+		sr.Code = code.(string)
+		err = h.r.PushPhoneCode(sms.Phone, rcode, time.Minute * 5)
+		if err != nil {
+			panic(err.Error())
+		}
 		response["status"] = "ok"
 		response["result"] = sr
 		enc := json.NewEncoder(w)

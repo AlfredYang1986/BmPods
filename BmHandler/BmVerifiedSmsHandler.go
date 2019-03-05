@@ -2,7 +2,6 @@ package BmHandler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmSms"
@@ -57,9 +56,7 @@ func (h VerifiedSmsHandler) NewVerifiedSmsHandler(args ...interface{}) VerifiedS
 }
 
 func (h VerifiedSmsHandler) VerifiedSmsCode(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	//TODO:小程序不支持patch更新，使用Function实现.
 	w.Header().Add("Content-Type", "application/json")
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)
@@ -68,19 +65,27 @@ func (h VerifiedSmsHandler) VerifiedSmsCode(w http.ResponseWriter, r *http.Reque
 	}
 	sr := SmsRecord{}
 	json.Unmarshal(body, &sr)
-	err, res := h.s.VerifyCode(sr.BizId, sr.Phone)
-	if err != nil {
-		log.Printf("Error VerifiedSmsCode: %v", err)
-		http.Error(w, "VerifiedSmsCode failed", http.StatusBadRequest)
-		return 1
+	rcode, err := h.r.GetPhoneCode(sr.Phone)
+	response := map[string]interface{}{
+		"status": "",
+		"error":  nil,
 	}
-	fmt.Println(res)
-	fmt.Println(res.GetHttpContentString())
-	m := make(map[string]interface{})
-	err = json.Unmarshal(res.GetHttpContentBytes(), &m)
-	fmt.Println(m)
+	if err==nil && rcode == sr.Code {
+		response["status"] = "ok"
+		enc := json.NewEncoder(w)
+		enc.Encode(response)
+		return 0
+	}
 
-	return 0
+	response["status"] = "error"
+	if err!=nil && err.Error() == "phoneCode expired" {
+		response["error"] = "验证码过期"
+	} else {
+		response["error"] = "验证码错误！"
+	}
+	enc := json.NewEncoder(w)
+	enc.Encode(response)
+	return 1
 }
 
 func (h VerifiedSmsHandler) GetHttpMethod() string {
