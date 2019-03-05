@@ -15,7 +15,8 @@ import (
 type BmClassResource struct {
 	BmClassStorage          *BmDataStorage.BmClassStorage
 	BmStudentStorage        *BmDataStorage.BmStudentStorage
-	BmDutyStorage           *BmDataStorage.BmDutyStorage
+	BmDutyStorage           *BmDataStorage.BmDutyStorage 
+	BmDutyResource          *BmDutyResource
 	BmYardStorage           *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
@@ -30,6 +31,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 	var ds *BmDataStorage.BmDutyStorage
 	var rs *BmDataStorage.BmReservableitemStorage
 	var rr *BmReservableitemResource   
+	var dr *BmDutyResource
 	//var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
@@ -41,6 +43,8 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
 		}else if tp.Name() == "BmDutyStorage" {
 			ds = arg.(*BmDataStorage.BmDutyStorage)
+		}else if tp.Name() == "BmDutyResource" {
+			dr = arg.(*BmDutyResource)
 		} else if tp.Name() == "BmYardStorage" {
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmReservableitemStorage" {
@@ -49,7 +53,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 			rr = arg.(interface{}).(*BmReservableitemResource)
 		}
 	}
-	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyStorage: ds, BmReservableitemStorage: rs, BmReservableitemResource: rr}
+	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: cs, BmDutyResource: dr,BmDutyStorage: ds, BmReservableitemStorage: rs, BmReservableitemResource: rr}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -344,10 +348,16 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class,r *api2go.Req
 
 	model.Duties = []*BmModel.Duty{}
 	r.QueryParams["dutiesids"]=model.DutiesIDs
-	duties:=s.BmDutyStorage.GetAll(*r,-1,-1)
-	for _,duty:= range duties {	
-		model.Duties = append(model.Duties, duty)
+	response,err:=s.BmDutyResource.FindAll(*r)
+	if err != nil {
+		return err
 	}
+	items := response.Result()
+	duties := items.([]BmModel.Duty)
+	for _,duty:=range duties{
+		model.Duties = append(model.Duties,&duty)
+	}
+	
 /*
 	for _, tmpID := range model.StudentsIDs {
 		choc, err := s.BmStudentStorage.GetOne(tmpID)

@@ -180,7 +180,6 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	r:=make(map[string]interface{})
 	var ids []bson.ObjectId
-	rst["archive"] = float64(0) //不传archive默认只查询在校的，传0只查在校的，传1只查离校的，传-1查全部【包含所有】
 	for k, v := range parameters {
 		switch k {
 		case "brand-id":
