@@ -20,7 +20,7 @@ type BmStudentResource struct {
 	BmClassStorage    *BmDataStorage.BmClassStorage
 }
 
-func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) BmStudentResource {
+func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *BmStudentResource {
 	var ss *BmDataStorage.BmStudentStorage
 	var ks *BmDataStorage.BmKidStorage
 	var gs *BmDataStorage.BmGuardianStorage
@@ -40,7 +40,7 @@ func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) Bm
 			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return BmStudentResource{BmStudentStorage: ss, BmKidStorage: ks, BmGuardianStorage: gs, BmTeacherStorage: ts, BmClassStorage: cs}
+	return &BmStudentResource{BmStudentStorage: ss, BmKidStorage: ks, BmGuardianStorage: gs, BmTeacherStorage: ts, BmClassStorage: cs}
 }
 
 // FindAll to satisfy api2go data source interface

@@ -328,6 +328,8 @@ func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 		}
 	}else if model.Execute==1{
 		panic("已结束，不可编辑")
+	}else if model.Execute==2{
+		panic("正在执行，不可编辑")
 	}
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
