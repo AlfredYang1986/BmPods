@@ -53,7 +53,25 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 
 func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Class
-
+	unitsID, ok:= r.QueryParams["unitsID"]
+	if ok {
+		modelRootID := unitsID[0]
+		modelRoot, err := s.BmUnitStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.ClassID
+		if modelID != "" {
+			model, err := s.BmClassStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			//result = append(result, model)
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
 
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
