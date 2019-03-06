@@ -28,11 +28,11 @@ type Class struct {
 	Duties         []*Duty        `json:"-"`
 	DutiesIDs      []string       `json:"-" bson:"duty-ids"`
 	YardID         string         `json:"yard-id" bson:"yard-id"`
-	Yard           Yard           `json:"-"`
+	Yard           *Yard           `json:"-"`
 	SessioninfoID  string         `json:"sessioninfo-id" bson:"sessioninfo-id"`
-	Sessioninfo    Sessioninfo    `json:"-"`
+	Sessioninfo    *Sessioninfo    `json:"-"`
 	ReservableID   string         `json:"reservable-id" bson:"reservable-id"`
-	Reservableitem Reservableitem `json:"-"`
+	Reservableitem *Reservableitem `json:"-"`
 	Archive     float64 `json:"archive" bson:"archive"` //表示是否归档
 	Execute     float64  //表示新班级/已安排/进行中/已结束或停课
 }
@@ -129,14 +129,14 @@ func (u Class) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Duties[key])
 	}
 
-	if u.YardID != "" {
+	if u.YardID != "" && u.Yard != nil {
 		result = append(result, u.Yard)
 	}
 
-	if u.SessioninfoID != "" {
+	if u.SessioninfoID != "" && u.Sessioninfo != nil {
 		result = append(result, u.Sessioninfo)
 	}
-	if u.ReservableID != "" {
+	if u.ReservableID != "" && u.Reservableitem != nil{
 		result = append(result, u.Reservableitem)
 	}
 

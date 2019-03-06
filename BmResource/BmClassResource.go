@@ -105,10 +105,10 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		} else if now > model.EndDate {
 			model.Execute = 3
 		}
-		err := s.ResetReferencedModel(model, &r)
-		if err != nil {
-			return &Response{}, err
-		}
+		//err := s.ResetReferencedModel(model, &r)
+		//if err != nil {
+		//	return &Response{}, err
+		//}
 		if model.NotExist == 0 {
 			result = append(result, *model)
 		}
@@ -299,14 +299,14 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Re
 		if err != nil {
 			return err
 		}
-		model.Yard = yard
+		model.Yard = &yard
 	}
 	if model.SessioninfoID != "" {
 		sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
 		if err != nil {
 			return err
 		}
-		model.Sessioninfo = sessioninfo
+		model.Sessioninfo = &sessioninfo
 	}
 
 	if model.ReservableID != "" {
@@ -316,7 +316,8 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Re
 		if err != nil {
 			return err
 		}
-		model.Reservableitem = item.(BmModel.Reservableitem)
+		tmp := item.(BmModel.Reservableitem)
+		model.Reservableitem = &tmp
 	}
 	return nil
 }
