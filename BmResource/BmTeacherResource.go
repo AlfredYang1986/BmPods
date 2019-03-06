@@ -14,26 +14,31 @@ import (
 type BmTeacherResource struct {
 	BmTeacherStorage *BmDataStorage.BmTeacherStorage
 	BmDutyStorage    *BmDataStorage.BmDutyStorage
+	BmUnitStorage    *BmDataStorage.BmUnitStorage
 }
 
 func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) BmTeacherResource {
 	var ss *BmDataStorage.BmTeacherStorage
 	var ds *BmDataStorage.BmDutyStorage
+	var us *BmDataStorage.BmUnitStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmTeacherStorage" {
 			ss = arg.(*BmDataStorage.BmTeacherStorage)
-		}else if tp.Name() == "BmDutyStorage" {
+		} else if tp.Name() == "BmDutyStorage" {
 			ds = arg.(*BmDataStorage.BmDutyStorage)
+		} else if tp.Name() == "BmUnitStorage" {
+			us = arg.(*BmDataStorage.BmUnitStorage)
 		}
 	}
-	return BmTeacherResource{BmTeacherStorage: ss,BmDutyStorage:ds}
+	return BmTeacherResource{BmTeacherStorage: ss, BmDutyStorage: ds, BmUnitStorage: us}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmTeacherResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	result:=[]BmModel.Category{}
-	dutiesID, ok:= r.QueryParams["dutiesID"]
+	result := []BmModel.Category{}
+
+	dutiesID, ok := r.QueryParams["dutiesID"]
 	if ok {
 		modelRootID := dutiesID[0]
 		modelRoot, err := s.BmDutyStorage.GetOne(modelRootID)
@@ -46,22 +51,39 @@ func (s BmTeacherResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			//result = append(result, model)
 			return &Response{Res: model}, nil
 		} else {
 			return &Response{}, err
 		}
 	}
-	//result := s.BmTeacherStorage.GetAll(r, -1, -1)
+
+	unitsID, ok := r.QueryParams["unitsID"]
+	if ok {
+		modelRootID := unitsID[0]
+		modelRoot, err := s.BmUnitStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.TeacherID
+		if modelID != "" {
+			model, err := s.BmTeacherStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
 	return &Response{Res: result}, nil
 }
 
-// PaginatedFindAll can be used to load users in chunks
 func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
 		result                      []BmModel.Teacher
 		number, size, offset, limit string
-		skip, take, count   int
+		skip, take, count           int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -107,7 +129,7 @@ func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 			return 0, &Response{}, err
 		}
 		skip = int(offsetI)
-		take = int(limitI)	
+		take = int(limitI)
 	}
 	result = s.BmTeacherStorage.GetAll(r, skip, take)
 	in := BmModel.Teacher{}

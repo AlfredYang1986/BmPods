@@ -15,24 +15,29 @@ import (
 type BmRoomResource struct {
 	BmRoomStorage *BmDataStorage.BmRoomStorage
 	BmYardStorage *BmDataStorage.BmYardStorage
+	BmUnitStorage *BmDataStorage.BmUnitStorage
 }
 
 func (c BmRoomResource) NewRoomResource(args []BmDataStorage.BmStorage) BmRoomResource {
-	var us *BmDataStorage.BmYardStorage
+	var ys *BmDataStorage.BmYardStorage
 	var cs *BmDataStorage.BmRoomStorage
+	var us *BmDataStorage.BmUnitStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmYardStorage" {
-			us = arg.(*BmDataStorage.BmYardStorage)
+			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmRoomStorage" {
 			cs = arg.(*BmDataStorage.BmRoomStorage)
+		} else if tp.Name() == "BmUnitStorage" {
+			us = arg.(*BmDataStorage.BmUnitStorage)
 		}
 	}
-	return BmRoomResource{BmYardStorage: us, BmRoomStorage: cs}
+	return BmRoomResource{BmYardStorage: ys, BmRoomStorage: cs, BmUnitStorage: us}
 }
 
 func (c BmRoomResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	result := []BmModel.Room{}
+
 	yardsID, ok := r.QueryParams["yardsID"]
 	if ok {
 		modelRootID := yardsID[0]
@@ -50,6 +55,26 @@ func (c BmRoomResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
 		return &Response{Res: result}, nil
 	}
+
+	unitsID, ok := r.QueryParams["unitsID"]
+	if ok {
+		modelRootID := unitsID[0]
+		modelRoot, err := c.BmUnitStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.RoomID
+		if modelID != "" {
+			model, err := c.BmRoomStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
 	result = c.BmRoomStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
