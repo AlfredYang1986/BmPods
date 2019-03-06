@@ -27,7 +27,7 @@ type Apply struct {
 	KidsIDs []string `json:"kid-ids" bson:"kid-ids"`
 
 	ApplicantID string    `json:"applicant-id" bson:"applicant-id"`
-	Applicant   Applicant `json:"-"`
+	Applicant   *Applicant `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -86,7 +86,7 @@ func (u Apply) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Kids[key])
 	}
 
-	if u.ApplicantID != "" {
+	if u.ApplicantID != "" &&u.Applicant!=nil{
 		result = append(result, u.Applicant)
 	}
 

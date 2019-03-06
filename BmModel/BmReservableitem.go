@@ -19,7 +19,7 @@ type Reservableitem struct {
 	CreateTime float64 `json:"create-time" bson:"create-time"`
 
 	SessioninfoID string      `json:"sessioninfo-id" bson:"sessioninfo-id"`
-	Sessioninfo   Sessioninfo `json:"-"`
+	Sessioninfo   *Sessioninfo `json:"-"`
 	Archive  float64 `json:"archive" bson:"archive"` //表示未结束或已结束=归档？ 
 	Execute    float64  //表示是否执行
 }
@@ -64,7 +64,7 @@ func (u Reservableitem) GetReferencedIDs() []jsonapi.ReferenceID {
 func (u Reservableitem) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	result := []jsonapi.MarshalIdentifier{}
 
-	if u.SessioninfoID != "" {
+	if u.SessioninfoID != ""&&u.Sessioninfo!=nil {
 		result = append(result, u.Sessioninfo)
 	}
 

@@ -63,7 +63,7 @@ func (s BmApplyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Applicant = applicant
+			model.Applicant = &applicant
 		}
 
 		result = append(result, *model)
@@ -141,7 +141,7 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			if err != nil {
 				return 0, &Response{}, err
 			}
-			model.Applicant = applicant
+			model.Applicant = &applicant
 		}
 
 		result = append(result, *model)
@@ -166,7 +166,7 @@ func (s BmApplyResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Applicant = applicant
+		model.Applicant = &applicant
 	}
 
 	model.Kids = []*BmModel.Kid{}
@@ -195,7 +195,7 @@ func (s BmApplyResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Applicant = applicant
+		model.Applicant = &applicant
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil

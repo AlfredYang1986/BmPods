@@ -13,7 +13,7 @@ type Duty struct {
 	TeacherDuty string `json:"teacher-duty" bson:"teacher-duty"`
 
 	TeacherID string  `json:"teacher-id" bson:"teacher-id"`
-	Teacher   Teacher `json:"-"`
+	Teacher   *Teacher `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -56,7 +56,7 @@ func (u Duty) GetReferencedIDs() []jsonapi.ReferenceID {
 func (u Duty) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	result := []jsonapi.MarshalIdentifier{}
 
-	if u.TeacherID != "" {
+	if u.TeacherID != "" && u.Teacher!=nil {
 		result = append(result, u.Teacher)
 	}
 

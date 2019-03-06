@@ -16,36 +16,36 @@ type BmClassResource struct {
 	BmClassStorage           *BmDataStorage.BmClassStorage
 	BmYardStorage            *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage     *BmDataStorage.BmSessioninfoStorage
-	BmDutyResource           *BmDutyResource
-	BmStudentResource        *BmStudentResource
-	BmReservableitemResource *BmReservableitemResource
+	BmDutyStorage            *BmDataStorage.BmDutyStorage
+	BmStudentStorage         *BmDataStorage.BmStudentStorage
+	BmReservableitemStorage  *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmClassResource {
 	var us *BmDataStorage.BmClassStorage
 	var ys *BmDataStorage.BmYardStorage
 	var ss *BmDataStorage.BmSessioninfoStorage
-	var sr *BmStudentResource
-	var rr *BmReservableitemResource
-	var dr *BmDutyResource
+	var sr *BmDataStorage.BmStudentStorage
+	var rs *BmDataStorage.BmReservableitemStorage
+	var ds *BmDataStorage.BmDutyStorage
 	//var bs *BmDataStorage.BmClassUnitBindStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmClassStorage" {
 			us = arg.(*BmDataStorage.BmClassStorage)
-		} else if tp.Name() == "BmStudentResource" {
-			sr = arg.(*BmStudentResource)
+		} else if tp.Name() == "BmStudentStorage" {
+			sr = arg.(*BmDataStorage.BmStudentStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
-		} else if tp.Name() == "BmDutyResource" {
-			dr = arg.(*BmDutyResource)
+		} else if tp.Name() == "BmDutyStorage" {
+			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmYardStorage" {
 			ys = arg.(*BmDataStorage.BmYardStorage)
-		} else if tp.Name() == "BmReservableitemResource" {
-			rr = arg.(interface{}).(*BmReservableitemResource)
+		} else if tp.Name() == "BmReservableitemStorage" {
+			rs = arg.(*BmDataStorage.BmReservableitemStorage)
 		}
 	}
-	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentResource: sr, BmDutyResource: dr, BmReservableitemResource: rr}
+	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: sr, BmDutyStorage: ds, BmReservableitemStorage: rs}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -275,23 +275,18 @@ func (s BmClassResource) Update(obj interface{}, r api2go.Request) (api2go.Respo
 
 func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Request) error {
 	model.Students = []*BmModel.Student{}
+	
 	r.QueryParams["studentsids"] = model.StudentsIDs
-	stuRes, err := s.BmStudentResource.FindAll(*r)
-	studs := stuRes.Result().([]BmModel.Student)
-	for i, _ := range studs {
-		model.Students = append(model.Students, &studs[i])
+	stuRes:= s.BmStudentStorage.GetAll(*r,-1,-1)
+	for i, _ := range stuRes {
+		model.Students = append(model.Students, stuRes[i])
 	}
 
 	model.Duties = []*BmModel.Duty{}
 	r.QueryParams["dutiesids"] = model.DutiesIDs
-	response, err := s.BmDutyResource.FindAll(*r)
-	if err != nil {
-		return err
-	}
-	items := response.Result()
-	duties := items.([]BmModel.Duty)
-	for i, _ := range duties {
-		model.Duties = append(model.Duties, &duties[i])
+	dutRes := s.BmDutyStorage.GetAll(*r,-1,-1)
+	for i, _ := range dutRes {
+		model.Duties = append(model.Duties, dutRes[i])
 	}
 
 	if model.YardID != "" {
@@ -311,13 +306,11 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Re
 
 	if model.ReservableID != "" {
 		//item, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
-		response, err := s.BmReservableitemResource.FindOne(model.ReservableID, api2go.Request{})
-		item := response.Result()
+		reservableitem, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
 		if err != nil {
 			return err
 		}
-		tmp := item.(BmModel.Reservableitem)
-		model.Reservableitem = &tmp
+		model.Reservableitem = &reservableitem
 	}
 	return nil
 }

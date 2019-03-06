@@ -45,23 +45,6 @@ func (s BmUnitStorage) GetOne(id string) (BmModel.Unit, error) {
 	out := BmModel.Unit{ID: id}
 	err := s.db.FindOne(&in, &out)
 	if err == nil {
-
-		//双重绑定
-		if out.TeacherID != "" {
-			item, err := BmTeacherStorage{db: s.db}.GetOne(out.TeacherID)
-			if err != nil {
-				return BmModel.Unit{}, err
-			}
-			out.Teacher = item
-		}
-		if out.RoomID != "" {
-			item, err := BmRoomStorage{db: s.db}.GetOne(out.RoomID)
-			if err != nil {
-				return BmModel.Unit{}, err
-			}
-			out.Room = item
-		}
-
 		return out, nil
 	}
 	errMessage := fmt.Sprintf("Unit for id %s not found", id)

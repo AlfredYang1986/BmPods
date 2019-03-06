@@ -38,7 +38,7 @@ type Sessioninfo struct {
 	Images    []*Image `json:"-"`
 	ImagesIDs []string `json:"-" bson:"image-ids"`
 
-	Category   Category `json:"-"`
+	Category   *Category `json:"-"`
 	CategoryID string   `json:"category-id" bson:"category-id"`
 }
 
@@ -96,7 +96,7 @@ func (u Sessioninfo) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Images[key])
 	}
 
-	if u.CategoryID != "" {
+	if u.CategoryID != "" && u.Category!=nil {
 		result = append(result, u.Category)
 	}
 

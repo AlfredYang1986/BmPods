@@ -50,7 +50,7 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Sessioninfo = sessioninfo
+			model.Sessioninfo = &sessioninfo
 		}
 
 		result = append(result, *model)
@@ -128,7 +128,7 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 			if err != nil {
 				return 0, &Response{}, err
 			}
-			model.Sessioninfo = sessioninfo
+			model.Sessioninfo = &sessioninfo
 		}
 		result = append(result, *model)
 	}
@@ -160,7 +160,7 @@ func (s BmReservableitemResource) FindOne(ID string, r api2go.Request) (api2go.R
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Sessioninfo = sessioninfo
+		model.Sessioninfo = &sessioninfo
 	}
 	return &Response{Res: model}, nil
 }
@@ -182,7 +182,7 @@ func (s BmReservableitemResource) Create(obj interface{}, r api2go.Request) (api
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Sessioninfo = sessioninfo
+		model.Sessioninfo = &sessioninfo
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil

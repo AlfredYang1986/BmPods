@@ -45,15 +45,6 @@ func (s BmDutyStorage) GetOne(id string) (BmModel.Duty, error) {
 	out := BmModel.Duty{ID: id}
 	err := s.db.FindOne(&in, &out)
 	if err == nil {
-
-		if out.TeacherID != "" {
-			item, err := BmTeacherStorage{db: s.db}.GetOne(out.TeacherID)
-			if err != nil {
-				return BmModel.Duty{}, err
-			}
-			out.Teacher = item
-		}
-
 		return out, nil
 	}
 	errMessage := fmt.Sprintf("Duty for id %s not found", id)

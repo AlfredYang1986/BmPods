@@ -20,14 +20,14 @@ type Unit struct {
 	BrandId    string  `json:"brand-id" bson:"brand-id"`
 
 	TeacherID string  `json:"teacher-id" bson:"teacher-id"`
-	Teacher   Teacher `json:"-"`
+	Teacher   *Teacher `json:"-"`
 
 	//通过room过滤unit
 	RoomID string `json:"room-id" bson:"room-id"`
-	Room   Room   `json:"-"`
+	Room   *Room   `json:"-"`
 
 	ClassID  string `json:"class-id" bson:"class-id"`
-	Class    Class `json:"-"`
+	Class   *Class `json:"-"`
 	Archive     float64 `json:"archive" bson:"archive"` //表示是否归档？
 
 }
@@ -94,13 +94,13 @@ func (u Unit) GetReferencedIDs() []jsonapi.ReferenceID {
 func (u Unit) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 	result := []jsonapi.MarshalIdentifier{}
 
-	if u.TeacherID != "" {
+	if u.TeacherID != "" && u.Teacher!=nil {
 		result = append(result, u.Teacher)
 	}
-	if u.RoomID != "" {
+	if u.RoomID != "" && u.Room!=nil {
 		result = append(result, u.Room)
 	}
-	if u.ClassID != "" {
+	if u.ClassID != "" && u.Class!=nil {
 		result = append(result, u.Class)
 	}
 

@@ -61,7 +61,7 @@ func (s BmBrandResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Cat = cat
+			model.Cat = &cat
 		}
 
 		result = append(result, *model)
@@ -152,7 +152,7 @@ func (s BmBrandResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Cat = cat
+		model.Cat = &cat
 	}
 
 	return &Response{Res: model}, nil
@@ -174,7 +174,7 @@ func (s BmBrandResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Cat = cat
+		model.Cat = &cat
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil

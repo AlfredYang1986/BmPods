@@ -43,7 +43,7 @@ type Student struct {
 	KidID string `json:"-" bson:"kid-id"`
 	Kid   *Kid   `json:"-"`
 
-	Teacher   Teacher `json:"-"`
+	Teacher   *Teacher `json:"-"`
 	TeacherID string  `json:"-" bson:"teacher-id"`
 
 	Guardians    []*Guardian `json:"-"`
@@ -116,11 +116,11 @@ func (u Student) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Guardians[key])
 	}
 
-	if u.TeacherID != "" {
+	if u.TeacherID != "" && u.Teacher!=nil {
 		result = append(result, u.Teacher)
 	}
 
-	if u.KidID != "" {
+	if u.KidID != ""&& u.Kid!=nil {
 		result = append(result, u.Kid)
 	}
 	return result

@@ -45,23 +45,6 @@ func (s BmClassStorage) GetOne(id string) (BmModel.Class, error) {
 	model := BmModel.Class{ID: id}
 	err := s.db.FindOne(&in, &model)
 	if err == nil {
-
-		if model.YardID != "" {
-			yard, err := BmYardStorage{db: s.db}.GetOne(model.YardID)
-			if err != nil {
-				return BmModel.Class{}, err
-			}
-			model.Yard = &yard
-		}
-		if model.SessioninfoID != "" {
-			Sessioninfo, err := BmSessioninfoStorage{db: s.db}.GetOne(model.SessioninfoID)
-			if err != nil {
-				return BmModel.Class{}, err
-			}
-			model.Sessioninfo = &Sessioninfo
-		}
-		
-
 		return model, nil
 	}
 	errMessage := fmt.Sprintf("Class for id %s not found", id)

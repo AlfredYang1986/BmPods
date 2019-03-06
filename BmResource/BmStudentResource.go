@@ -217,7 +217,7 @@ func (s BmStudentResource) Create(obj interface{}, r api2go.Request) (api2go.Res
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Teacher = k
+		model.Teacher = &k
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
@@ -270,7 +270,7 @@ func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student,r *api2go
 		if err != nil {
 			return err
 		}
-		model.Teacher = k
+		model.Teacher = &k
 	}
 
 	return nil

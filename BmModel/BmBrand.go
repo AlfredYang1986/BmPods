@@ -22,7 +22,7 @@ type Brand struct {
 	AboutUs    string   `json:"about-us" bson:"about-us"`     //团队
 
 	CategoryID string   `json:"-" bson:"category-id"`
-	Cat        Category `json:"-"`
+	Cat        *Category `json:"-"`
 	ImagesIDs  []string `json:"-" bson:"image-ids"`
 	Imgs       []*Image `json:"-"`
 }
@@ -63,7 +63,7 @@ func (u Brand) GetReferencedIDs() []jsonapi.ReferenceID {
 		})
 	}
 
-	if u.CategoryID != "" {
+	if u.CategoryID != ""&& u.Cat!=nil {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.CategoryID,
 			Type: "categories",
@@ -81,7 +81,7 @@ func (u Brand) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Imgs[key])
 	}
 
-	if u.CategoryID != "" {
+	if u.CategoryID != "" && u.Cat!=nil{
 		result = append(result, u.Cat)
 	}
 

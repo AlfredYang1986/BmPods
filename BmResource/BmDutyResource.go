@@ -41,7 +41,7 @@ func (s BmDutyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, errors.New("error")
 			}
-			duty.Teacher = r
+			duty.Teacher = &r
 		}
 		result = append(result, *duty)
 	}
@@ -124,7 +124,7 @@ func (s BmDutyResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		model.Teacher = r
+		model.Teacher = &r
 	}
 
 	return &Response{Res: model}, nil
@@ -145,7 +145,7 @@ func (s BmDutyResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 		if err != nil {
 			return &Response{}, errors.New("error")
 		}
-		model.Teacher = r
+		model.Teacher = &r
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil

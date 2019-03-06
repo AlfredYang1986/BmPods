@@ -70,7 +70,7 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 				if err != nil {
 					return &Response{}, err
 				}
-				model.Category = cate
+				model.Category = &cate
 			}
 
 			//result = append(result, model)
@@ -97,7 +97,7 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Category = cate
+			model.Category = &cate
 		}
 
 		result = append(result, *model)
@@ -175,7 +175,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 			if err != nil {
 				return 0, &Response{}, err
 			}
-			model.Category = cate
+			model.Category = &cate
 		}
 		result = append(result, *model)
 	}
@@ -218,7 +218,7 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 		if err != nil {
 			return &Response{}, err
 		}
-		model.Category = cate
+		model.Category = &cate
 	}
 
 	return &Response{Res: model, Code: http.StatusCreated}, nil
