@@ -43,27 +43,12 @@ func (s BmUnitResource) NewUnitResource(args []BmDataStorage.BmStorage) BmUnitRe
 	return BmUnitResource{BmUnitStorage: us, BmRoomStorage: rs, BmTeacherStorage: ts, BmClassStorage: cs, BmClassResource: cr}
 }
 
-// FindAll to satisfy api2go data source interface
 func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Unit
-	/*_, ok := r.QueryParams["class-id"]
-	if ok {
-		result := []BmModel.Unit{}
-		binds := s.BmClassUnitBindStorage.GetAll(r, -1, -1)
-		for _, bind := range binds {
-			model, err := s.BmUnitStorage.GetOne(bind.UnitID)
-			if err != nil {
-				return &Response{}, err
-			}
-			result = append(result, model)
-		}
-		return &Response{Res: result}, nil
-	}*/
 
 	models := s.BmUnitStorage.GetAll(r, -1, -1)
 	
 	for _, model := range models {
-		// get all sweets for the model
 		now := float64(time.Now().UnixNano() / 1e6)
 		if now <= model.StartDate {
 			model.Execute=0
@@ -100,7 +85,6 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	return &Response{Res: result}, nil
 }
 
-// PaginatedFindAll can be used to load users in chunks
 func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
 		result                      []BmModel.Unit
@@ -189,8 +173,6 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 	return uint(count), &Response{Res: reval}, nil
 }
 
-// FindOne to satisfy `api2go.DataSource` interface
-// this method should return the user with the given ID, otherwise an error
 func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmUnitStorage.GetOne(ID)
 	if err != nil {
@@ -230,7 +212,6 @@ func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	return &Response{Res: model}, nil
 }
 
-// Create method to satisfy `api2go.DataSource` interface
 func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	model, ok := obj.(BmModel.Unit)
 	if !ok {
@@ -267,7 +248,6 @@ func (s BmUnitResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
-// Delete to satisfy `api2go.DataSource` interface
 func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmUnitStorage.GetOne(id)
 	if err != nil {
@@ -295,7 +275,6 @@ func (s BmUnitResource) Delete(id string, r api2go.Request) (api2go.Responder, e
 	return &Response{Code: http.StatusNoContent}, err
 }
 
-//Update stores all changes on the user
 func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	model, ok := obj.(BmModel.Unit)
 	var err error 
@@ -321,15 +300,15 @@ func (s BmUnitResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 	}else{
 		model.Execute=1
 	}
-	if model.Execute==0{
+
+	if model.Execute==1{
+		panic("已结束，不可编辑")
+	} else {
 		err = s.BmUnitStorage.Update(model)
 		if err != nil {
 			return &Response{}, err
 		}
-	}else if model.Execute==1{
-		panic("已结束，不可编辑")
-	}else if model.Execute==2{
-		panic("正在执行，不可编辑")
 	}
+
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
