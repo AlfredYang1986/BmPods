@@ -59,9 +59,9 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 				return &Response{}, err
 			}
 			model.Images = []*BmModel.Image{}
-			r.QueryParams["imageids"]=model.ImagesIDs
-			imageids:=s.BmImageStorage.GetAll(r)
-			for _,image:= range imageids {	
+			r.QueryParams["imageids"] = model.ImagesIDs
+			imageids := s.BmImageStorage.GetAll(r)
+			for _, image := range imageids {
 				model.Images = append(model.Images, &image)
 			}
 
@@ -86,9 +86,9 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 	for _, model := range models {
 		// get all sweets for the model
 		model.Images = []*BmModel.Image{}
-		r.QueryParams["imageids"]=model.ImagesIDs
-		imageids:=s.BmImageStorage.GetAll(r)
-		for _,image:= range imageids {	
+		r.QueryParams["imageids"] = model.ImagesIDs
+		imageids := s.BmImageStorage.GetAll(r)
+		for _, image := range imageids {
 			model.Images = append(model.Images, &image)
 		}
 
@@ -164,9 +164,9 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 
 	for _, model := range s.BmSessioninfoStorage.GetAll(r, skip, take) {
 		model.Images = []*BmModel.Image{}
-		r.QueryParams["imageids"]=model.ImagesIDs
-		imageids:=s.BmImageStorage.GetAll(r)
-		for _,image:= range imageids {	
+		r.QueryParams["imageids"] = model.ImagesIDs
+		imageids := s.BmImageStorage.GetAll(r)
+		for _, image := range imageids {
 			model.Images = append(model.Images, &image)
 		}
 
@@ -194,11 +194,18 @@ func (s BmSessioninfoResource) FindOne(ID string, r api2go.Request) (api2go.Resp
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 	model.Images = []*BmModel.Image{}
-		r.QueryParams["imageids"]=model.ImagesIDs
-		imageids:=s.BmImageStorage.GetAll(r)
-		for _,image:= range imageids {	
-			model.Images = append(model.Images, &image)
+	r.QueryParams["imageids"] = model.ImagesIDs
+	imageids := s.BmImageStorage.GetAll(r)
+	for _, image := range imageids {
+		model.Images = append(model.Images, &image)
+	}
+	if model.CategoryID != "" {
+		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return &Response{}, err
 		}
+		model.Category = &cate
+	}
 	return &Response{Res: model}, nil
 }
 
