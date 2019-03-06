@@ -13,22 +13,46 @@ import (
 
 type BmTeacherResource struct {
 	BmTeacherStorage *BmDataStorage.BmTeacherStorage
+	BmDutyStorage    *BmDataStorage.BmDutyStorage
 }
 
 func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) BmTeacherResource {
 	var ss *BmDataStorage.BmTeacherStorage
+	var ds *BmDataStorage.BmDutyStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmTeacherStorage" {
 			ss = arg.(*BmDataStorage.BmTeacherStorage)
+		}else if tp.Name() == "BmDutyStorage" {
+			ds = arg.(*BmDataStorage.BmDutyStorage)
 		}
 	}
-	return BmTeacherResource{BmTeacherStorage: ss}
+	return BmTeacherResource{BmTeacherStorage: ss,BmDutyStorage:ds}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmTeacherResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	result := s.BmTeacherStorage.GetAll(r, -1, -1)
+	result:=[]BmModel.Category{}
+	dutiesID, ok:= r.QueryParams["dutiesID"]
+	if ok {
+		modelRootID := dutiesID[0]
+		modelRoot, err := s.BmDutyStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.TeacherID
+		if modelID != "" {
+			model, err := s.BmTeacherStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			//result = append(result, model)
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+	//result := s.BmTeacherStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
