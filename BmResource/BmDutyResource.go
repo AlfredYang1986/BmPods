@@ -31,29 +31,16 @@ func (s BmDutyResource) NewDutyResource(args []BmDataStorage.BmStorage) *BmDutyR
 
 // FindAll to satisfy api2go data source interface
 func (s BmDutyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var result []BmModel.Duty
 	duties := s.BmDutyStorage.GetAll(r, -1, -1)
-
-	for _, duty := range duties {
-		// get all sweets for the duty
-		if duty.TeacherID != "" {
-			r, err := s.BmTeacherStorage.GetOne(duty.TeacherID)
-			if err != nil {
-				return &Response{}, errors.New("error")
-			}
-			duty.Teacher = &r
-		}
-		result = append(result, *duty)
-	}
-
-	return &Response{Res: result}, nil
+	return &Response{Res: duties}, nil
 }
 
 // PaginatedFindAll can be used to load users in chunks
 func (s BmDutyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
-		result                      []BmModel.Duty
+		
 		number, size, offset, limit string
+		skip, take, count  int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -85,9 +72,9 @@ func (s BmDutyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, iter := range s.BmDutyStorage.GetAll(r, int(start), int(sizeI)) {
-			result = append(result, *iter)
-		}
+		
+		skip = int(start)
+		take = int(sizeI)
 
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
@@ -99,16 +86,15 @@ func (s BmDutyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
-		for _, iter := range s.BmDutyStorage.GetAll(r, int(offsetI), int(limitI)) {
-			result = append(result, *iter)
-		}
+		skip = int(offsetI)
+		take = int(limitI)
 	}
 
+	results:= s.BmDutyStorage.GetAll(r,  skip, take)
 	in := BmModel.Duty{}
-	count := s.BmDutyStorage.Count(r, in)
+	count = s.BmDutyStorage.Count(r, in)
 
-	return uint(count), &Response{Res: result}, nil
+	return uint(count), &Response{Res: results}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface

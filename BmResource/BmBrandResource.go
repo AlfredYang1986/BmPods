@@ -35,46 +35,15 @@ func (s BmBrandResource) NewBrandResource(args []BmDataStorage.BmStorage) BmBran
 
 // FindAll to satisfy api2go data source interface
 func (s BmBrandResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var result []BmModel.Brand
 	models := s.BmBrandStorage.GetAll(r, -1, -1)
-
-	for _, model := range models {
-		// get all sweets for the model
-		model.Imgs = []*BmModel.Image{}
-		r.QueryParams["imageids"]=model.ImagesIDs
-		imageids:=s.BmImageStorage.GetAll(r)
-		for _,image:= range imageids {	
-			model.Imgs = append(model.Imgs, &image)
-		}
-/*
-		model.Imgs = []*BmModel.Image{}
-		for _, kID := range model.ImagesIDs {
-			choc, err := s.BmImageStorage.GetOne(kID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Imgs = append(model.Imgs, &choc)
-		}
-*/
-		if model.CategoryID != "" {
-			cat, err := s.BmCategoryStorage.GetOne(model.CategoryID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Cat = &cat
-		}
-
-		result = append(result, *model)
-	}
-
-	return &Response{Res: result}, nil
+	return &Response{Res: models}, nil
 }
 
 // PaginatedFindAll can be used to load models in chunks
 func (s BmBrandResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
-		result                      []BmModel.Brand
 		number, size, offset, limit string
+		skip, take, count int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -106,9 +75,8 @@ func (s BmBrandResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, iter := range s.BmBrandStorage.GetAll(r, int(start), int(sizeI)) {
-			result = append(result, *iter)
-		}
+		skip = int(start)
+		take = int(sizeI)
 
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
@@ -121,15 +89,14 @@ func (s BmBrandResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 			return 0, &Response{}, err
 		}
 
-		for _, iter := range s.BmBrandStorage.GetAll(r, int(offsetI), int(limitI)) {
-			result = append(result, *iter)
-		}
+		skip = int(offsetI)
+		take = int(limitI)
 	}
-
+	results:=s.BmBrandStorage.GetAll(r, skip, take)
 	in := BmModel.Brand{}
-	count := s.BmBrandStorage.Count(r, in)
+	count = s.BmBrandStorage.Count(r, in)
 
-	return uint(count), &Response{Res: result}, nil
+	return uint(count), &Response{Res: results}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface

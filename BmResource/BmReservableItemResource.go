@@ -38,8 +38,6 @@ func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage
 
 // FindAll to satisfy api2go data source interface
 func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var result []BmModel.Reservableitem
-	
 	classesID, ok:= r.QueryParams["classesID"]
 	if ok {
 		modelRootID := classesID[0]
@@ -61,26 +59,7 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 	}
 		
 	models := s.BmReservableitemStorage.GetAll(r, -1, -1)
-	for _, model := range models {
-		now := float64(time.Now().UnixNano() / 1e6)
-		if now <= model.StartDate {
-			model.Execute=0
-		}else if now > model.StartDate && now <= model.EndDate{
-			model.Execute=2
-		}else{
-			model.Execute=1
-		}
-		if model.SessioninfoID != "" {
-			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Sessioninfo = &sessioninfo
-		}
-		result = append(result, *model)
-	}
-
-	return &Response{Res: result}, nil
+	return &Response{Res: models}, nil
 }
 
 // PaginatedFindAll can be used to load models in chunks
@@ -146,13 +125,6 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 			model.Execute=2
 		}else{
 			model.Execute=1
-		}
-		if model.SessioninfoID != "" {			
-			sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
-			if err != nil {
-				return 0, &Response{}, err
-			}
-			model.Sessioninfo = &sessioninfo
 		}
 		result = append(result, *model)
 	}

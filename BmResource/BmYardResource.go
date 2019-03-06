@@ -36,33 +36,8 @@ func (s BmYardResource) NewYardResource(args []BmDataStorage.BmStorage) BmYardRe
 
 // FindAll to satisfy api2go data source interface
 func (s BmYardResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var result []BmModel.Yard
 	models := s.BmYardStorage.GetAll(r, -1, -1)
-
-	for _, model := range models {
-		// get all sweets for the model
-		model.Images = []*BmModel.Image{}
-		for _, kID := range model.ImagesIDs {
-			choc, err := s.BmImageStorage.GetOne(kID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Images = append(model.Images, &choc)
-		}
-
-		model.Rooms = []*BmModel.Room{}
-		for _, kID := range model.RoomsIDs {
-			choc, err := s.BmRoomStorage.GetOne(kID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Rooms = append(model.Rooms, &choc)
-		}
-
-		result = append(result, *model)
-	}
-
-	return &Response{Res: result}, nil
+	return &Response{Res: models}, nil
 }
 
 // PaginatedFindAll can be used to load models in chunks

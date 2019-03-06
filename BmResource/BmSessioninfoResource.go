@@ -80,36 +80,14 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			return &Response{}, err
 		}
 	}
-
-	var result []BmModel.Sessioninfo
 	models := s.BmSessioninfoStorage.GetAll(r, -1, -1)
-	for _, model := range models {
-		// get all sweets for the model
-		model.Images = []*BmModel.Image{}
-		r.QueryParams["imageids"] = model.ImagesIDs
-		imageids := s.BmImageStorage.GetAll(r)
-		for _, image := range imageids {
-			model.Images = append(model.Images, &image)
-		}
 
-		if model.CategoryID != "" {
-			cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Category = &cate
-		}
-
-		result = append(result, *model)
-	}
-
-	return &Response{Res: result}, nil
+	return &Response{Res: models}, nil
 }
 
 // PaginatedFindAll can be used to load models in chunks
 func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
-		result                      []BmModel.Sessioninfo
 		number, size, offset, limit string
 		skip, take, pages           int
 	)
@@ -162,28 +140,12 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 		take = int(limitI)
 	}
 
-	for _, model := range s.BmSessioninfoStorage.GetAll(r, skip, take) {
-		model.Images = []*BmModel.Image{}
-		r.QueryParams["imageids"] = model.ImagesIDs
-		imageids := s.BmImageStorage.GetAll(r)
-		for _, image := range imageids {
-			model.Images = append(model.Images, &image)
-		}
-
-		if model.CategoryID != "" {
-			cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
-			if err != nil {
-				return 0, &Response{}, err
-			}
-			model.Category = &cate
-		}
-		result = append(result, *model)
-	}
+	models :=s.BmSessioninfoStorage.GetAll(r, skip, take)
 
 	in := BmModel.Sessioninfo{}
 	count := s.BmSessioninfoStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
-	return uint(count), &Response{Res: result, QueryRes: "reservableitems", TotalPage: pages, TotalCount: count}, nil
+	return uint(count), &Response{Res: models, QueryRes: "reservableitems", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface

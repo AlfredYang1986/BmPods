@@ -181,10 +181,6 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		} else if now > model.EndDate {
 			model.Execute = 3
 		}
-		err := s.ResetReferencedModel(model, &r)
-		if err != nil {
-			return 0, &Response{}, err
-		}
 		if model.NotExist == 0 {
 			result = append(result, *model)
 		}

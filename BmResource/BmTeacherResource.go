@@ -61,6 +61,7 @@ func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 	var (
 		result                      []BmModel.Teacher
 		number, size, offset, limit string
+		skip, take, count   int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -92,9 +93,8 @@ func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, iter := range s.BmTeacherStorage.GetAll(r, int(start), int(sizeI)) {
-			result = append(result, iter)
-		}
+		skip = int(start)
+		take = int(sizeI)
 
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
@@ -106,14 +106,12 @@ func (s BmTeacherResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
-		for _, iter := range s.BmTeacherStorage.GetAll(r, int(offsetI), int(limitI)) {
-			result = append(result, iter)
-		}
+		skip = int(offsetI)
+		take = int(limitI)	
 	}
-
+	result = s.BmTeacherStorage.GetAll(r, skip, take)
 	in := BmModel.Teacher{}
-	count := s.BmTeacherStorage.Count(r, in)
+	count = s.BmTeacherStorage.Count(r, in)
 
 	return uint(count), &Response{Res: result}, nil
 }

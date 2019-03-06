@@ -53,23 +53,6 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		}else{
 			model.Execute=1
 		}
-
-		if model.RoomID != "" {
-			r, _ := s.BmRoomStorage.GetOne(model.RoomID)
-			model.Room = &r
-		}
-
-		if model.TeacherID != "" {
-			r, _ := s.BmTeacherStorage.GetOne(model.TeacherID)
-			model.Teacher = &r
-		}
-		if model.ClassID != "" {
-			r, err := s.BmClassStorage.GetOne(model.ClassID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Class = &r
-		}
 		result = append(result, *model)
 	}
 
@@ -78,8 +61,8 @@ func (s BmUnitResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
 func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
-		result                      []BmModel.Unit
 		number, size, offset, limit string
+		skip, take, count   int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -111,9 +94,8 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		}
 
 		start := sizeI * (numberI - 1)
-		for _, iter := range s.BmUnitStorage.GetAll(r, int(start), int(sizeI)) {
-			result = append(result, *iter)
-		}
+		skip = int(start)
+		take = int(sizeI)
 
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
@@ -125,13 +107,11 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		if err != nil {
 			return 0, &Response{}, err
 		}
-
-		for _, iter := range s.BmUnitStorage.GetAll(r, int(offsetI), int(limitI)) {
-			result = append(result, *iter)
-		}
+		skip = int(offsetI)
+		take = int(limitI)
+		
 	}
-
-	reval := []BmModel.Unit{}
+	result:= s.BmUnitStorage.GetAll(r,skip, take) 		
 	for _, model := range result {
 		now := float64(time.Now().UnixNano() / 1e6)
 		if now <= model.StartDate {
@@ -141,30 +121,13 @@ func (s BmUnitResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respond
 		}else{
 			model.Execute=1
 		}
-		if model.RoomID != "" {
-			r, _ := s.BmRoomStorage.GetOne(model.RoomID)
-			model.Room = &r
-		}
-
-		if model.TeacherID != "" {
-			r, _ := s.BmTeacherStorage.GetOne(model.TeacherID)
-			model.Teacher = &r
-		}
-		if model.ClassID != "" {
-			r, err := s.BmClassStorage.GetOne(model.ClassID)
-			if err != nil {
-				return 0,&Response{}, err
-			}
-			model.Class = &r
-		}
-
-		reval = append(reval, model)
+		result = append(result, model)
 	}
 
 	in := BmModel.Unit{}
-	count := s.BmUnitStorage.Count(r, in)
+	count = s.BmUnitStorage.Count(r, in)
 
-	return uint(count), &Response{Res: reval}, nil
+	return uint(count), &Response{Res: result}, nil
 }
 
 func (s BmUnitResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {

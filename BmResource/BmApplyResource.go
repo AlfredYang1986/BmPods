@@ -37,45 +37,13 @@ func (s BmApplyResource) NewApplyResource(args []BmDataStorage.BmStorage) BmAppl
 
 // FindAll to satisfy api2go data source interface
 func (s BmApplyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var result []BmModel.Apply
 	models := s.BmApplyStorage.GetAll(r, -1, -1)
-
-	for _, model := range models {
-		// get all sweets for the model
-		model.Kids = []*BmModel.Kid{}
-		r.QueryParams["kidsids"]=model.KidsIDs
-		kids:=s.BmKidStorage.GetAll(r)
-		for _,kid:= range kids {	
-			model.Kids = append(model.Kids, &kid)
-		}
-/*
-		model.Kids = []*BmModel.Kid{}
-		for _, kID := range model.KidsIDs {
-			choc, err := s.BmKidStorage.GetOne(kID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Kids = append(model.Kids, &choc)
-		}
-*/
-		if model.ApplicantID != "" {
-			applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
-			if err != nil {
-				return &Response{}, err
-			}
-			model.Applicant = &applicant
-		}
-
-		result = append(result, *model)
-	}
-
-	return &Response{Res: result}, nil
+	return &Response{Res: models}, nil
 }
 
 // PaginatedFindAll can be used to load models in chunks
 func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Responder, error) {
 	var (
-		result                      []BmModel.Apply
 		number, size, offset, limit string
 		skip, take, count, pages    int
 	)
@@ -127,30 +95,11 @@ func (s BmApplyResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 		take = int(limitI)
 	}
 
-	for _, model := range s.BmApplyStorage.GetAll(r, skip, take) {
-
-		model.Kids = []*BmModel.Kid{}
-		r.QueryParams["kidsids"]=model.KidsIDs
-		kids:=s.BmKidStorage.GetAll(r)
-		for _,kid:= range kids {	
-			model.Kids = append(model.Kids, &kid)
-		}
-
-		if model.ApplicantID != "" {
-			applicant, err := s.BmApplicantStorage.GetOne(model.ApplicantID)
-			if err != nil {
-				return 0, &Response{}, err
-			}
-			model.Applicant = &applicant
-		}
-
-		result = append(result, *model)
-	}
-
+	results:=s.BmApplyStorage.GetAll(r, skip, take)
 	in := BmModel.Apply{}
 	count = s.BmApplyStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
-	return uint(count), &Response{Res: result, QueryRes: "applies", TotalPage: pages, TotalCount: count}, nil
+	return uint(count), &Response{Res: results, QueryRes: "applies", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface

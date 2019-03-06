@@ -72,14 +72,7 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	}
 
 	models := s.BmStudentStorage.GetAll(r, -1, -1)
-	for _, model := range models {
-		err := s.ResetReferencedModel(model,&r)
-		if err != nil {
-			return &Response{}, err
-		}
-		result = append(result, *model)
-	}
-	return &Response{Res: result}, nil
+	return &Response{Res: models}, nil
 }
 
 // PaginatedFindAll can be used to load users in chunks
@@ -161,21 +154,15 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 			result = append(result, model)
 		}
 		pages = int(math.Ceil(float64(count) / float64(take)))
-		return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages}, nil
+		return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages, TotalCount: count}, nil
 	}
 
-	for _, model := range s.BmStudentStorage.GetAll(r, skip, take) {
-		err := s.ResetReferencedModel(model,&r)
-		if err != nil {
-			return uint(0), &Response{}, err
-		}
-		result = append(result, *model)
-	}
-
+	models:=s.BmStudentStorage.GetAll(r, skip, take) 
+		
 	in := BmModel.Student{}
 	count = s.BmStudentStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
-	return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages}, nil
+	return uint(count), &Response{Res: models, QueryRes: "students", TotalPage: pages}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
