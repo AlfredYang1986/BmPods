@@ -15,27 +15,52 @@ import (
 type BmReservableitemResource struct {
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
+	BmClassStorage    	    *BmDataStorage.BmClassStorage
+
 }
 
 func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage.BmStorage) *BmReservableitemResource {
 	var us *BmDataStorage.BmReservableitemStorage
 	var ts *BmDataStorage.BmSessioninfoStorage
+	var cs *BmDataStorage.BmClassStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmReservableitemStorage" {
 			us = arg.(*BmDataStorage.BmReservableitemStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ts = arg.(*BmDataStorage.BmSessioninfoStorage)
+		} else if tp.Name() == "BmClassStorage" {
+			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return &BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts}
+	return &BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts,BmClassStorage:cs}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Reservableitem
+	
+	classesID, ok:= r.QueryParams["classesID"]
+	if ok {
+		modelRootID := classesID[0]
+		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.ReservableID
+		if modelID != "" {
+			model, err := s.BmReservableitemStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			//result = append(result, model)
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+		
 	models := s.BmReservableitemStorage.GetAll(r, -1, -1)
-
 	for _, model := range models {
 		now := float64(time.Now().UnixNano() / 1e6)
 		if now <= model.StartDate {
@@ -52,7 +77,6 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 			}
 			model.Sessioninfo = &sessioninfo
 		}
-
 		result = append(result, *model)
 	}
 
