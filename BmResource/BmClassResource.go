@@ -13,13 +13,13 @@ import (
 )
 
 type BmClassResource struct {
-	BmClassStorage           *BmDataStorage.BmClassStorage
-	BmYardStorage            *BmDataStorage.BmYardStorage
-	BmSessioninfoStorage     *BmDataStorage.BmSessioninfoStorage
-	BmDutyStorage            *BmDataStorage.BmDutyStorage
-	BmUnitStorage            *BmDataStorage.BmUnitStorage
-	BmStudentStorage         *BmDataStorage.BmStudentStorage
-	BmReservableitemStorage  *BmDataStorage.BmReservableitemStorage
+	BmClassStorage          *BmDataStorage.BmClassStorage
+	BmYardStorage           *BmDataStorage.BmYardStorage
+	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
+	BmDutyStorage           *BmDataStorage.BmDutyStorage
+	BmUnitStorage           *BmDataStorage.BmUnitStorage
+	BmStudentStorage        *BmDataStorage.BmStudentStorage
+	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmClassResource {
@@ -53,7 +53,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 
 func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Class
-	unitsID, ok:= r.QueryParams["unitsID"]
+	unitsID, ok := r.QueryParams["unitsID"]
 	if ok {
 		modelRootID := unitsID[0]
 		modelRoot, err := s.BmUnitStorage.GetOne(modelRootID)
@@ -205,7 +205,7 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmClassStorage.GetOne(id)
 	now := float64(time.Now().UnixNano() / 1e6)
-	if len(model.DutiesIDs) != 0 || len(model.StudentsIDs) != 0 || model.ReservableID != "" {
+	if len(model.DutiesIDs) != 0 || len(model.StudentsIDs) != 0 {
 		model.Execute = 1
 	}
 	if now > model.StartDate && now <= model.EndDate {
@@ -226,10 +226,9 @@ func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, 
 			}
 		}
 
-	}
-	if model.Execute==1{
+	} else if model.Execute == 1 {
 		panic("只允许停课，不允许删除")
-	}else{
+	} else if model.Execute == 2 || model.Execute == 3 {
 		panic("不允许删除")
 	}
 
@@ -249,16 +248,16 @@ func (s BmClassResource) Update(obj interface{}, r api2go.Request) (api2go.Respo
 
 func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Request) error {
 	model.Students = []*BmModel.Student{}
-	
+
 	r.QueryParams["studentsids"] = model.StudentsIDs
-	stuRes:= s.BmStudentStorage.GetAll(*r,-1,-1)
+	stuRes := s.BmStudentStorage.GetAll(*r, -1, -1)
 	for i, _ := range stuRes {
 		model.Students = append(model.Students, stuRes[i])
 	}
 
 	model.Duties = []*BmModel.Duty{}
 	r.QueryParams["dutiesids"] = model.DutiesIDs
-	dutRes := s.BmDutyStorage.GetAll(*r,-1,-1)
+	dutRes := s.BmDutyStorage.GetAll(*r, -1, -1)
 	for i, _ := range dutRes {
 		model.Duties = append(model.Duties, dutRes[i])
 	}

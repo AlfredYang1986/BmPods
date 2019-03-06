@@ -36,7 +36,7 @@ func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) Bm
 
 // FindAll to satisfy api2go data source interface
 func (s BmTeacherResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	result := []BmModel.Category{}
+	result := []BmModel.Teacher{}
 
 	dutiesID, ok := r.QueryParams["dutiesID"]
 	if ok {
@@ -75,6 +75,8 @@ func (s BmTeacherResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			return &Response{}, err
 		}
 	}
+
+	result = s.BmTeacherStorage.GetAll(r, -1, -1)
 
 	return &Response{Res: result}, nil
 }
