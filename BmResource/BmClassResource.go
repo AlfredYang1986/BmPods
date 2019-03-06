@@ -17,22 +17,23 @@ type BmClassResource struct {
 	BmYardStorage            *BmDataStorage.BmYardStorage
 	BmSessioninfoStorage     *BmDataStorage.BmSessioninfoStorage
 	BmDutyStorage            *BmDataStorage.BmDutyStorage
+	BmUnitStorage            *BmDataStorage.BmUnitStorage
 	BmStudentStorage         *BmDataStorage.BmStudentStorage
 	BmReservableitemStorage  *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmClassResource {
-	var us *BmDataStorage.BmClassStorage
+	var cs *BmDataStorage.BmClassStorage
 	var ys *BmDataStorage.BmYardStorage
 	var ss *BmDataStorage.BmSessioninfoStorage
 	var sr *BmDataStorage.BmStudentStorage
 	var rs *BmDataStorage.BmReservableitemStorage
 	var ds *BmDataStorage.BmDutyStorage
-	//var bs *BmDataStorage.BmClassUnitBindStorage
+	var us *BmDataStorage.BmUnitStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmClassStorage" {
-			us = arg.(*BmDataStorage.BmClassStorage)
+			cs = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmStudentStorage" {
 			sr = arg.(*BmDataStorage.BmStudentStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
@@ -43,56 +44,16 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 			ys = arg.(*BmDataStorage.BmYardStorage)
 		} else if tp.Name() == "BmReservableitemStorage" {
 			rs = arg.(*BmDataStorage.BmReservableitemStorage)
+		} else if tp.Name() == "BmUnitStorage" {
+			us = arg.(*BmDataStorage.BmUnitStorage)
 		}
 	}
-	return &BmClassResource{BmClassStorage: us, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: sr, BmDutyStorage: ds, BmReservableitemStorage: rs}
+	return &BmClassResource{BmClassStorage: cs, BmYardStorage: ys, BmSessioninfoStorage: ss, BmStudentStorage: sr, BmDutyStorage: ds, BmReservableitemStorage: rs, BmUnitStorage: us}
 }
 
-// FindAll to satisfy api2go data source interface
 func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Class
 
-	//查詢 reservable 下的 classes
-	//_, ok := r.QueryParams["reservableitem-id"]
-	//if ok {
-	//	modelBinds := s.BmBindReservableClassStorage.GetAll(r)
-	//	for _, modelBind := range modelBinds {
-	//		model, err := s.BmClassStorage.GetOne(modelBind.ClassId)
-	//		if err != nil {
-	//			return &Response{}, err
-	//		}
-	//		err = s.ResetReferencedModel(&model)
-	//		if err != nil {
-	//			return &Response{}, err
-	//		}
-	//		if model.NotExist == 0 {
-	//			result = append(result, model)
-	//		}
-	//	}
-	//	return &Response{Res: result}, nil
-	//}
-
-	// 写这个的人必须弹鸡鸡，无视数据库的所有规则，强制遍历所有自己filter
-	// 那还要数据库做啥呢 。。。。
-	//flag, fok := r.QueryParams["flag"]
-	//if fok {
-	//	flagInt, err := strconv.Atoi(flag[0])
-	//	if err != nil {
-	//		return &Response{}, err
-	//	}
-	//	models := s.BmClassStorage.GetAll(r, -1, -1)
-	//	for _, model := range models {
-	//		err := s.ResetReferencedModel(model)
-	//		if err != nil {
-	//			return &Response{}, err
-	//		}
-	//		err = s.FilterClassByFlag(model, flagInt)
-	//		if err == nil && model.NotExist == 0 {
-	//			result = append(result, *model)
-	//		}
-	//	}
-	//	return &Response{Res: result}, nil
-	//}
 
 	models := s.BmClassStorage.GetAll(r, -1, -1)
 	for _, model := range models {
@@ -105,10 +66,6 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		} else if now > model.EndDate {
 			model.Execute = 3
 		}
-		//err := s.ResetReferencedModel(model, &r)
-		//if err != nil {
-		//	return &Response{}, err
-		//}
 		if model.NotExist == 0 {
 			result = append(result, *model)
 		}
@@ -193,8 +150,6 @@ func (s BmClassResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Respon
 	return uint(count), &Response{Res: result, QueryRes: "classes", TotalPage: pages, TotalCount: count}, nil
 }
 
-// FindOne to satisfy `api2go.DataSource` interface
-// this method should return the modelRoot with the given ID, otherwise an error
 func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmClassStorage.GetOne(ID)
 	now := float64(time.Now().UnixNano() / 1e6)
@@ -216,7 +171,6 @@ func (s BmClassResource) FindOne(ID string, r api2go.Request) (api2go.Responder,
 	return &Response{Res: model}, nil
 }
 
-// Create method to satisfy `api2go.DataSource` interface
 func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	model, ok := obj.(BmModel.Class)
 	if !ok {
@@ -230,7 +184,6 @@ func (s BmClassResource) Create(obj interface{}, r api2go.Request) (api2go.Respo
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
-// Delete to satisfy `api2go.DataSource` interface
 func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmClassStorage.GetOne(id)
 	now := float64(time.Now().UnixNano() / 1e6)
@@ -247,6 +200,14 @@ func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, 
 	}
 	if model.Execute == 0 {
 		s.BmClassStorage.Delete(id)
+		r.QueryParams["class-id"] = []string{id}
+		us := s.BmUnitStorage.GetAll(r, -1, -1)
+		if len(us) != 0 {
+			for _, u := range us {
+				s.BmUnitStorage.Delete(u.ID)
+			}
+		}
+
 	}
 	if model.Execute==1{
 		panic("只允许停课，不允许删除")
@@ -257,7 +218,6 @@ func (s BmClassResource) Delete(id string, r api2go.Request) (api2go.Responder, 
 	return &Response{Code: http.StatusNoContent}, err
 }
 
-//Update stores all changes on the modelRoot
 func (s BmClassResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	model, ok := obj.(BmModel.Class)
 	if !ok {
@@ -301,7 +261,6 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Re
 	}
 
 	if model.ReservableID != "" {
-		//item, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
 		reservableitem, err := s.BmReservableitemStorage.GetOne(model.ReservableID)
 		if err != nil {
 			return err
@@ -311,38 +270,5 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Re
 	return nil
 }
 func (s BmClassResource) FilterClassByFlag(model *BmModel.Class, flag int) error {
-	/*switch flag {
-	case 0:
-	   if len(model.UnitsIDs) != 0 {
-		  model.ReSetCourseCount()
-	   }
-	   return nil
-	case -1:
-	   if len(model.UnitsIDs) == 0 {
-		  return nil
-	   }
-	case 1:
-	   if len(model.UnitsIDs) != 0 {
-		  var us BmModel.Units
-		  us = model.Units
-		  us.SortByEndDate(false)
-		  now := float64(time.Now().UnixNano() / 1e6)
-		  if us[0].EndDate > now {
-			 model.ReSetCourseCount()
-			 return nil
-		  }
-	   }
-	case 2:
-	   if len(model.UnitsIDs) != 0 {
-		  var us BmModel.Units
-		  us = model.Units
-		  us.SortByEndDate(false)
-		  now := float64(time.Now().UnixNano() / 1e6)
-		  if us[0].EndDate <= now {
-			 model.ReSetCourseCount()
-			 return nil
-		  }
-	   }
-	}*/
 	return errors.New("not found")
 }
