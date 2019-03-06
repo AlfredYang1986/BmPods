@@ -10,31 +10,54 @@ import (
 )
 
 type BmCategoryResource struct {
-	CategoryStorage *BmDataStorage.BmCategoryStorage
-	BmBrandStorage  *BmDataStorage.BmBrandStorage
+	CategoryStorage 	  *BmDataStorage.BmCategoryStorage
+	BmBrandStorage  	  *BmDataStorage.BmBrandStorage
+	BmSessioninfoStorage  *BmDataStorage.BmSessioninfoStorage
 }
 
 func (c BmCategoryResource) NewCategoryResource(args []BmDataStorage.BmStorage) BmCategoryResource {
 	var as *BmDataStorage.BmCategoryStorage
 	var bs *BmDataStorage.BmBrandStorage
+	var ss *BmDataStorage.BmSessioninfoStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmCategoryStorage" {
 			as = arg.(*BmDataStorage.BmCategoryStorage)
 		} else if tp.Name() == "BmBrandStorage" {
 			bs = arg.(*BmDataStorage.BmBrandStorage)
+		} else if tp.Name() == "BmSessioninfoStorage" {
+			ss = arg.(*BmDataStorage.BmSessioninfoStorage)
 		}
 	}
-	return BmCategoryResource{CategoryStorage: as, BmBrandStorage: bs}
+	return BmCategoryResource{CategoryStorage: as, BmBrandStorage: bs,BmSessioninfoStorage:ss}
 }
 
 // FindAll apeolates
 func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	brandsID, ok := r.QueryParams["brandsID"]
 	result:=[]BmModel.Category{}
+	sessioninfosID, ok:= r.QueryParams["sessioninfosID"]
+	if ok {
+		modelRootID := sessioninfosID[0]
+		modelRoot, err := c.BmSessioninfoStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.CategoryID
+		if modelID != "" {
+			model, err := c.CategoryStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			//result = append(result, model)
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
+	brandsID, ok:= r.QueryParams["brandsID"]
 	if ok {
 		modelRootID := brandsID[0]
-
 		modelRoot, err := c.BmBrandStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
@@ -46,7 +69,6 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 				return &Response{}, err
 			}
 			//result = append(result, model)
-
 			return &Response{Res: model}, nil
 		} else {
 			return &Response{}, err
