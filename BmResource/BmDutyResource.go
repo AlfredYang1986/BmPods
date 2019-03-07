@@ -12,27 +12,46 @@ import (
 
 type BmDutyResource struct {
 	BmDutyStorage    *BmDataStorage.BmDutyStorage
+	BmClassStorage *BmDataStorage.BmClassStorage
 	BmTeacherStorage *BmDataStorage.BmTeacherStorage
 }
 
 func (s BmDutyResource) NewDutyResource(args []BmDataStorage.BmStorage) *BmDutyResource {
 	var ds *BmDataStorage.BmDutyStorage
 	var ts *BmDataStorage.BmTeacherStorage
+	var cs *BmDataStorage.BmClassStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmDutyStorage" {
 			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmTeacherStorage" {
 			ts = arg.(*BmDataStorage.BmTeacherStorage)
+		} else if tp.Name() == "BmClassStorage" {
+			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return &BmDutyResource{BmDutyStorage: ds, BmTeacherStorage: ts}
+	return &BmDutyResource{BmDutyStorage: ds, BmTeacherStorage: ts, BmClassStorage: cs}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmDutyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	duties := s.BmDutyStorage.GetAll(r, -1, -1)
-	return &Response{Res: duties}, nil
+
+	classesID, ok := r.QueryParams["classesID"]
+	if ok {
+		modelRootID := classesID[0]
+		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		if len(modelRoot.DutiesIDs) != 0 {
+			r.QueryParams["dutiesids"] = modelRoot.DutiesIDs
+			models := s.BmDutyStorage.GetAll(r, -1, -1)
+			return &Response{Res: models}, nil
+		}
+		return &Response{}, nil
+	}
+
+	return &Response{}, nil
 }
 
 // PaginatedFindAll can be used to load users in chunks

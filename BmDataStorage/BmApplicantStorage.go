@@ -10,7 +10,6 @@ import (
 	"net/http"
 )
 
-// ApplicantStorage stores all users
 type BmApplicantStorage struct {
 	db *BmMongodb.BmMongodb
 }

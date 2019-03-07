@@ -15,12 +15,14 @@ type BmYardResource struct {
 	BmYardStorage  *BmDataStorage.BmYardStorage
 	BmImageStorage *BmDataStorage.BmImageStorage
 	BmRoomStorage  *BmDataStorage.BmRoomStorage
+	BmClassStorage  *BmDataStorage.BmClassStorage
 }
 
 func (s BmYardResource) NewYardResource(args []BmDataStorage.BmStorage) BmYardResource {
 	var ys *BmDataStorage.BmYardStorage
 	var is *BmDataStorage.BmImageStorage
 	var rs *BmDataStorage.BmRoomStorage
+	var cs *BmDataStorage.BmClassStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmYardStorage" {
@@ -29,13 +31,35 @@ func (s BmYardResource) NewYardResource(args []BmDataStorage.BmStorage) BmYardRe
 			is = arg.(*BmDataStorage.BmImageStorage)
 		} else if tp.Name() == "BmRoomStorage" {
 			rs = arg.(*BmDataStorage.BmRoomStorage)
+		} else if tp.Name() == "BmClassStorage" {
+			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return BmYardResource{BmYardStorage: ys, BmImageStorage: is, BmRoomStorage: rs}
+	return BmYardResource{BmYardStorage: ys, BmImageStorage: is, BmRoomStorage: rs, BmClassStorage: cs}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmYardResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+
+	classesID, ok := r.QueryParams["classesID"]
+	if ok {
+		modelRootID := classesID[0]
+		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.YardID
+		if modelID != "" {
+			model, err := s.BmYardStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
 	models := s.BmYardStorage.GetAll(r, -1, -1)
 	return &Response{Res: models}, nil
 }

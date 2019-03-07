@@ -48,7 +48,6 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 			if err != nil {
 				return &Response{}, err
 			}
-			//result = append(result, model)
 			return &Response{Res: model}, nil
 		} else {
 			return &Response{}, err
@@ -68,14 +67,12 @@ func (c BmCategoryResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 			if err != nil {
 				return &Response{}, err
 			}
-			//result = append(result, model)
 			return &Response{Res: model}, nil
 		} else {
 			return &Response{}, err
 		}
 	}
 
-	//result := c.CategoryStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 

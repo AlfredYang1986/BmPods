@@ -16,38 +16,45 @@ type BmSessioninfoResource struct {
 	BmImageStorage          *BmDataStorage.BmImageStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
 	BmCategoryStorage       *BmDataStorage.BmCategoryStorage
+	BmClassStorage          *BmDataStorage.BmClassStorage
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 }
 
 func (s BmSessioninfoResource) NewSessioninfoResource(args []BmDataStorage.BmStorage) BmSessioninfoResource {
 	var us *BmDataStorage.BmSessioninfoStorage
 	var ts *BmDataStorage.BmCategoryStorage
-	var cs *BmDataStorage.BmImageStorage
+	var is *BmDataStorage.BmImageStorage
+	var cs *BmDataStorage.BmClassStorage
 	var rs *BmDataStorage.BmReservableitemStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmSessioninfoStorage" {
 			us = arg.(*BmDataStorage.BmSessioninfoStorage)
 		} else if tp.Name() == "BmImageStorage" {
-			cs = arg.(*BmDataStorage.BmImageStorage)
+			is = arg.(*BmDataStorage.BmImageStorage)
 		} else if tp.Name() == "BmCategoryStorage" {
 			ts = arg.(*BmDataStorage.BmCategoryStorage)
 		} else if tp.Name() == "BmReservableitemStorage" {
 			rs = arg.(*BmDataStorage.BmReservableitemStorage)
+		} else if tp.Name() == "BmClassStorage" {
+			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return BmSessioninfoResource{BmSessioninfoStorage: us,
-		BmImageStorage:          cs,
+	return BmSessioninfoResource{
+		BmSessioninfoStorage:    us,
+		BmImageStorage:          is,
 		BmCategoryStorage:       ts,
-		BmReservableitemStorage: rs}
+		BmReservableitemStorage: rs,
+		BmClassStorage:          cs,
+	}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+
 	resid, ok := r.QueryParams["reservableitemsID"]
 	if ok {
 		modelRootID := resid[0]
-
 		modelRoot, err := s.BmReservableitemStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
@@ -58,28 +65,33 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			if err != nil {
 				return &Response{}, err
 			}
-			model.Images = []*BmModel.Image{}
-			r.QueryParams["imageids"] = model.ImagesIDs
-			imageids := s.BmImageStorage.GetAll(r)
-			for _, image := range imageids {
-				model.Images = append(model.Images, &image)
-			}
-
-			if model.CategoryID != "" {
-				cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
-				if err != nil {
-					return &Response{}, err
-				}
-				model.Category = &cate
-			}
-
-			//result = append(result, model)
 
 			return &Response{Res: model}, nil
 		} else {
 			return &Response{}, err
 		}
 	}
+
+	classesID, ok := r.QueryParams["classesID"]
+	if ok {
+		modelRootID := classesID[0]
+		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.SessioninfoID
+		if modelID != "" {
+			model, err := s.BmSessioninfoStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
 	models := s.BmSessioninfoStorage.GetAll(r, -1, -1)
 
 	return &Response{Res: models}, nil
@@ -140,7 +152,7 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 		take = int(limitI)
 	}
 
-	models :=s.BmSessioninfoStorage.GetAll(r, skip, take)
+	models := s.BmSessioninfoStorage.GetAll(r, skip, take)
 
 	in := BmModel.Sessioninfo{}
 	count := s.BmSessioninfoStorage.Count(r, in)
@@ -148,25 +160,14 @@ func (s BmSessioninfoResource) PaginatedFindAll(r api2go.Request) (uint, api2go.
 	return uint(count), &Response{Res: models, QueryRes: "reservableitems", TotalPage: pages, TotalCount: count}, nil
 }
 
-// FindOne to satisfy `api2go.DataSource` interface
-// this method should return the model with the given ID, otherwise an error
 func (s BmSessioninfoResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
 	model, err := s.BmSessioninfoStorage.GetOne(ID)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-	model.Images = []*BmModel.Image{}
-	r.QueryParams["imageids"] = model.ImagesIDs
-	imageids := s.BmImageStorage.GetAll(r)
-	for _, image := range imageids {
-		model.Images = append(model.Images, &image)
-	}
-	if model.CategoryID != "" {
-		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Category = &cate
+	err = s.ResetReferencedModel(&model, &r)
+	if err != nil {
+		return &Response{}, err
 	}
 	return &Response{Res: model}, nil
 }
@@ -193,18 +194,34 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 	return &Response{Res: model, Code: http.StatusCreated}, nil
 }
 
-// Delete to satisfy `api2go.DataSource` interface
 func (s BmSessioninfoResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	panic("sessioninfo不可被删除")
 }
 
-//Update stores all changes on the model
 func (s BmSessioninfoResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	model, ok := obj.(BmModel.Sessioninfo)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
-
 	err := s.BmSessioninfoStorage.Update(model)
 	return &Response{Res: model, Code: http.StatusNoContent}, err
+}
+
+func (s BmSessioninfoResource) ResetReferencedModel(model *BmModel.Sessioninfo, r *api2go.Request) error {
+
+	model.Images = []*BmModel.Image{}
+	r.QueryParams["imageids"] = model.ImagesIDs
+	imageids := s.BmImageStorage.GetAll(*r)
+	for _, image := range imageids {
+		model.Images = append(model.Images, &image)
+	}
+	if model.CategoryID != "" {
+		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)
+		if err != nil {
+			return err
+		}
+		model.Category = &cate
+	}
+
+	return nil
 }

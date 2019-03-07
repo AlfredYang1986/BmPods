@@ -53,6 +53,7 @@ func (s BmClassResource) NewClassResource(args []BmDataStorage.BmStorage) *BmCla
 
 func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Class
+
 	unitsID, ok := r.QueryParams["unitsID"]
 	if ok {
 		modelRootID := unitsID[0]
@@ -66,7 +67,6 @@ func (s BmClassResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			//result = append(result, model)
 			return &Response{Res: model}, nil
 		} else {
 			return &Response{}, err
@@ -286,6 +286,7 @@ func (s BmClassResource) ResetReferencedModel(model *BmModel.Class, r *api2go.Re
 	}
 	return nil
 }
+
 func (s BmClassResource) FilterClassByFlag(model *BmModel.Class, flag int) error {
 	return errors.New("not found")
 }

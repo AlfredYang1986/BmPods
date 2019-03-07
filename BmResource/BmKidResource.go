@@ -12,43 +12,64 @@ import (
 type BmKidResource struct {
 	BmKidStorage   *BmDataStorage.BmKidStorage
 	BmApplyStorage *BmDataStorage.BmApplyStorage
+	BmStudentStorage *BmDataStorage.BmStudentStorage
 }
 
 func (c BmKidResource) NewKidResource(args []BmDataStorage.BmStorage) BmKidResource {
 	var us *BmDataStorage.BmApplyStorage
 	var cs *BmDataStorage.BmKidStorage
+	var ss *BmDataStorage.BmStudentStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmApplyStorage" {
 			us = arg.(*BmDataStorage.BmApplyStorage)
 		} else if tp.Name() == "BmKidStorage" {
 			cs = arg.(*BmDataStorage.BmKidStorage)
+		} else if tp.Name() == "BmStudentStorage" {
+			ss = arg.(*BmDataStorage.BmStudentStorage)
 		}
 	}
-	return BmKidResource{BmApplyStorage: us, BmKidStorage: cs}
+	return BmKidResource{BmApplyStorage: us, BmKidStorage: cs, BmStudentStorage: ss}
 }
 
 // FindAll kids
 func (c BmKidResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	kidsID, ok := r.QueryParams["kidsID"]
-	kids := c.BmKidStorage.GetAll(r)
+	appliesID, ok := r.QueryParams["appliesID"]
 	if ok {
-		modelID := kidsID[0]
-		filteredLeafs := []BmModel.Kid{}
-		model, err := c.BmApplyStorage.GetOne(modelID)
+		modelRootID := appliesID[0]
+		modelRoot, err := c.BmApplyStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}
-		for _, modelLeafID := range model.KidsIDs {
-			sweet, err := c.BmKidStorage.GetOne(modelLeafID)
+		if len(modelRoot.KidsIDs) != 0 {
+			r.QueryParams["kidsids"] = modelRoot.KidsIDs
+			models := c.BmKidStorage.GetAll(r)
+			return &Response{Res: models}, nil
+		}
+		return &Response{}, nil
+	}
+
+	studentsID, ok := r.QueryParams["studentsID"]
+	if ok {
+		modelRootID := studentsID[0]
+		modelRoot, err := c.BmStudentStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.KidID
+		if modelID != "" {
+			model, err := c.BmKidStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
-			filteredLeafs = append(filteredLeafs, sweet)
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
 		}
-
-		return &Response{Res: filteredLeafs}, nil
+		return &Response{}, nil
 	}
+
+	kids := c.BmKidStorage.GetAll(r)
 	return &Response{Res: kids}, nil
 }
 

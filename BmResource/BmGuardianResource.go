@@ -40,12 +40,10 @@ func (c BmGuardianResource) FindAll(r api2go.Request) (api2go.Responder, error) 
 		if err != nil {
 			return &Response{}, err
 		}
-		for _, modelID := range modelRoot.GuardiansIDs {
-			model, err := c.BmGuardianStorage.GetOne(modelID)
-			if err != nil {
-				return &Response{}, err
-			}
-			result = append(result, model)
+		if len(modelRoot.GuardiansIDs) != 0 {
+			r.QueryParams["guardiansids"] = modelRoot.GuardiansIDs
+			models := c.BmGuardianStorage.GetAll(r)
+			return &Response{Res: models}, nil
 		}
 
 		return &Response{Res: result}, nil

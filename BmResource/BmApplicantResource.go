@@ -10,23 +10,69 @@ import (
 )
 
 type BmApplicantResource struct {
-	ApplicantStorage *BmDataStorage.BmApplicantStorage
+	BmApplicantStorage *BmDataStorage.BmApplicantStorage
+	BmApplyStorage     *BmDataStorage.BmApplyStorage
+	BmKidStorage       *BmDataStorage.BmKidStorage
 }
 
 func (c BmApplicantResource) NewApplicantResource(args []BmDataStorage.BmStorage) BmApplicantResource {
+	var ks *BmDataStorage.BmKidStorage
 	var as *BmDataStorage.BmApplicantStorage
+	var apys *BmDataStorage.BmApplyStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmApplicantStorage" {
 			as = arg.(*BmDataStorage.BmApplicantStorage)
+		} else if tp.Name() == "BmApplyStorage" {
+			apys = arg.(*BmDataStorage.BmApplyStorage)
+		} else if tp.Name() == "BmKidStorage" {
+			ks = arg.(*BmDataStorage.BmKidStorage)
 		}
 	}
-	return BmApplicantResource{ApplicantStorage: as}
+	return BmApplicantResource{BmApplicantStorage: as, BmApplyStorage: apys, BmKidStorage: ks}
 }
 
-// FindAll apeolates
 func (c BmApplicantResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	result := c.ApplicantStorage.GetAll(r, -1, -1)
+
+	appliesID, ok := r.QueryParams["appliesID"]
+	if ok {
+		modelRootID := appliesID[0]
+		modelRoot, err := c.BmApplyStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.ApplicantID
+		if modelID != "" {
+			model, err := c.BmApplicantStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
+	kidsID, ok := r.QueryParams["kidsID"]
+	if ok {
+		modelRootID := kidsID[0]
+		modelRoot, err := c.BmKidStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.ApplicantID
+		if modelID != "" {
+			model, err := c.BmApplicantStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
+	result := c.BmApplicantStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
@@ -37,7 +83,7 @@ func (s BmApplicantResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Re
 
 // FindOne ape
 func (c BmApplicantResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	res, err := c.ApplicantStorage.GetOne(ID)
+	res, err := c.BmApplicantStorage.GetOne(ID)
 	return &Response{Res: res}, err
 }
 
@@ -48,14 +94,14 @@ func (c BmApplicantResource) Create(obj interface{}, r api2go.Request) (api2go.R
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	id := c.ApplicantStorage.Insert(ape)
+	id := c.BmApplicantStorage.Insert(ape)
 	ape.ID = id
 	return &Response{Res: ape, Code: http.StatusCreated}, nil
 }
 
 // Delete a ape :(
 func (c BmApplicantResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.ApplicantStorage.Delete(id)
+	err := c.BmApplicantStorage.Delete(id)
 	return &Response{Code: http.StatusOK}, err
 }
 
@@ -66,6 +112,6 @@ func (c BmApplicantResource) Update(obj interface{}, r api2go.Request) (api2go.R
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	err := c.ApplicantStorage.Update(ape)
+	err := c.BmApplicantStorage.Update(ape)
 	return &Response{Res: ape, Code: http.StatusNoContent}, err
 }
