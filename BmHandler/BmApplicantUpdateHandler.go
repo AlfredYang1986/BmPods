@@ -1,37 +1,27 @@
 package BmHandler
 
 import (
-	"crypto/md5"
 	"encoding/json"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"reflect"
-	"time"
 
-	"github.com/julienschmidt/httprouter"
-	"gopkg.in/mgo.v2/bson"
-
+	"github.com/alfredyang1986/BmPods/BmModel"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"github.com/alfredyang1986/BmPods/BmModel"
-
+	"github.com/julienschmidt/httprouter"
 )
 
-type AccountHandler struct {
+type ApplicantUpdateHandler struct {
 	Method     string
 	HttpMethod string
 	Args       []string
 	db         *BmMongodb.BmMongodb
-	rd         *BmRedis.BmRedis
 }
 
-func (h AccountHandler) NewAccountHandler(args ...interface{}) AccountHandler {
+func (h ApplicantUpdateHandler) NewApplicantUpdateHandler(args ...interface{}) ApplicantUpdateHandler {
 	var m *BmMongodb.BmMongodb
-	var r *BmRedis.BmRedis
 	var hm string
 	var md string
 	var ag []string
@@ -43,9 +33,6 @@ func (h AccountHandler) NewAccountHandler(args ...interface{}) AccountHandler {
 				tm := reflect.ValueOf(tp).Elem().Type()
 				if tm.Name() == "BmMongodb" {
 					m = dm.(*BmMongodb.BmMongodb)
-				}
-				if tm.Name() == "BmRedis" {
-					r = dm.(*BmRedis.BmRedis)
 				}
 			}
 		} else if i == 1 {
@@ -61,10 +48,18 @@ func (h AccountHandler) NewAccountHandler(args ...interface{}) AccountHandler {
 		}
 	}
 
-	return AccountHandler{Method: md, HttpMethod: hm, Args: ag, db: m, rd: r}
+	return ApplicantUpdateHandler{Method: md, HttpMethod: hm, Args: ag, db: m}
 }
 
-func (h AccountHandler) AccountValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+func (h ApplicantUpdateHandler) GetHttpMethod() string {
+	return h.HttpMethod
+}
+
+func (h ApplicantUpdateHandler) GetHandlerMethod() string {
+	return h.Method
+}
+
+func (h ApplicantUpdateHandler) UpdateApplicant(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	w.Header().Add("Content-Type", "application/json")
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -73,47 +68,28 @@ func (h AccountHandler) AccountValidation(w http.ResponseWriter, r *http.Request
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return 1
 	}
-	res := BmModel.Account{}
-	json.Unmarshal(body, &res)
-	var out BmModel.Account
-	cond := bson.M{"account": res.Account, "password": res.Password}
-	err = h.db.FindOneByCondition(&res, &out, cond)
+	req := BmModel.Applicant{}
+	json.Unmarshal(body, &req)
+
+	err = h.db.Update(&req)
 
 	response := map[string]interface{}{
 		"status": "",
-		"result": nil,
 		"error":  nil,
 	}
 
-	if err == nil && out.ID != "" {
-		hex := md5.New()
-		io.WriteString(hex, out.ID)
-		out.Password = ""
-		token := fmt.Sprintf("%x", hex.Sum(nil))
-		err = h.rd.PushToken(token, time.Hour*24*365)
-		out.Token = token
-
+	if err == nil {
 		response["status"] = "ok"
-		response["result"] = out
 		response["error"] = err
-
-		//reval, _ := json.Marshal(response)
 		enc := json.NewEncoder(w)
 		enc.Encode(response)
 		return 0
 	} else {
 		response["status"] = "error"
-		response["error"] = "账户或密码错误！"
+		response["error"] = err.Error()
 		enc := json.NewEncoder(w)
 		enc.Encode(response)
 		return 1
 	}
-}
 
-func (h AccountHandler) GetHttpMethod() string {
-	return h.HttpMethod
-}
-
-func (h AccountHandler) GetHandlerMethod() string {
-	return h.Method
 }

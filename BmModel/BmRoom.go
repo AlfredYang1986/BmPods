@@ -46,6 +46,14 @@ func (u *Room) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			} else {
 				rst[k] = val
 			}
+		case "roomids":
+			r:=make(map[string]interface{})
+			var ids []bson.ObjectId
+			for i:=0;i<len(v);i++{
+				ids=append(ids,bson.ObjectIdHex(v[i]))
+			}
+			r["$in"]=ids
+			rst["_id"] = r
 		}
 	}
 	return rst

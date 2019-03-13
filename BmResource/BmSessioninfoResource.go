@@ -65,6 +65,10 @@ func (s BmSessioninfoResource) FindAll(r api2go.Request) (api2go.Responder, erro
 			if err != nil {
 				return &Response{}, err
 			}
+			err = s.ResetReferencedModel(&model, &r)
+			if err != nil {
+				return &Response{}, err
+			}
 
 			return &Response{Res: model}, nil
 		} else {
@@ -212,8 +216,8 @@ func (s BmSessioninfoResource) ResetReferencedModel(model *BmModel.Sessioninfo, 
 	model.Images = []*BmModel.Image{}
 	r.QueryParams["imageids"] = model.ImagesIDs
 	imageids := s.BmImageStorage.GetAll(*r)
-	for _, image := range imageids {
-		model.Images = append(model.Images, &image)
+	for i, _ := range imageids {
+		model.Images = append(model.Images, &imageids[i])
 	}
 	if model.CategoryID != "" {
 		cate, err := s.BmCategoryStorage.GetOne(model.CategoryID)

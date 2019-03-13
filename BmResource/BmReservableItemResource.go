@@ -15,13 +15,16 @@ import (
 type BmReservableitemResource struct {
 	BmReservableitemStorage *BmDataStorage.BmReservableitemStorage
 	BmSessioninfoStorage    *BmDataStorage.BmSessioninfoStorage
-	BmClassStorage    	    *BmDataStorage.BmClassStorage
-
+	BmCategoryStorage       *BmDataStorage.BmCategoryStorage
+	BmImageStorage          *BmDataStorage.BmImageStorage
+	BmClassStorage          *BmDataStorage.BmClassStorage
 }
 
 func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage.BmStorage) *BmReservableitemResource {
 	var us *BmDataStorage.BmReservableitemStorage
 	var ts *BmDataStorage.BmSessioninfoStorage
+	var gs *BmDataStorage.BmCategoryStorage
+	var is *BmDataStorage.BmImageStorage
 	var cs *BmDataStorage.BmClassStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
@@ -29,16 +32,20 @@ func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage
 			us = arg.(*BmDataStorage.BmReservableitemStorage)
 		} else if tp.Name() == "BmSessioninfoStorage" {
 			ts = arg.(*BmDataStorage.BmSessioninfoStorage)
+		} else if tp.Name() == "BmCategoryStorage" {
+			gs = arg.(*BmDataStorage.BmCategoryStorage)
+		} else if tp.Name() == "BmImageStorage" {
+			is = arg.(*BmDataStorage.BmImageStorage)
 		} else if tp.Name() == "BmClassStorage" {
 			cs = arg.(*BmDataStorage.BmClassStorage)
 		}
 	}
-	return &BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts,BmClassStorage:cs}
+	return &BmReservableitemResource{BmReservableitemStorage: us, BmSessioninfoStorage: ts, BmCategoryStorage: gs, BmImageStorage: is, BmClassStorage: cs}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	classesID, ok:= r.QueryParams["classesID"]
+	classesID, ok := r.QueryParams["classesID"]
 	if ok {
 		modelRootID := classesID[0]
 		modelRoot, err := s.BmClassStorage.GetOne(modelRootID)
@@ -57,7 +64,7 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 			return &Response{}, err
 		}
 	}
-		
+
 	models := s.BmReservableitemStorage.GetAll(r, -1, -1)
 	return &Response{Res: models}, nil
 }
@@ -67,7 +74,7 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 	var (
 		result                      []BmModel.Reservableitem
 		number, size, offset, limit string
-		skip, take, pages    int
+		skip, take, pages           int
 	)
 
 	numberQuery, ok := r.QueryParams["page[number]"]
@@ -102,7 +109,7 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 
 		skip = int(start)
 		take = int(sizeI)
-		
+
 	} else {
 		limitI, err := strconv.ParseUint(limit, 10, 64)
 		if err != nil {
@@ -120,20 +127,19 @@ func (s BmReservableitemResource) PaginatedFindAll(r api2go.Request) (uint, api2
 	for _, model := range s.BmReservableitemStorage.GetAll(r, skip, take) {
 		now := float64(time.Now().UnixNano() / 1e6)
 		if now <= model.StartDate {
-			model.Execute=0
-		}else if now > model.StartDate && now <= model.EndDate{
-			model.Execute=2
-		}else{
-			model.Execute=1
+			model.Execute = 0
+		} else if now > model.StartDate && now <= model.EndDate {
+			model.Execute = 2
+		} else {
+			model.Execute = 1
 		}
 		result = append(result, *model)
 	}
 
-
 	in := BmModel.Reservableitem{}
 	count := s.BmReservableitemStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
-	return uint(count), &Response{Res: result, QueryRes: "reservableitems", TotalPage: pages, TotalCount:count}, nil
+	return uint(count), &Response{Res: result, QueryRes: "reservableitems", TotalPage: pages, TotalCount: count}, nil
 }
 
 // FindOne to satisfy `api2go.DataSource` interface
@@ -145,17 +151,32 @@ func (s BmReservableitemResource) FindOne(ID string, r api2go.Request) (api2go.R
 	}
 	now := float64(time.Now().UnixNano() / 1e6)
 	if now <= model.StartDate {
-		model.Execute=0
-	}else if now > model.StartDate && now <= model.EndDate{
-		model.Execute=2
-	}else{
-		model.Execute=1
+		model.Execute = 0
+	} else if now > model.StartDate && now <= model.EndDate {
+		model.Execute = 2
+	} else {
+		model.Execute = 1
 	}
 	if model.SessioninfoID != "" {
 		sessioninfo, err := s.BmSessioninfoStorage.GetOne(model.SessioninfoID)
 		if err != nil {
 			return &Response{}, err
 		}
+
+		sessioninfo.Images = []*BmModel.Image{}
+		r.QueryParams["imageids"] = sessioninfo.ImagesIDs
+		imageids := s.BmImageStorage.GetAll(r)
+		for i, _ := range imageids {
+			sessioninfo.Images = append(sessioninfo.Images, &imageids[i])
+		}
+		if sessioninfo.CategoryID != "" {
+			cate, err := s.BmCategoryStorage.GetOne(sessioninfo.CategoryID)
+			if err != nil {
+				return &Response{}, err
+			}
+			sessioninfo.Category = &cate
+		}
+
 		model.Sessioninfo = &sessioninfo
 	}
 	return &Response{Res: model}, nil

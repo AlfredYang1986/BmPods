@@ -135,21 +135,17 @@ func (s BmYardResource) FindOne(ID string, r api2go.Request) (api2go.Responder, 
 	}
 
 	model.Images = []*BmModel.Image{}
-	for _, kID := range model.ImagesIDs {
-		choc, err := s.BmImageStorage.GetOne(kID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Images = append(model.Images, &choc)
+	r.QueryParams["imageids"] = model.ImagesIDs
+	images := s.BmImageStorage.GetAll(r)
+	for i, _ := range images {
+		model.Images = append(model.Images, &images[i])
 	}
 
 	model.Rooms = []*BmModel.Room{}
-	for _, kID := range model.RoomsIDs {
-		choc, err := s.BmRoomStorage.GetOne(kID)
-		if err != nil {
-			return &Response{}, err
-		}
-		model.Rooms = append(model.Rooms, &choc)
+	r.QueryParams["roomids"] = model.ImagesIDs
+	rooms := s.BmRoomStorage.GetAll(r, -1, -1)
+	for i, _ := range rooms {
+		model.Rooms = append(model.Rooms, &rooms[i])
 	}
 
 	return &Response{Res: model}, nil

@@ -86,16 +86,17 @@ var BLACKMIRROR_DAEMON_FACTORY = map[string]interface{}{
 }
 
 var BLACKMIRROR_FUNCTION_FACTORY = map[string]interface{}{
-	"BmProvinceHandler":    BmHandler.ProvinceHandler{},
-	"BmCityHandler":        BmHandler.CityHandler{},
-	"BmDistrictHandler":    BmHandler.DistrictHandler{},
-	"BmUploadToOssHandler": BmHandler.UploadToOssHandler{},
-	"BmAccountHandler":     BmHandler.AccountHandler{},
-	"BmApplicantHandler":   BmHandler.ApplicantHandler{},
-	"BmWeChatHandler":      BmHandler.WeChatHandler{},
-	"BmCommonPanicHandle":  BmHandler.CommonPanicHandle{},
-	"BmGenerateSmsHandler": BmHandler.GenerateSmsHandler{},
-	"BmVerifiedSmsHandler": BmHandler.VerifiedSmsHandler{},
+	"BmProvinceHandler":        BmHandler.ProvinceHandler{},
+	"BmCityHandler":            BmHandler.CityHandler{},
+	"BmDistrictHandler":        BmHandler.DistrictHandler{},
+	"BmUploadToOssHandler":     BmHandler.UploadToOssHandler{},
+	"BmAccountHandler":         BmHandler.AccountHandler{},
+	"BmApplicantHandler":       BmHandler.ApplicantHandler{},
+	"BmApplicantUpdateHandler": BmHandler.ApplicantUpdateHandler{},
+	"BmWeChatHandler":          BmHandler.WeChatHandler{},
+	"BmCommonPanicHandle":      BmHandler.CommonPanicHandle{},
+	"BmGenerateSmsHandler":     BmHandler.GenerateSmsHandler{},
+	"BmVerifiedSmsHandler":     BmHandler.VerifiedSmsHandler{},
 }
 
 var BLACKMIRROR_MIDDLEWARE_FACTORY = map[string]interface{}{
