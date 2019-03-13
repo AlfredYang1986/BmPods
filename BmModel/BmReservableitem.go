@@ -93,6 +93,22 @@ func (u *Reservableitem) GetConditionsBsonM(parameters map[string][]string) bson
 				panic(err.Error())
 			}
 			rst[k] = val
+		case "ne[start-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$ne"] = val
+			rst["start-date"] = r
+		case "ne[end-date]":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			r := make(map[string]interface{})
+			r["$ne"] = val
+			rst["end-date"] = r
 		case "archive":
 			val, err := strconv.ParseFloat(v[0], 64)
 			if err != nil {
