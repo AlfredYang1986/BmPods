@@ -183,6 +183,14 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
+	imagesIDs := []string{}
+	for _, img := range model.ImagesIDs {
+		if img != "" {
+			imagesIDs = append(imagesIDs, img)
+		}
+	}
+	model.ImagesIDs = imagesIDs
+
 	id := s.BmSessioninfoStorage.Insert(model)
 	model.ID = id
 
@@ -207,6 +215,15 @@ func (s BmSessioninfoResource) Update(obj interface{}, r api2go.Request) (api2go
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
+
+	imagesIDs := []string{}
+	for _, img := range model.ImagesIDs {
+		if img != "" {
+			imagesIDs = append(imagesIDs, img)
+		}
+	}
+	model.ImagesIDs = imagesIDs
+
 	err := s.BmSessioninfoStorage.Update(model)
 	return &Response{Res: model, Code: http.StatusNoContent}, err
 }
