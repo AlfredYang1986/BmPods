@@ -13,14 +13,9 @@ type Student struct {
 
 	BrandId string `json:"brand-id" bson:"brand-id"`
 
-	// 顾问， 关联关系 teacher
-	//TeacherId   string `json:"teacher-id" bson:"teacher-id"`
-	//TeacherName string `json:"teacher-name" bson:"teacher-name"`
-
 	SourceWay string `json:"source-way" bson:"source-way"` // 来源于
-
 	Intro       string  `json:"intro" bson:"intro"`
-	Status      string  `json:"status" bson:"status"` //未付款-candidate, 已付款-stud
+	Status      float64  `json:"status" bson:"status"` //0-潜在, 1-正式, -1-休学
 	LessonCount float64 `json:"lesson-count" bson:"lesson-count"`
 
 	Name       string  `json:"name" bson:"name"`
