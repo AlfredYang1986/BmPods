@@ -191,8 +191,13 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
-		case "kid-id":
-			rst[k] = v[0]
+		case "kidids":
+			var kidids []string
+			for i:=0;i<len(v);i++{
+				kidids=append(kidids, v[i])
+			}
+			r["$in"]=kidids
+			rst["kid-id"] = r
 		}
 	}
 	return rst

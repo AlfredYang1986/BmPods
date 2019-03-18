@@ -50,6 +50,7 @@ func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *B
 // FindAll to satisfy api2go data source interface
 func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []BmModel.Student
+	var kidsids []string
 	contact, ok := r.QueryParams["contact"]
 	r.QueryParams["regi-phone"]=contact
 	if ok {
@@ -57,12 +58,13 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 		for _,applient:=range applients{
 			r.QueryParams["applicant-id"]=[]string{applient.ID}
 			kids := s.BmKidStorage.GetAll(r)
-			for _,kid := range kids{		
-				r.QueryParams["kid-id"]=[]string{kid.ID}
-				students := s.BmStudentStorage.GetAll(r,-1,-1)
-				for _,student:=range students{
-					result = append(result,*student)
-				}
+			for _,kid := range kids{	
+				kidsids=append(kidsids,kid.ID)
+			}
+			r.QueryParams["kidids"]=kidsids
+			students := s.BmStudentStorage.GetAll(r,-1,-1)
+			for _,student:=range students{
+				result = append(result,*student)
 			}
 		}
 		return &Response{Res: result}, nil
@@ -144,6 +146,25 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 		take = int(limitI)
 	}
 
+	var kidsids []string
+	contact, ok := r.QueryParams["contact"]
+	r.QueryParams["regi-phone"]=contact
+	if ok {
+		applients := s.BmApplicantStorage.GetAll(r,-1,-1)
+		for _,applient:=range applients{
+			r.QueryParams["applicant-id"]=[]string{applient.ID}
+			kids := s.BmKidStorage.GetAll(r)
+			for _,kid := range kids{	
+				kidsids=append(kidsids,kid.ID)
+			}
+			r.QueryParams["kidids"]=kidsids
+			students := s.BmStudentStorage.GetAll(r,skip,take)
+			for _,student:=range students{
+				result = append(result,*student)
+			}
+		}
+		return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages, TotalCount: count}, nil
+	}
 	//查詢class下的students
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
