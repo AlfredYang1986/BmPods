@@ -64,8 +64,8 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 					result = append(result,*student)
 				}
 			}
-			return &Response{Res: result}, nil
 		}
+		return &Response{Res: result}, nil
 	}
 	//查詢 class 下的 students
 	classesID, ok := r.QueryParams["classesID"]
