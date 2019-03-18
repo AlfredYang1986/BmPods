@@ -31,7 +31,14 @@ func (u *Applicant) SetID(id string) error {
 }
 
 func (u *Applicant) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	for k, v := range parameters {
+		switch k {	
+		case "regi-phone":
+			rst[k] = v[0]
+		}
+	}
+	return rst
 }
 
 // TODO 老Model写法

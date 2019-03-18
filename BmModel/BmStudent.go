@@ -35,7 +35,7 @@ type Student struct {
 	School   string `json:"school" bson:"school"`
 	IdCardNo string `json:"id-card-no" bson:"id-card-no"`
 
-	KidID string `json:"-" bson:"kid-id"`
+	KidID string `json:"kid-id" bson:"kid-id"`
 	Kid   *Kid   `json:"-"`
 
 	Teacher   *Teacher `json:"-"`
@@ -191,6 +191,8 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
+		case "kid-id":
+			rst[k] = v[0]
 		}
 	}
 	return rst

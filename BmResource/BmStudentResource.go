@@ -13,11 +13,12 @@ import (
 )
 
 type BmStudentResource struct {
-	BmStudentStorage  *BmDataStorage.BmStudentStorage
-	BmKidStorage      *BmDataStorage.BmKidStorage
-	BmTeacherStorage  *BmDataStorage.BmTeacherStorage
-	BmGuardianStorage *BmDataStorage.BmGuardianStorage
-	BmClassStorage    *BmDataStorage.BmClassStorage
+	BmStudentStorage    *BmDataStorage.BmStudentStorage
+	BmKidStorage        *BmDataStorage.BmKidStorage
+	BmTeacherStorage    *BmDataStorage.BmTeacherStorage
+	BmGuardianStorage	*BmDataStorage.BmGuardianStorage
+	BmClassStorage   	*BmDataStorage.BmClassStorage
+	BmApplicantStorage *BmDataStorage.BmApplicantStorage
 }
 
 func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *BmStudentResource {
@@ -26,6 +27,7 @@ func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *B
 	var gs *BmDataStorage.BmGuardianStorage
 	var ts *BmDataStorage.BmTeacherStorage
 	var cs *BmDataStorage.BmClassStorage
+	var as *BmDataStorage.BmApplicantStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmStudentStorage" {
@@ -38,16 +40,33 @@ func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *B
 			ts = arg.(*BmDataStorage.BmTeacherStorage)
 		} else if tp.Name() == "BmClassStorage" {
 			cs = arg.(*BmDataStorage.BmClassStorage)
+		} else if tp.Name() == "BmApplicantStorage" {
+			as = arg.(*BmDataStorage.BmApplicantStorage)
 		}
 	}
-	return &BmStudentResource{BmStudentStorage: ss, BmKidStorage: ks, BmGuardianStorage: gs, BmTeacherStorage: ts, BmClassStorage: cs}
+	return &BmStudentResource{BmStudentStorage: ss, BmKidStorage: ks, BmGuardianStorage: gs, BmTeacherStorage: ts, BmClassStorage: cs,BmApplicantStorage: as}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-
 	var result []BmModel.Student
-
+	contact, ok := r.QueryParams["contact"]
+	r.QueryParams["regi-phone"]=contact
+	if ok {
+		applients := s.BmApplicantStorage.GetAll(r,-1,-1)
+		for _,applient:=range applients{
+			r.QueryParams["applicant-id"]=[]string{applient.ID}
+			kids := s.BmKidStorage.GetAll(r)
+			for _,kid := range kids{		
+				r.QueryParams["kid-id"]=[]string{kid.ID}
+				students := s.BmStudentStorage.GetAll(r,-1,-1)
+				for _,student:=range students{
+					result = append(result,*student)
+				}
+			}
+			return &Response{Res: result}, nil
+		}
+	}
 	//查詢 class 下的 students
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
