@@ -162,6 +162,8 @@ func (u *Sessioninfo) GetConditionsBsonM(parameters map[string][]string) bson.M 
 			rst[k] = val
 		case "sub-title":
 			rst[k] = v[0]
+		case "title":
+			rst[k] = v[0]
 		}
 	}
 	return rst

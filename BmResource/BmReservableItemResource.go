@@ -60,6 +60,19 @@ func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, e
 		}
 	}
 	
+	_, titleok := r.QueryParams["title"]
+	if titleok {
+		sessioninfos := s.BmSessioninfoStorage.GetAll(r,-1,-1)
+		for _,sessioninfo:=range sessioninfos{
+			r.QueryParams["sessioninfo-id"]=[]string{sessioninfo.ID}
+			reservableitems := s.BmReservableitemStorage.GetAll(r,-1,-1)		
+			for _,reservableitem:=range reservableitems{
+				result = append(result,*reservableitem)
+			}
+			return &Response{Res: result}, nil
+		}
+	}
+
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
 		modelRootID := classesID[0]
