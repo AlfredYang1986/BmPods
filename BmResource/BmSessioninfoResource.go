@@ -2,6 +2,8 @@ package BmResource
 
 import (
 	"errors"
+	"gopkg.in/mgo.v2/bson"
+
 	//"fmt"
 	"github.com/alfredyang1986/BmPods/BmDataStorage"
 	"github.com/alfredyang1986/BmPods/BmModel"
@@ -185,7 +187,7 @@ func (s BmSessioninfoResource) Create(obj interface{}, r api2go.Request) (api2go
 
 	imagesIDs := []string{}
 	for _, img := range model.ImagesIDs {
-		if img != "" {
+		if bson.IsObjectIdHex(img) {
 			imagesIDs = append(imagesIDs, img)
 		}
 	}
@@ -218,7 +220,7 @@ func (s BmSessioninfoResource) Update(obj interface{}, r api2go.Request) (api2go
 
 	imagesIDs := []string{}
 	for _, img := range model.ImagesIDs {
-		if img != "" {
+		if bson.IsObjectIdHex(img) {
 			imagesIDs = append(imagesIDs, img)
 		}
 	}
