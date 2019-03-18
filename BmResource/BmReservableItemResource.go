@@ -45,6 +45,21 @@ func (s BmReservableitemResource) NewReservableitemResource(args []BmDataStorage
 
 // FindAll to satisfy api2go data source interface
 func (s BmReservableitemResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+
+	var result []BmModel.Reservableitem
+	_, ok := r.QueryParams["sub-title"]
+	if ok {
+		sessioninfos := s.BmSessioninfoStorage.GetAll(r,-1,-1)
+		for _,sessioninfo:=range sessioninfos{
+			r.QueryParams["sessioninfo-id"]=[]string{sessioninfo.ID}
+			reservableitems := s.BmReservableitemStorage.GetAll(r,-1,-1)		
+			for _,reservableitem:=range reservableitems{
+				result = append(result,*reservableitem)
+			}
+			return &Response{Res: result}, nil
+		}
+	}
+	
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
 		modelRootID := classesID[0]

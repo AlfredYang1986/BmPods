@@ -160,6 +160,8 @@ func (u *Sessioninfo) GetConditionsBsonM(parameters map[string][]string) bson.M 
 				panic(err.Error())
 			}
 			rst[k] = val
+		case "sub-title":
+			rst[k] = v[0]
 		}
 	}
 	return rst

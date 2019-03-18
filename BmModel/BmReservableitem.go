@@ -119,6 +119,8 @@ func (u *Reservableitem) GetConditionsBsonM(parameters map[string][]string) bson
 			} else {
 				rst[k] = val
 			}
+		case "sessioninfo-id":
+			rst[k] = v[0]
 		}
 	}
 	return rst
