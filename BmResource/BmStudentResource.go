@@ -265,6 +265,9 @@ func (s BmStudentResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
+	//以reg-date作为学生注册时间，更新时更新create-time作为更新时间
+	user.CreateTime = float64(time.Now().UnixNano() / 1e6)
+
 	err := s.BmStudentStorage.Update(user)
 	return &Response{Res: user, Code: http.StatusNoContent}, err
 }
