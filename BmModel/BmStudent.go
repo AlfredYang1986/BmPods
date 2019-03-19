@@ -13,9 +13,9 @@ type Student struct {
 
 	BrandId string `json:"brand-id" bson:"brand-id"`
 
-	SourceWay string `json:"source-way" bson:"source-way"` // 来源于
+	SourceWay   string  `json:"source-way" bson:"source-way"` // 来源于
 	Intro       string  `json:"intro" bson:"intro"`
-	Status      float64  `json:"status" bson:"status"` //0-潜在, 1-正式, -1-休学
+	Status      float64 `json:"status" bson:"status"` //0-潜在, 1-正式, -1-休学
 	LessonCount float64 `json:"lesson-count" bson:"lesson-count"`
 
 	Name       string  `json:"name" bson:"name"`
@@ -33,13 +33,14 @@ type Student struct {
 	District string `json:"district" bson:"district"`
 	Address  string `json:"address" bson:"address"`
 	School   string `json:"school" bson:"school"`
+	Grade    string `json:"grade" bson:"grade"`
 	IdCardNo string `json:"id-card-no" bson:"id-card-no"`
 
 	KidID string `json:"kid-id" bson:"kid-id"`
 	Kid   *Kid   `json:"-"`
 
 	Teacher   *Teacher `json:"-"`
-	TeacherID string  `json:"-" bson:"teacher-id"`
+	TeacherID string   `json:"-" bson:"teacher-id"`
 
 	Guardians    []*Guardian `json:"-"`
 	GuardiansIDs []string    `json:"-" bson:"guardian-ids"`
@@ -111,11 +112,11 @@ func (u Student) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Guardians[key])
 	}
 
-	if u.TeacherID != "" && u.Teacher!=nil {
+	if u.TeacherID != "" && u.Teacher != nil {
 		result = append(result, u.Teacher)
 	}
 
-	if u.KidID != ""&& u.Kid!=nil {
+	if u.KidID != "" && u.Kid != nil {
 		result = append(result, u.Kid)
 	}
 	return result
@@ -173,7 +174,7 @@ func (u *Student) DeleteToManyIDs(name string, IDs []string) error {
 
 func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
-	r:=make(map[string]interface{})
+	r := make(map[string]interface{})
 	var ids []bson.ObjectId
 	for k, v := range parameters {
 		switch k {
@@ -186,17 +187,17 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			rst[k] = val
 		case "studentsids":
-			for i:=0;i<len(v);i++{
-				ids=append(ids,bson.ObjectIdHex(v[i]))
+			for i := 0; i < len(v); i++ {
+				ids = append(ids, bson.ObjectIdHex(v[i]))
 			}
-			r["$in"]=ids
+			r["$in"] = ids
 			rst["_id"] = r
 		case "kidids":
 			var kidids []string
-			for i:=0;i<len(v);i++{
-				kidids=append(kidids, v[i])
+			for i := 0; i < len(v); i++ {
+				kidids = append(kidids, v[i])
 			}
-			r["$in"]=kidids
+			r["$in"] = kidids
 			rst["kid-id"] = r
 		}
 	}
