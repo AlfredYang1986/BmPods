@@ -44,6 +44,8 @@ func (u *Guardian) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"]=ids
 			rst["_id"] = r
+		case "contact":
+			rst[k] = v[0]
 		}
 	}
 	return rst
