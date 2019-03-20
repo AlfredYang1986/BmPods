@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
@@ -115,6 +116,9 @@ func (h PotentialStudentHandler) AddPotentialStudent(w http.ResponseWriter, r *h
 		panic(err.Error())
 	}
 	stud.GuardiansIDs = []string{guardian.ID}
+	stud.Contact = guardian.Contact
+	stud.RegDate = float64(time.Now().UnixNano() / 1e6)
+	stud.CreateTime = stud.RegDate
 
 	studID, err := h.db.InsertBmObject(&stud)
 	if err != nil {
@@ -153,6 +157,7 @@ func (h PotentialStudentHandler) checkGuardianExist(ps PotentialStudent) (BmMode
 		out.Contact = ps.Contact
 		out.RelationShip = ps.RelationShip
 		out.BrandId = ps.BrandId
+		out.RegDate = float64(time.Now().UnixNano() / 1e6)
 		id, err := h.db.InsertBmObject(&out)
 		if err != nil {
 			panic(err.Error())

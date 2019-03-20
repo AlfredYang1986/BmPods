@@ -125,11 +125,25 @@ func (h ApplicantHandler) registerApplicant(model BmModel.Applicant) (string, er
 
 func (h ApplicantHandler) checkApplicantExist(model BmModel.Applicant) (BmModel.Applicant, bool) {
 	var out BmModel.Applicant
-	cond := bson.M{"wechat-openid": model.WeChatOpenid}
-	err := h.db.FindOneByCondition(&model, &out, cond)
+	condi := make(map[string]interface{})
+	openIdCond := bson.M{"wechat-openid": model.WeChatOpenid}
+	phoneCond := bson.M{"regi-phone": model.RegisterPhone}
+	orCond := []bson.M{openIdCond, phoneCond}
+	condi["$or"] = orCond
+	err := h.db.FindOneByCondition(&model, &out, condi)
 
 	if err != nil && err.Error() == "not found" {
 		return model, false
 	}
+
+	if model.RegisterPhone != out.RegisterPhone {
+		out.RegisterPhone = model.RegisterPhone
+		out.WeChatBindPhone = model.WeChatBindPhone
+		err = h.db.Update(&out)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	return out, true
 }
