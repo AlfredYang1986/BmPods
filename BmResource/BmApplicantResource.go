@@ -10,14 +10,16 @@ import (
 )
 
 type BmApplicantResource struct {
-	BmApplicantStorage *BmDataStorage.BmApplicantStorage
-	BmApplyStorage     *BmDataStorage.BmApplyStorage
-	BmKidStorage       *BmDataStorage.BmKidStorage
+	BmApplicantStorage   *BmDataStorage.BmApplicantStorage
+	BmTransactionStorage *BmDataStorage.BmTransactionStorage
+	BmApplyStorage       *BmDataStorage.BmApplyStorage
+	BmKidStorage         *BmDataStorage.BmKidStorage
 }
 
 func (c BmApplicantResource) NewApplicantResource(args []BmDataStorage.BmStorage) BmApplicantResource {
 	var ks *BmDataStorage.BmKidStorage
 	var as *BmDataStorage.BmApplicantStorage
+	var ts *BmDataStorage.BmTransactionStorage
 	var apys *BmDataStorage.BmApplyStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
@@ -27,12 +29,33 @@ func (c BmApplicantResource) NewApplicantResource(args []BmDataStorage.BmStorage
 			apys = arg.(*BmDataStorage.BmApplyStorage)
 		} else if tp.Name() == "BmKidStorage" {
 			ks = arg.(*BmDataStorage.BmKidStorage)
+		} else if tp.Name() == "BmTransactionStorage" {
+			ts = arg.(*BmDataStorage.BmTransactionStorage)
 		}
 	}
-	return BmApplicantResource{BmApplicantStorage: as, BmApplyStorage: apys, BmKidStorage: ks}
+	return BmApplicantResource{BmApplicantStorage: as, BmApplyStorage: apys, BmKidStorage: ks, BmTransactionStorage: ts}
 }
 
 func (c BmApplicantResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+
+	transactionsID, ok := r.QueryParams["transactionsID"]
+	if ok {
+		modelRootID := transactionsID[0]
+		modelRoot, err := c.BmTransactionStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.ApplicantID
+		if modelID != "" {
+			model, err := c.BmApplicantStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
 
 	appliesID, ok := r.QueryParams["appliesID"]
 	if ok {

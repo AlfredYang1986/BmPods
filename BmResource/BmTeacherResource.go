@@ -16,6 +16,7 @@ type BmTeacherResource struct {
 	BmDutyStorage    *BmDataStorage.BmDutyStorage
 	BmUnitStorage    *BmDataStorage.BmUnitStorage
 	BmStudentStorage    *BmDataStorage.BmStudentStorage
+	BmTransactionStorage    *BmDataStorage.BmTransactionStorage
 }
 
 func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) BmTeacherResource {
@@ -23,6 +24,7 @@ func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) Bm
 	var ds *BmDataStorage.BmDutyStorage
 	var us *BmDataStorage.BmUnitStorage
 	var ss *BmDataStorage.BmStudentStorage
+	var trans *BmDataStorage.BmTransactionStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmTeacherStorage" {
@@ -31,14 +33,35 @@ func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) Bm
 			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmUnitStorage" {
 			us = arg.(*BmDataStorage.BmUnitStorage)
+		} else if tp.Name() == "BmTransactionStorage" {
+			trans = arg.(*BmDataStorage.BmTransactionStorage)
 		}
 	}
-	return BmTeacherResource{BmTeacherStorage: ts, BmDutyStorage: ds, BmUnitStorage: us, BmStudentStorage: ss}
+	return BmTeacherResource{BmTeacherStorage: ts, BmDutyStorage: ds, BmUnitStorage: us, BmStudentStorage: ss, BmTransactionStorage: trans}
 }
 
 // FindAll to satisfy api2go data source interface
 func (s BmTeacherResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	result := []BmModel.Teacher{}
+
+	transactionsID, ok := r.QueryParams["transactionsID"]
+	if ok {
+		modelRootID := transactionsID[0]
+		modelRoot, err := s.BmTransactionStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.TeacherID
+		if modelID != "" {
+			model, err := s.BmTeacherStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
 
 	studentsID, ok := r.QueryParams["studentsID"]
 	if ok {

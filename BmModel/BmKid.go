@@ -1,6 +1,8 @@
 package BmModel
 
 import (
+	"errors"
+	"github.com/manyminds/api2go/jsonapi"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -15,7 +17,7 @@ type Kid struct {
 	GuardianRole string        `json:"guardian-role" bson:"guardian-role"`
 
 	ApplicantID string    `json:"applicant-id" bson:"applicant-id"`
-	Applicant   Applicant `json:"-"`
+	Applicant   *Applicant `json:"-"`
 
 }
 
@@ -28,6 +30,52 @@ func (c Kid) GetID() string {
 func (c *Kid) SetID(id string) error {
 	c.ID = id
 	return nil
+}
+
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (u Kid) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type:         "applicants",
+			Name:         "applicant",
+			Relationship: jsonapi.ToOneRelationship,
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (u Kid) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+
+	if u.ApplicantID != "" {
+		result = append(result, jsonapi.ReferenceID{
+			ID:   u.ApplicantID,
+			Type: "applicants",
+			Name: "applicant",
+		})
+	}
+
+	return result
+}
+
+// GetReferencedStructs to satisfy the jsonapi.MarhsalIncludedRelations interface
+func (u *Kid) GetReferencedStructs() []jsonapi.MarshalIdentifier {
+	result := []jsonapi.MarshalIdentifier{}
+
+	if u.ApplicantID != "" &&u.Applicant!=nil{
+		result = append(result, u.Applicant)
+	}
+
+	return result
+}
+
+func (u *Kid) SetToOneReferenceID(name, ID string) error {
+	if name == "applicant" {
+		u.ApplicantID = ID
+		return nil
+	}
+
+	return errors.New("There is no to-one relationship with the name " + name)
 }
 
 func (u *Kid) GetConditionsBsonM(parameters map[string][]string) bson.M {

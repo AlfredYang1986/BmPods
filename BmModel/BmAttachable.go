@@ -26,7 +26,7 @@ type Attachable struct {
 	Archive             float64 `json:"archive" bson:"archive"` //表示是否归档
 
 	Student   *Student `json:"-"`
-	StudentID string   `json:"-" bson:"student-ids"`
+	StudentID string   `json:"-" bson:"student-id"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

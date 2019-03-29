@@ -22,6 +22,7 @@ type Transaction struct {
 	MoneyUnit       string  `json:"money-unit" bson:"money-unit"`
 	Payment         string  `json:"payment" bson:"payment"`
 	Remark          string  `json:"remark" bson:"remark"`
+	Operator          string  `json:"operator" bson:"operator"`
 
 	Attachables    []*Attachable `json:"-"`
 	AttachablesIDs []string      `json:"attachable-ids" bson:"attachable-ids"`

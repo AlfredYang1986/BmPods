@@ -11,7 +11,7 @@ type Image struct {
 	Id_  bson.ObjectId `json:"-" bson:"_id"`
 	Img  string        `json:"img" bson:"img"`
 	Tag  string        `json:"tag" bson:"tag"`
-	Flag float64       `json:"flag" bson:"flag"`
+	Flag float64       `json:"flag" bson:"flag"`	// 0=default,1=honor,2=certification
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

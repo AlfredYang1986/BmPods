@@ -16,9 +16,10 @@ type BmStudentResource struct {
 	BmStudentStorage    *BmDataStorage.BmStudentStorage
 	BmKidStorage        *BmDataStorage.BmKidStorage
 	BmTeacherStorage    *BmDataStorage.BmTeacherStorage
-	BmGuardianStorage	*BmDataStorage.BmGuardianStorage
-	BmClassStorage   	*BmDataStorage.BmClassStorage
-	BmApplicantStorage *BmDataStorage.BmApplicantStorage
+	BmGuardianStorage   *BmDataStorage.BmGuardianStorage
+	BmClassStorage      *BmDataStorage.BmClassStorage
+	BmApplicantStorage  *BmDataStorage.BmApplicantStorage
+	BmAttachableStorage *BmDataStorage.BmAttachableStorage
 }
 
 func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *BmStudentResource {
@@ -28,6 +29,7 @@ func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *B
 	var ts *BmDataStorage.BmTeacherStorage
 	var cs *BmDataStorage.BmClassStorage
 	var as *BmDataStorage.BmApplicantStorage
+	var atts *BmDataStorage.BmAttachableStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "BmStudentStorage" {
@@ -42,9 +44,11 @@ func (s BmStudentResource) NewStudentResource(args []BmDataStorage.BmStorage) *B
 			cs = arg.(*BmDataStorage.BmClassStorage)
 		} else if tp.Name() == "BmApplicantStorage" {
 			as = arg.(*BmDataStorage.BmApplicantStorage)
+		} else if tp.Name() == "BmAttachableStorage" {
+			atts = arg.(*BmDataStorage.BmAttachableStorage)
 		}
 	}
-	return &BmStudentResource{BmStudentStorage: ss, BmKidStorage: ks, BmGuardianStorage: gs, BmTeacherStorage: ts, BmClassStorage: cs,BmApplicantStorage: as}
+	return &BmStudentResource{BmStudentStorage: ss, BmKidStorage: ks, BmGuardianStorage: gs, BmTeacherStorage: ts, BmClassStorage: cs, BmApplicantStorage: as, BmAttachableStorage: atts}
 }
 
 // FindAll to satisfy api2go data source interface
@@ -53,22 +57,39 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var guardiansids []string
 	contact, ok := r.QueryParams["contact"]
 	if ok {
-		r.QueryParams["contact"]=contact
+		r.QueryParams["contact"] = contact
 		guardians := s.BmGuardianStorage.GetAll(r)
-		for _,guardian := range guardians{	
-			guardiansids=append(guardiansids,guardian.ID)
+		for _, guardian := range guardians {
+			guardiansids = append(guardiansids, guardian.ID)
 		}
 
-		r.QueryParams["guardiansids"]=guardiansids
-		students := s.BmStudentStorage.GetAll(r,-1,-1)
-		for _,student:=range students{
-			result = append(result,*student)
+		r.QueryParams["guardiansids"] = guardiansids
+		students := s.BmStudentStorage.GetAll(r, -1, -1)
+		for _, student := range students {
+			result = append(result, *student)
 		}
 		return &Response{Res: result}, nil
 	}
 
-	
-	//查詢 class 下的 students
+	attachablesID, ok := r.QueryParams["attachablesID"]
+	if ok {
+		modelRootID := attachablesID[0]
+		modelRoot, err := s.BmAttachableStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.StudentID
+		if modelID != "" {
+			model, err := s.BmStudentStorage.GetOne(modelID)
+			if err != nil {
+				return &Response{}, err
+			}
+			return &Response{Res: model}, nil
+		} else {
+			return &Response{}, err
+		}
+	}
+
 	classesID, ok := r.QueryParams["classesID"]
 	if ok {
 		modelRootID := classesID[0]
@@ -81,7 +102,7 @@ func (s BmStudentResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 			if err != nil {
 				return &Response{}, err
 			}
-			err = s.ResetReferencedModel(&model,&r)
+			err = s.ResetReferencedModel(&model, &r)
 			if err != nil {
 				return &Response{}, err
 			}
@@ -148,16 +169,16 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 	var guardiansids []string
 	contact, ok := r.QueryParams["contact"]
 	if ok {
-		r.QueryParams["contact"]=contact
+		r.QueryParams["contact"] = contact
 		guardians := s.BmGuardianStorage.GetAll(r)
-		for _,guardian := range guardians{	
-			guardiansids=append(guardiansids,guardian.ID)
+		for _, guardian := range guardians {
+			guardiansids = append(guardiansids, guardian.ID)
 		}
 
-		r.QueryParams["guardiansids"]=guardiansids
-		students := s.BmStudentStorage.GetAll(r,-1,-1)
-		for _,student:=range students{
-			result = append(result,*student)
+		r.QueryParams["guardiansids"] = guardiansids
+		students := s.BmStudentStorage.GetAll(r, -1, -1)
+		for _, student := range students {
+			result = append(result, *student)
 		}
 		count = len(result)
 		pages = int(math.Ceil(float64(count) / float64(take)))
@@ -184,7 +205,7 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
-			err = s.ResetReferencedModel(&model,&r)
+			err = s.ResetReferencedModel(&model, &r)
 			if err != nil {
 				return uint(0), &Response{}, err
 			}
@@ -195,8 +216,8 @@ func (s BmStudentResource) PaginatedFindAll(r api2go.Request) (uint, api2go.Resp
 		return uint(count), &Response{Res: result, QueryRes: "students", TotalPage: pages, TotalCount: count}, nil
 	}
 
-	models:=s.BmStudentStorage.GetAll(r, skip, take) 
-		
+	models := s.BmStudentStorage.GetAll(r, skip, take)
+
 	in := BmModel.Student{}
 	count = s.BmStudentStorage.Count(r, in)
 	pages = int(math.Ceil(float64(count) / float64(take)))
@@ -210,7 +231,7 @@ func (s BmStudentResource) FindOne(ID string, r api2go.Request) (api2go.Responde
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
-	err = s.ResetReferencedModel(&model,&r)
+	err = s.ResetReferencedModel(&model, &r)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
@@ -268,23 +289,23 @@ func (s BmStudentResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 	return &Response{Res: user, Code: http.StatusNoContent}, err
 }
 
-func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student,r *api2go.Request) error {
+func (s BmStudentResource) ResetReferencedModel(model *BmModel.Student, r *api2go.Request) error {
 
 	model.Guardians = []*BmModel.Guardian{}
-	r.QueryParams["guardiansids"]=model.GuardiansIDs
-	guardians:=s.BmGuardianStorage.GetAll(*r)
-	for _,guardian:= range guardians {	
+	r.QueryParams["guardiansids"] = model.GuardiansIDs
+	guardians := s.BmGuardianStorage.GetAll(*r)
+	for _, guardian := range guardians {
 		model.Guardians = append(model.Guardians, &guardian)
 	}
-/*			
-	for _, chocolateID := range model.GuardiansIDs {
-		choc, err := s.BmGuardianStorage.GetOne(chocolateID)
-		if err != nil {
-			return err
+	/*
+		for _, chocolateID := range model.GuardiansIDs {
+			choc, err := s.BmGuardianStorage.GetOne(chocolateID)
+			if err != nil {
+				return err
+			}
+			model.Guardians = append(model.Guardians, &choc)
 		}
-		model.Guardians = append(model.Guardians, &choc)
-	}
-*/
+	*/
 	if model.KidID != "" {
 		k, err := s.BmKidStorage.GetOne(model.KidID)
 		if err != nil {
