@@ -17,6 +17,7 @@ type Student struct {
 	Intro       string  `json:"intro" bson:"intro"`
 	Status      float64 `json:"status" bson:"status"` //0-潜在, 1-正式, -1-休学
 	LessonCount float64 `json:"lesson-count" bson:"lesson-count"`
+	PunchedCount float64 `json:"punched-count" bson:"punched-count"`
 
 	Name       string  `json:"name" bson:"name"`
 	Nickname   string  `json:"nickname" bson:"nickname"`
