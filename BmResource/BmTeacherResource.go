@@ -33,6 +33,8 @@ func (s BmTeacherResource) NewTeacherResource(args []BmDataStorage.BmStorage) Bm
 			ds = arg.(*BmDataStorage.BmDutyStorage)
 		} else if tp.Name() == "BmUnitStorage" {
 			us = arg.(*BmDataStorage.BmUnitStorage)
+		} else if tp.Name() == "BmStudentStorage" {
+			ss = arg.(*BmDataStorage.BmStudentStorage)
 		} else if tp.Name() == "BmTransactionStorage" {
 			trans = arg.(*BmDataStorage.BmTransactionStorage)
 		}
