@@ -18,6 +18,7 @@ type Student struct {
 	Status      float64 `json:"status" bson:"status"` //0-潜在, 1-正式, -1-休学
 	LessonCount float64 `json:"lesson-count" bson:"lesson-count"`
 	PunchedCount float64 `json:"punched-count" bson:"punched-count"`
+	Archive     float64 `json:"archive" bson:"archive"`
 
 	Name       string  `json:"name" bson:"name"`
 	Nickname   string  `json:"nickname" bson:"nickname"`
@@ -175,6 +176,7 @@ func (u *Student) DeleteToManyIDs(name string, IDs []string) error {
 
 func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
+	rst["archive"] = float64(0)
 	r := make(map[string]interface{})
 	var ids []bson.ObjectId
 	for k, v := range parameters {
@@ -200,6 +202,16 @@ func (u *Student) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"] = guardiansids
 			rst["guardian-ids"] = r
+		case "archive":
+			val, err := strconv.ParseFloat(v[0], 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			if val == -1 {
+				delete(rst, k)
+			} else {
+				rst[k] = val
+			}
 		}
 	}
 	return rst
